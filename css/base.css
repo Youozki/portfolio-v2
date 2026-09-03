@@ -21,6 +21,16 @@
     U+1E00-1E9F, U+2020, U+20A0-20AB, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 
+/* 中文：思源黑变量字重，按站内实际用字裁的子集（tools/subset_cn.py）。
+   自托管而不是靠系统字，否则 Windows 会回退到微软雅黑、细字重直接消失。 */
+@font-face {
+  font-family: 'Noto Sans SC Subset';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('../fonts/notosanssc-subset.woff2') format('woff2');
+}
+
 /* ---- 复位 ------------------------------------------------------------ */
 *, *::before, *::after { box-sizing: border-box; }
 
