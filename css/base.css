@@ -160,6 +160,19 @@ a { color: inherit; text-decoration: none; }
 .band--accent .pill { border-color: rgba(255, 255, 255, 0.6); color: #fff; }
 .band--accent .pill:hover { background: #fff; color: var(--accent); }
 
+/* ---- 标签串：索引页与项目页共用 -------------------------------------- */
+.work__tags { display: flex; flex-wrap: wrap; gap: var(--space-xs); margin-top: var(--space-2xs); }
+.tag {
+  font-size: var(--text-xs);
+  letter-spacing: 0;
+  padding: 0.3em 0.75em;
+  border-radius: var(--radius-pill);
+  border: var(--rule) solid var(--hair);
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+.band--ink .tag { border-color: var(--hair-on-ink); color: var(--on-ink-soft); }
+
 /* ---- 悬浮胶囊导航（augen 用的就是这种 N5） --------------------------- */
 .nav {
   position: fixed;

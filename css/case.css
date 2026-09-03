@@ -1,0 +1,297 @@
+/* 项目内页：长文档骨架。
+ * 一页 = 四幕，靠色带切章；每幕内部用「吸顶栏 + 推进列」承载顺序。
+ * 招牌段落两处：钉住的横向情绪带、钉住的六屏接管。 */
+
+/* ---- 顶部阅读进度：一条发丝 ----------------------------------------- */
+.progress {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 95;
+  height: 2px;
+  background: transparent;
+  pointer-events: none;
+}
+.progress > span {
+  display: block;
+  height: 100%;
+  width: 100%;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  will-change: transform;
+}
+
+/* ---- 抬头 ------------------------------------------------------------ */
+.case-head { padding-block: calc(var(--nav-h) + var(--space-3xl)) var(--space-3xl); }
+.case-head__title { margin-top: var(--space-lg); }
+.case-head__title .line-clip { display: block; }
+.case-head__dim { color: var(--ink-soft); }
+.case-head__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-sm) var(--space-lg);
+  margin-top: var(--space-xl);
+  padding-top: var(--space-md);
+  border-top: var(--rule) solid var(--hair);
+}
+.case-head__meta .work__tags { margin-top: 0; }
+.case-head__intro {
+  margin-top: var(--space-2xl);
+  margin-left: auto;
+  max-width: var(--measure);
+}
+
+/* ---- 幕：统一的纵向节奏 ---------------------------------------------- */
+.act { padding-block: var(--space-4xl); }
+.act > * + * { margin-top: var(--space-3xl); }
+
+/* ---- 幕一 · 钉住的舞台：整屏镜片 + 两句依次浮现 ---------------------- */
+.stage { height: 300vh; }                 /* 三屏的滚动量换一屏的停留 */
+.stage__pin {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: clip;
+  display: grid;
+  align-items: end;
+}
+.stage__bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.85;
+  will-change: transform;
+}
+.stage__copy {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  padding-bottom: var(--space-3xl);
+  display: grid;
+  grid-template-areas: 'label' 'line';
+  gap: var(--space-md);
+}
+/* 两句话占同一格，交接时不互相顶位 */
+.stage__copy > .t-label { grid-area: label; }
+.stage__line { grid-area: line; max-width: 46rem; align-self: end; }
+.js .stage__line { opacity: 0; }
+/* 舞台底部往下渐隐到墨色，接住下一段 */
+.stage__pin::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 55%;
+  background: linear-gradient(to bottom, rgba(14, 15, 17, 0) 0%, var(--ink) 88%);
+  pointer-events: none;
+}
+
+/* ---- 吸顶章名 + 推进列（mandandan 把章节文案钉在 top:171px） --------- */
+.split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2.6fr);
+  column-gap: clamp(2rem, 6vw, 7rem);
+  align-items: start;
+}
+.split__aside {
+  position: sticky;
+  top: calc(var(--nav-h) + var(--space-xl));
+  display: grid;
+  gap: var(--space-xs);
+}
+.split__lead { color: var(--ink-soft); margin-top: var(--space-sm); }
+.band--ink .split__lead { color: var(--on-ink-soft); }
+.split__main { display: grid; gap: var(--space-lg); }
+
+/* 三个问题：编号悬挂在左外侧 */
+.steps { display: grid; gap: var(--space-3xl); }
+.step { position: relative; display: grid; gap: var(--space-md); }
+.step__no {
+  position: absolute;
+  left: -3.25rem;
+  top: 0.35em;
+  color: var(--ink-soft);
+}
+.step__claim { max-width: 36rem; }
+.step__fig { margin-top: var(--space-sm); }
+.step__fig--narrow { max-width: 20rem; }
+
+/* 初步结论：四条发丝行，最后一条给强调色 */
+.conclusion__head { margin-bottom: var(--space-lg); }
+.conclusion__row { grid-template-columns: 2rem minmax(0, 1fr); }
+.conclusion__row .t-body, .conclusion__row .t-lead { max-width: 44rem; }
+.conclusion__row.is-final { border-bottom-width: 0; }
+
+/* ---- 图版 ------------------------------------------------------------ */
+.fig { display: grid; gap: var(--space-sm); }
+.fig img { border-radius: var(--radius-sm); }
+.fig--wide img { width: 100%; }
+.fig--bleed img { width: 100%; border-radius: 0; }
+.fig--bleed figcaption { margin-top: var(--space-sm); }
+
+/* ---- 招牌一 · 钉住的横向情绪带 --------------------------------------- */
+.hstrip { height: 260vh; }
+.hstrip__pin {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: clip;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--space-2xl);
+}
+.hstrip__head { display: grid; gap: var(--space-xs); width: 100%; }
+.hstrip__lead { max-width: 36rem; }
+.hstrip__track {
+  width: max-content;
+  padding-left: var(--margin);
+  will-change: transform;
+}
+.hstrip__track img {
+  height: clamp(16rem, 42vh, 26rem);
+  width: auto;
+  max-width: none;
+  border-radius: var(--radius-sm);
+}
+
+/* ---- 图文对开 -------------------------------------------------------- */
+.grid2 {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  column-gap: clamp(2rem, 5vw, 5rem);
+  align-items: center;
+}
+.grid2__copy { display: grid; gap: var(--space-md); align-content: center; }
+
+/* ---- 招牌二 · 六屏接管同一个位置 ------------------------------------- */
+.deck { height: 420vh; }
+.deck__pin {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: grid;
+  align-content: center;
+}
+.deck__inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 3fr);
+  column-gap: clamp(2rem, 6vw, 7rem);
+  align-items: center;
+  row-gap: var(--space-md);
+  width: 100%;
+}
+.deck__index { display: grid; gap: var(--space-sm); }
+.deck__idx {
+  display: grid;
+  grid-template-columns: 2.25rem minmax(0, 1fr);
+  align-items: baseline;
+  opacity: 0.32;
+  transition: opacity var(--dur-2) var(--ease-out), transform var(--dur-3) var(--ease-out);
+}
+.deck__idx.is-on { opacity: 1; transform: translate3d(0.35rem, 0, 0); }
+.deck__idx.is-on .t-cap { color: var(--ink); }
+.deck__idx.is-on .t-num { color: var(--accent); }
+
+/* 六张屏叠在同一格里，后一张从下方裁进来接管 */
+.deck__stack { position: relative; aspect-ratio: 1004 / 628; }
+.deck__card {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-md);
+  overflow: clip;
+  background: var(--paper-3);
+  will-change: transform, clip-path;
+}
+.deck__card img { width: 100%; height: 100%; object-fit: cover; }
+.deck__caption { grid-column: 2; }
+
+/* ---- Pet Tracking 四步：不同画幅并排，底线对齐 ----------------------- */
+.seq {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  column-gap: var(--gutter);
+  align-items: end;
+}
+.seq__item {
+  position: relative;
+  display: grid;
+  gap: var(--space-sm);
+  padding-top: var(--space-xl);
+  border-top: var(--rule) solid var(--hair);
+}
+.seq__no { position: absolute; top: var(--space-sm); left: 0; }
+.seq__item img {
+  width: 100%;
+  border-radius: var(--radius-sm);
+  background: var(--paper-3);
+}
+.seq__caption { margin-top: var(--space-md); }
+
+/* ---- 收尾 ------------------------------------------------------------ */
+.coda { padding-block: var(--space-4xl); }
+.coda__line { max-width: 38rem; }
+
+.next { padding-block: var(--space-3xl); }
+.next__link { display: grid; gap: var(--space-md); }
+.next__row {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-lg);
+  padding-top: var(--space-md);
+  border-top: var(--rule) solid var(--hair);
+  transition: border-color var(--dur-2) var(--ease-out);
+}
+.next__title { flex: 1; transition: color var(--dur-2) var(--ease-out); }
+.next__arrow {
+  align-self: center;
+  transition: transform var(--dur-3) var(--ease-out);
+}
+.next__link:hover .next__row { border-color: var(--accent); }
+.next__link:hover .next__title { color: var(--accent); }
+.next__link:hover .next__arrow { transform: translate3d(0.6rem, 0, 0); }
+.next__desc { color: var(--ink-soft); }
+
+/* ---- 降级：关掉动效偏好时，钉住段落全部摊平 -------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .js .stage__line { opacity: 1; }
+  .progress > span { transform: scaleX(0); }
+  .deck__idx { opacity: 1; }
+}
+
+/* ---- 移动端：所有钉住段落改成纵向直读 -------------------------------- */
+@media (max-width: 767px) {
+  .act { padding-block: var(--space-3xl); }
+  .act > * + * { margin-top: var(--space-2xl); }
+  .case-head { padding-block: var(--space-3xl) var(--space-2xl); }
+  .case-head__intro { margin-top: var(--space-xl); }
+
+  .split { grid-template-columns: minmax(0, 1fr); row-gap: var(--space-lg); }
+  .split__aside { position: static; }
+  .steps { gap: var(--space-2xl); }
+  .step__no { position: static; }
+  .step__fig--narrow { max-width: none; }
+
+  .stage { height: auto; }
+  .stage__pin { position: static; height: auto; min-height: 78vh; }
+  .stage__copy { padding-block: var(--space-4xl) var(--space-2xl); }
+
+  .hstrip { height: auto; }
+  .hstrip__pin { position: static; height: auto; gap: var(--space-lg); }
+  .hstrip__track { overflow-x: auto; width: auto; padding-inline: var(--margin); }
+  .hstrip__track img { height: 14rem; }
+
+  .grid2 { grid-template-columns: minmax(0, 1fr); row-gap: var(--space-lg); }
+
+  .deck { height: auto; }
+  .deck__pin { position: static; height: auto; }
+  .deck__inner { grid-template-columns: minmax(0, 1fr); row-gap: var(--space-lg); }
+  .deck__index { display: none; }
+  .deck__stack { position: static; aspect-ratio: auto; display: grid; gap: var(--space-md); }
+  .deck__card { position: static; }
+  .deck__caption { grid-column: 1; }
+
+  .seq { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: var(--space-xl); }
+}
