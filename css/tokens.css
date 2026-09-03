@@ -1,0 +1,87 @@
+/* Hallmark · macrostructure: Catalogue (索引) + Long Document (项目内页)
+ * theme: studied-DNA (source: url https://augen.pro/) · genre: modern-minimal
+ * paper oklch(93.5% 0.003 106) #EDEDEA · ink oklch(17.5% 0.006 265) #0E0F11
+ * accent oklch(55.6% 0.208 256) #0071E3 · display + body: Geist (grotesk-sans, roman)
+ * axes: light paper / grotesk-sans / cool accent
+ * 数值来自对 augen.pro 的实测：140px w300 ls+0.008em 的巨号细体、5 栏网格、
+ * 胶囊半径 54/94px、1px 强调色描边、blur(12/20px) 毛玻璃、整屏色带切换。
+ */
+
+:root {
+  /* ---- 颜色 ---------------------------------------------------------- */
+  --paper: #ededea;          /* 主纸张，暖灰白 */
+  --paper-2: #f4f4f2;        /* 抬起一层的面 */
+  --paper-3: #e4e4e0;        /* 压下一层／分区底 */
+  --ink: #0e0f11;            /* 正文与深色色带底 */
+  --ink-2: #1d1e20;          /* 深色区里抬起的一层 */
+  --ink-soft: #5e5e5e;       /* 次要文字（augen 实测 rgb(94,94,94)） */
+  --on-ink: #f2f2f4;         /* 深底上的文字 */
+  --on-ink-soft: #8a8a8e;
+  --accent: #0071e3;
+  --accent-ink: #ffffff;
+  --hair: rgba(14, 15, 17, 0.14);      /* 浅底发丝线 */
+  --hair-on-ink: rgba(242, 242, 244, 0.16);
+  --veil: rgba(237, 237, 234, 0.72);   /* 毛玻璃底 */
+  --veil-ink: rgba(14, 15, 17, 0.6);
+
+  /* ---- 字体 ---------------------------------------------------------- */
+  --font-sans: 'Geist', 'Noto Sans SC Subset', -apple-system, 'PingFang SC',
+    'HarmonyOS Sans SC', 'Microsoft YaHei', system-ui, sans-serif;
+
+  /* 字阶：贴 augen 的 140 / 38 / 27 / 20 / 16 / 14 / 12，全部流体化 */
+  --text-display: clamp(3rem, 9.72vw, 8.75rem);   /* 48 → 140 */
+  --text-h1: clamp(1.75rem, 2.64vw, 2.375rem);    /* 28 → 38 */
+  --text-h2: clamp(1.375rem, 1.875vw, 1.6875rem); /* 22 → 27 */
+  --text-lg: clamp(1.0625rem, 1.39vw, 1.25rem);   /* 17 → 20 */
+  --text-base: 1rem;
+  --text-sm: 0.875rem;
+  --text-xs: 0.75rem;
+
+  /* 字距：西文越大越收，中文一律不收 */
+  --track-display: 0.008em;   /* augen 在 140px 上给的是正字距 */
+  --track-h1: -0.02em;
+  --track-h2: -0.02em;
+  --track-tight: -0.01em;
+  --track-wide: 0.06em;       /* 小号全大写标签 */
+
+  --leading-display: 1.2;
+  --leading-tight: 1.2;
+  --leading-body: 1.62;
+  --leading-cn: 1.78;         /* 中文正文要更松 */
+
+  /* ---- 网格与间距（4pt） --------------------------------------------- */
+  --cols: 5;
+  --gutter: clamp(1rem, 1.67vw, 1.5rem);
+  --margin: clamp(1.25rem, 4.44vw, 4rem);
+  --page-max: 1440px;
+  --measure: 34rem;           /* 正文单列最大宽度 */
+  --nav-h: 4.75rem;
+
+  --space-2xs: 0.25rem;
+  --space-xs: 0.5rem;
+  --space-sm: 0.75rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2.5rem;
+  --space-2xl: 4rem;
+  --space-3xl: 6.5rem;
+  --space-4xl: 10rem;
+
+  /* ---- 形状 ---------------------------------------------------------- */
+  --radius-pill: 54px;
+  --radius-pill-lg: 94px;
+  --radius-sm: 10px;
+  --radius-md: 18px;
+  --rule: 1px;
+  --blur-veil: blur(20px);
+  --blur-veil-sm: blur(12px);
+
+  /* ---- 动效 ---------------------------------------------------------- */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-1: 180ms;
+  --dur-2: 320ms;
+  --dur-3: 560ms;
+  --dur-4: 900ms;
+}

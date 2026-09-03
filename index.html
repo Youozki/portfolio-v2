@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>朱晨宇 — 用户体验设计师</title>
+<meta name="description" content="朱晨宇的作品集。用户体验设计师，联想体验设计、百度 AI 产品设计。" />
+<link rel="stylesheet" href="css/base.css" />
+<link rel="stylesheet" href="css/index.css" />
+</head>
+<body>
+
+<nav class="nav" id="nav" aria-label="主导航">
+  <a class="nav__home" href="index.html" aria-label="首页">✳</a>
+  <ul class="nav__list">
+    <li><a class="nav__link" href="#work">作品</a></li>
+    <li><a class="nav__link" href="#about">关于</a></li>
+    <li><a class="nav__link" href="#contact">联系</a></li>
+  </ul>
+</nav>
+
+<main>
+  <!-- 幕一：入口。只做一句定位，不抢作品的位置 -->
+  <header class="band band--paper hero" id="top">
+    <div class="page hero__inner">
+      <p class="t-label hero__mark">朱晨宇 · Zhu Chenyu</p>
+      <h1 class="t-display hero__name">
+        <span class="line-clip"><span class="line-inner">Experience</span></span>
+        <span class="line-clip"><span class="line-inner hero__dim">Designer</span></span>
+      </h1>
+      <div class="hero__foot">
+        <p class="t-h2 hero__statement">
+          用户体验设计师。<br />
+          <span class="hero__dim">兼具全局产品观、精细化设计与交互执行力。</span>
+        </p>
+        <div class="hero__jump">
+          <span class="t-cap">直接看</span>
+          <a class="pill" href="case-companion.html">Companion App</a>
+          <a class="pill" href="#row-justpaper">Just Paper</a>
+          <a class="pill" href="#row-oreate">Oreate AI</a>
+          <a class="pill" href="#row-terabox">Terabox</a>
+          <a class="pill" href="#row-practices">Practices</a>
+        </div>
+      </div>
+      <a class="hero__cue" href="#work" aria-label="向下浏览作品"><span>↓</span></a>
+    </div>
+  </header>
+
+  <!-- 幕二：作品索引。五个项目并列直达，顺序承载信息但不强制线性 -->
+  <section class="band band--paper work" id="work" aria-labelledby="work-title">
+    <div class="page">
+      <h2 class="t-display work__title" id="work-title">Selected Work</h2>
+      <ol class="work__list" id="workList"></ol>
+    </div>
+  </section>
+
+  <!-- 幕三：关于。深色带做分章 -->
+  <section class="band band--ink about" id="about" aria-labelledby="about-title">
+    <div class="page">
+      <p class="t-label">关于</p>
+      <h2 class="t-h1 about__title" id="about-title">在图纸与硬件的结合处工作。</h2>
+      <div class="about__grid" id="aboutRows"></div>
+    </div>
+  </section>
+
+  <!-- 幕四：联系。整屏强调色收尾 -->
+  <section class="band band--accent contact" id="contact" aria-labelledby="contact-title">
+    <div class="page contact__inner">
+      <p class="t-num">1.0</p>
+      <h2 class="t-h1" id="contact-title">大概就这些，期待面聊 ：）</h2>
+      <ul class="contact__list" id="contactList"></ul>
+    </div>
+  </section>
+</main>
+
+<script src="vendor/gsap.min.js"></script>
+<script src="vendor/ScrollTrigger.min.js"></script>
+<script src="vendor/SplitText.min.js"></script>
+<script src="vendor/lenis.min.js"></script>
+<script src="js/site.js"></script>
+<script src="js/index.js"></script>
+</body>
+</html>

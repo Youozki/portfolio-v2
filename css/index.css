@@ -1,0 +1,183 @@
+/* 索引页专属版式。结构参照 augen.pro 实测：5 栏、发丝分隔行、整屏色带、胶囊。 */
+
+/* ---- 幕一 · 入口 ------------------------------------------------------ */
+.hero { min-height: 100svh; display: flex; }
+.hero__inner {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  padding-block: calc(var(--nav-h) + var(--space-2xl)) var(--space-2xl);
+  position: relative;
+}
+.hero__mark { margin-bottom: var(--space-xl); }
+
+/* 140px 细体大字，正字距 —— augen 在同尺寸上给的就是 +0.008em */
+.hero__name { margin-bottom: auto; }
+.hero__name .line-clip { display: block; }
+.hero__name .line-inner { display: block; will-change: transform; }
+
+.hero__foot {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+  padding-top: var(--space-3xl);
+}
+.hero__statement { max-width: 42rem; }
+.hero__dim { color: var(--ink-soft); }
+
+.hero__jump {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-sm);
+}
+.hero__jump .t-cap { margin-right: var(--space-2xs); }
+
+.hero__cue {
+  position: absolute;
+  right: 0;
+  bottom: var(--space-2xl);
+  width: 2.5rem;
+  height: 2.5rem;
+  display: grid;
+  place-items: center;
+  border: var(--rule) solid var(--hair);
+  border-radius: 50%;
+  font-size: var(--text-sm);
+}
+.hero__cue span { display: block; animation: cue 2.4s var(--ease-in-out) infinite; }
+@keyframes cue {
+  0%, 100% { transform: translateY(0); opacity: 0.55; }
+  50% { transform: translateY(3px); opacity: 1; }
+}
+
+/* 从入口胶囊跳过来时，让目标行亮一下，交代"你到了这里" */
+.work__item:target .work__row::before { opacity: 1; }
+.work__item:target .work__no { color: var(--accent); }
+
+/* ---- 幕二 · 作品索引 -------------------------------------------------- */
+.work { padding-block: var(--space-3xl) var(--space-4xl); }
+.work__title { margin-bottom: var(--space-3xl); }
+
+.work__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 3.2fr);
+  column-gap: var(--gutter);
+  align-items: start;
+  padding-block: clamp(1.75rem, 3vw, 2.75rem);
+  border-top: var(--rule) solid var(--hair);
+  position: relative;
+  transition: color var(--dur-2) var(--ease-out);
+}
+.work__item:last-child .work__row { border-bottom: var(--rule) solid var(--hair); }
+
+/* 悬停时整行左移一点，并铺一条极淡的底 —— 只用 transform 和背景色 */
+.work__row::before {
+  content: '';
+  position: absolute;
+  inset: 0 calc(var(--margin) * -0.5);
+  background: rgba(14, 15, 17, 0.03);
+  opacity: 0;
+  transition: opacity var(--dur-2) var(--ease-out);
+  pointer-events: none;
+}
+.work__row:hover::before, .work__row:focus-visible::before { opacity: 1; }
+.work__row:hover .work__name, .work__row:focus-visible .work__name { color: var(--accent); }
+
+.work__meta { display: flex; flex-direction: column; gap: 0.15rem; }
+.work__no { color: var(--accent); }
+
+.work__main { display: flex; flex-direction: column; gap: var(--space-sm); }
+.work__name {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-sm);
+  transition: color var(--dur-2) var(--ease-out);
+}
+.work__desc { color: var(--ink-soft); }
+
+.work__tags { display: flex; flex-wrap: wrap; gap: var(--space-xs); margin-top: var(--space-2xs); }
+.tag {
+  font-size: var(--text-xs);
+  letter-spacing: 0;
+  padding: 0.3em 0.75em;
+  border-radius: var(--radius-pill);
+  border: var(--rule) solid var(--hair);
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+.work__wip {
+  font-size: var(--text-xs);
+  font-style: normal;              /* 不用斜体 */
+  letter-spacing: var(--track-wide);
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  border: var(--rule) solid var(--hair);
+  border-radius: var(--radius-pill);
+  padding: 0.25em 0.7em;
+}
+.work__row.is-wip { cursor: default; }
+.work__row.is-wip:hover .work__name { color: inherit; }
+
+/* ---- 跟随光标的预览卡 ------------------------------------------------- */
+.peek {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 60;
+  width: 32.5rem;                 /* 520px */
+  aspect-ratio: 1040 / 660;
+  margin: -10.3rem 0 0 -16.25rem; /* 以光标为中心 */
+  border-radius: var(--radius-md);
+  overflow: clip;
+  background: var(--paper-3);
+  box-shadow: 0 24px 60px -20px rgba(14, 15, 17, 0.35);
+  opacity: 0;
+  visibility: hidden;
+  transform: scale(0.94);
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+.peek__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity var(--dur-2) var(--ease-out);
+}
+.peek__img.is-on { opacity: 1; }
+
+/* ---- 幕三 · 关于 ------------------------------------------------------ */
+.about { padding-block: var(--space-4xl) var(--space-3xl); }
+.about__title { max-width: 32rem; margin: var(--space-md) 0 var(--space-3xl); }
+.about__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+  gap: var(--space-2xl);
+}
+.about__row { grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); }
+.about__row > span:last-child { display: flex; flex-direction: column; gap: 0.1rem; }
+.about__sub { color: var(--on-ink-soft); }
+
+/* ---- 幕四 · 联系 ------------------------------------------------------ */
+.contact { padding-block: var(--space-4xl); }
+.contact__inner { display: flex; flex-direction: column; gap: var(--space-lg); }
+.contact__list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+  gap: var(--space-xl);
+  margin-top: var(--space-2xl);
+}
+.contact__item { display: flex; flex-direction: column; gap: var(--space-2xs); }
+.contact__val { letter-spacing: 0; }
+
+@media (max-width: 767px) {
+  .work__row { grid-template-columns: minmax(0, 1fr); row-gap: var(--space-md); }
+  .work__meta { flex-direction: row; gap: var(--space-sm); }
+  .about__row { grid-template-columns: minmax(0, 1fr); row-gap: var(--space-2xs); }
+  .peek { display: none; }
+}
+
