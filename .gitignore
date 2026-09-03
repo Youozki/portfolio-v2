@@ -1,0 +1,7 @@
+.DS_Store
+
+# 设计稿源图，只是切图用的输入，不进仓库
+assets/figma/
+
+# 喂给模型看的降采样副本，本地工具产物，不进仓库
+assets/_llm-preview/
