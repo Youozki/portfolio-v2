@@ -55,13 +55,45 @@
 .work__item:target .work__row::before { opacity: 1; }
 .work__item:target .work__no { color: var(--accent); }
 
+/* 铝板：漂在大字右侧，随滚动做极缓的位移，量很小 */
+.hero__mark, .hero__name, .hero__foot { position: relative; z-index: 1; }
+.hero__object {
+  position: absolute;
+  right: calc(var(--margin) * -0.25);
+  top: 14%;
+  width: clamp(16rem, 34vw, 32rem);
+  margin: 0;
+  pointer-events: none;
+  z-index: 0;                 /* 在文字之下、在色带之上 */
+  will-change: transform;
+}
+.hero__object img { width: 100%; height: auto; }
+
+/* ---- 过场带 ----------------------------------------------------------- */
+.interlude { padding-block: var(--space-3xl); overflow: clip; }
+.interlude__inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+  column-gap: var(--space-2xl);
+  align-items: center;
+}
+.interlude__fig { margin: 0; }
+.interlude__fig img { width: 100%; height: auto; }
+.interlude__copy { display: flex; flex-direction: column; gap: var(--space-sm); }
+.interlude__note { max-width: 22rem; }
+
+@media (max-width: 767px) {
+  .interlude__inner { grid-template-columns: minmax(0, 1fr); row-gap: var(--space-xl); }
+  .hero__object { position: static; width: 60%; margin: var(--space-xl) 0 0 auto; }
+}
+
 /* ---- 幕二 · 作品索引 -------------------------------------------------- */
 .work { padding-block: var(--space-3xl) var(--space-4xl); }
 .work__title { margin-bottom: var(--space-3xl); }
 
 .work__row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 3.2fr);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2.3fr) minmax(0, 1.1fr);
   column-gap: var(--gutter);
   align-items: start;
   padding-block: clamp(1.75rem, 3vw, 2.75rem);
@@ -120,39 +152,54 @@
 .work__row.is-wip { cursor: default; }
 .work__row.is-wip:hover .work__name { color: inherit; }
 
-/* ---- 跟随光标的预览卡 ------------------------------------------------- */
-.peek {
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 60;
-  width: 32.5rem;                 /* 520px */
+/* 焦点阶梯：悬停某一行时，其余行按距离递增地虚化和压暗。
+   mandandan 用的就是这套渐进模糊（实测有 blur(0.61/0.87/1.02/1.25/1.48/1.69/2.21/2.39px) 的阶梯）。 */
+.work__list { transition: none; }
+.work__item {
+  transition: opacity var(--dur-3) var(--ease-out), filter var(--dur-3) var(--ease-out);
+}
+.work__list.is-focusing .work__item { opacity: 0.55; }
+.work__list.is-focusing .work__item[data-far='1'] { filter: blur(0.7px); opacity: 0.5; }
+.work__list.is-focusing .work__item[data-far='2'] { filter: blur(1.3px); opacity: 0.42; }
+.work__list.is-focusing .work__item[data-far='3'] { filter: blur(1.9px); opacity: 0.36; }
+.work__list.is-focusing .work__item[data-far='4'] { filter: blur(2.4px); opacity: 0.32; }
+.work__list.is-focusing .work__item[data-far='0'] { opacity: 1; filter: none; }
+
+/* ---- 行内缩略图：占住第三列，贴右端从右往左抹开 ---------------------- */
+.work__thumb {
+  grid-column: 3;
+  align-self: center;
+  width: 100%;
   aspect-ratio: 1040 / 660;
-  margin: -10.3rem 0 0 -16.25rem; /* 以光标为中心 */
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
   overflow: clip;
   background: var(--paper-3);
-  box-shadow: 0 24px 60px -20px rgba(14, 15, 17, 0.35);
   opacity: 0;
   visibility: hidden;
-  transform: scale(0.94);
-  pointer-events: none;
-  will-change: transform, opacity;
+  clip-path: inset(0% 0% 0% 100%);
+  will-change: clip-path, transform, opacity;
 }
-.peek__img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  opacity: 0;
-  transition: opacity var(--dur-2) var(--ease-out);
-}
-.peek__img.is-on { opacity: 1; }
+.work__thumb img { width: 100%; height: 100%; object-fit: cover; will-change: transform; }
 
 /* ---- 幕三 · 关于 ------------------------------------------------------ */
 .about { padding-block: var(--space-4xl) var(--space-3xl); }
-.about__title { max-width: 32rem; margin: var(--space-md) 0 var(--space-3xl); }
+.about__title { max-width: 32rem; margin: var(--space-md) 0 var(--space-2xl); }
+
+.about__bio {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 24rem), 1fr));
+  gap: var(--space-xl);
+  max-width: 64rem;
+}
+.about__bio .t-body { color: var(--on-ink-soft); max-width: none; }
+
+.about__quote {
+  margin: var(--space-3xl) 0;
+  padding-left: var(--space-lg);
+  border-left: var(--rule) solid var(--accent);
+  max-width: 44rem;
+}
+
 .about__grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
@@ -161,6 +208,10 @@
 .about__row { grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); }
 .about__row > span:last-child { display: flex; flex-direction: column; gap: 0.1rem; }
 .about__sub { color: var(--on-ink-soft); }
+
+.about__skills { margin-top: var(--space-3xl); }
+.about__skills .about__row { grid-template-columns: minmax(0, 1fr) minmax(0, 4fr); }
+.about__skillval { color: var(--on-ink-soft); max-width: none; }
 
 /* ---- 幕四 · 联系 ------------------------------------------------------ */
 .contact { padding-block: var(--space-4xl); }
@@ -178,6 +229,11 @@
   .work__row { grid-template-columns: minmax(0, 1fr); row-gap: var(--space-md); }
   .work__meta { flex-direction: row; gap: var(--space-sm); }
   .about__row { grid-template-columns: minmax(0, 1fr); row-gap: var(--space-2xs); }
-  .peek { display: none; }
+  .work__thumb {
+    grid-column: 1;
+    opacity: 1;
+    visibility: visible;
+    clip-path: none;              /* 触屏没有 hover，直接常显 */
+  }
 }
 

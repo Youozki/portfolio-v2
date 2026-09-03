@@ -5,3 +5,4 @@ assets/figma/
 
 # 喂给模型看的降采样副本，本地工具产物，不进仓库
 assets/_llm-preview/
+images/

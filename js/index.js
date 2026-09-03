@@ -44,6 +44,9 @@
       <span class="t-body work__desc">${esc(p.desc)}</span>
       <span class="work__tags">${p.tags.map((t) => `<span class="tag">${esc(t)}</span>`).join('')}</span>
     </span>
+    <span class="work__thumb" aria-hidden="true">
+      <img src="assets/preview/${p.id}.webp" alt="" width="1040" height="660" loading="lazy" />
+    </span>
   </${tag}>
 </li>`;
     }).join('');
@@ -78,39 +81,83 @@
 </li>`).join('');
   }
 
-  /* ---- 悬停预览：跟随光标，用 quickTo 做插值，手感要黏而不迟滞 -------- */
-  function hoverPreview() {
+  /* ---- 技能：与第一版逐字一致，只调整了排版分组 ----------------------- */
+  const skillsBox = document.getElementById('aboutSkills');
+  if (skillsBox) {
+    const SKILLS = [
+      ['产品', '多模态 / 用户心理 / 模型推动 / 功能迭代 / 需求挖掘 / 服务蓝图 / 用户体验地图…'],
+      ['视频', 'AfterEffects / Premiere / Protopie / Spline / Rive'],
+      ['二维', 'Figma / Illustrator / Photoshop'],
+      ['三维', 'Zbrush / Blender / 3DS Max'],
+      ['AI', 'IDE 类 / 视觉生成类'],
+    ];
+    skillsBox.innerHTML = `<p class="t-label">Skills</p>
+${SKILLS.map(([k, v]) => `<div class="row about__row" data-reveal="up">
+  <span class="t-lead">${esc(k)}</span>
+  <span class="t-body about__skillval">${esc(v)}</span>
+</div>`).join('')}`;
+  }
+
+  /* ---- 行内缩略图：贴着行右端揭开，不再用跟随光标的大卡片 ------------- */
+  function rowThumbs() {
     if (!S || S.reduced || !S.hasGsap || matchMedia('(hover: none)').matches) return;
 
-    const card = document.createElement('div');
-    card.className = 'peek';
-    card.setAttribute('aria-hidden', 'true');
-    card.innerHTML = PROJECTS.map((p) =>
-      `<img class="peek__img" data-for="${p.id}" src="assets/preview/${p.id}.webp"
-            alt="" width="1040" height="660" loading="lazy" />`).join('');
-    document.body.appendChild(card);
-
-    const xTo = gsap.quickTo(card, 'x', { duration: 0.55, ease: 'power3.out' });
-    const yTo = gsap.quickTo(card, 'y', { duration: 0.55, ease: 'power3.out' });
-    const imgs = card.querySelectorAll('.peek__img');
-    let shown = false;
-
-    const move = (e) => { xTo(e.clientX); yTo(e.clientY); };
-
     document.querySelectorAll('.work__row').forEach((row) => {
-      row.addEventListener('pointerenter', (e) => {
-        const id = row.dataset.id;
-        imgs.forEach((im) => im.classList.toggle('is-on', im.dataset.for === id));
-        if (!shown) { gsap.set(card, { x: e.clientX, y: e.clientY }); shown = true; }
-        gsap.to(card, { autoAlpha: 1, scale: 1, duration: 0.5, ease: 'expo.out' });
+      const thumb = row.querySelector('.work__thumb');
+      const img = thumb && thumb.querySelector('img');
+      if (!thumb || !img) return;
+
+      // 揭开：从右向左抹开 + 图片本身反向位移，做出"被推出来"的错位感
+      const open = gsap.timeline({ paused: true })
+        .to(thumb, { clipPath: 'inset(0% 0% 0% 0%)', duration: 0.62, ease: 'expo.out' }, 0)
+        .fromTo(img, { xPercent: 12 }, { xPercent: 0, duration: 0.78, ease: 'expo.out' }, 0)
+        .to(thumb, { autoAlpha: 1, duration: 0.2, ease: 'none' }, 0);
+
+      // 轻微视差：光标在行内横向移动时缩略图反向偏一点，量很小，只做"活"的感觉
+      const px = gsap.quickTo(thumb, 'x', { duration: 0.7, ease: 'power3.out' });
+      const py = gsap.quickTo(thumb, 'y', { duration: 0.7, ease: 'power3.out' });
+
+      row.addEventListener('pointerenter', () => open.play());
+      row.addEventListener('pointerleave', () => { open.reverse(); px(0); py(0); });
+      row.addEventListener('pointermove', (e) => {
+        const r = row.getBoundingClientRect();
+        px(((e.clientX - r.left) / r.width - 0.5) * -18);
+        py(((e.clientY - r.top) / r.height - 0.5) * -12);
       });
-      row.addEventListener('pointerleave', () => {
-        gsap.to(card, { autoAlpha: 0, scale: 0.94, duration: 0.35, ease: 'power2.out' });
-      });
-      row.addEventListener('pointermove', move);
     });
   }
 
-  hoverPreview();
-  if (S) { S.revealAll(); S.navBehaviour(); }
+  /* ---- 焦点阶梯：悬停一行，其余行按距离递增虚化 ------------------------ */
+  function focusLadder() {
+    if (!S || S.reduced || matchMedia('(hover: none)').matches) return;
+    const listEl = document.getElementById('workList');
+    if (!listEl) return;
+    const items = [...listEl.children];
+    items.forEach((item, i) => {
+      item.addEventListener('pointerenter', () => {
+        listEl.classList.add('is-focusing');
+        items.forEach((o, j) => { o.dataset.far = String(Math.min(4, Math.abs(j - i))); });
+      });
+    });
+    listEl.addEventListener('pointerleave', () => {
+      listEl.classList.remove('is-focusing');
+      items.forEach((o) => { delete o.dataset.far; });
+    });
+  }
+
+  /* ---- 铝板随滚动缓慢下沉：只是一层很轻的视差，别抢注意力 -------------- */
+  function heroParallax() {
+    if (!S || S.reduced || !S.hasGsap) return;
+    const obj = document.querySelector('.hero__object');
+    if (!obj) return;
+    gsap.to(obj, {
+      yPercent: 16, rotate: -2.5, ease: 'none',
+      scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: 0.8 },
+    });
+  }
+
+  rowThumbs();
+  focusLadder();
+  heroParallax();
+  if (S) { S.revealAll(); S.navBehaviour(); S.navInvert(); }
 })();

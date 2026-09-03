@@ -11,7 +11,14 @@
 <body>
 
 <nav class="nav" id="nav" aria-label="主导航">
-  <a class="nav__home" href="index.html" aria-label="首页">✳</a>
+  <a class="nav__home" href="index.html" aria-label="回到顶部">
+    <!-- 自己设计的标记：两片错开的圆角方，取"图纸与硬件叠合"的意思；
+         悬停时两片朝反方向分开一点，露出中间的缝。 -->
+    <svg class="mark" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+      <rect class="mark__a" x="3.2" y="3.2" width="12.6" height="12.6" rx="3.6" />
+      <rect class="mark__b" x="8.2" y="8.2" width="12.6" height="12.6" rx="3.6" />
+    </svg>
+  </a>
   <ul class="nav__list">
     <li><a class="nav__link" href="#work">作品</a></li>
     <li><a class="nav__link" href="#about">关于</a></li>
@@ -28,6 +35,9 @@
         <span class="line-clip"><span class="line-inner">Experience</span></span>
         <span class="line-clip"><span class="line-inner hero__dim">Designer</span></span>
       </h1>
+      <figure class="hero__object" aria-hidden="true">
+        <img src="assets/graphics/plates.webp" alt="" width="1200" height="960" />
+      </figure>
       <div class="hero__foot">
         <p class="t-h2 hero__statement">
           用户体验设计师。<br />
@@ -54,12 +64,40 @@
     </div>
   </section>
 
+  <!-- 过场：把两幕之间的转折用一张图承接，同时交代"硬件那一侧"的工作 -->
+  <section class="band band--ink interlude" aria-labelledby="interlude-title">
+    <div class="page interlude__inner">
+      <figure class="interlude__fig" data-reveal="soft">
+        <img src="assets/graphics/blueprint.webp" alt="铰链旋转轴与开合角度的线框推演图" width="1536" height="1024" />
+      </figure>
+      <div class="interlude__copy">
+        <p class="t-num">0.0</p>
+        <h2 class="t-h2" id="interlude-title" data-reveal="soft">设计不是悬在空中的闭门思考。</h2>
+        <p class="t-cap interlude__note" data-reveal="soft" data-reveal-delay="0.1">
+          从梳理项目需求与实际机器运作情况，到视觉交互，再到研发测试。
+        </p>
+      </div>
+    </div>
+  </section>
+
   <!-- 幕三：关于。深色带做分章 -->
   <section class="band band--ink about" id="about" aria-labelledby="about-title">
     <div class="page">
       <p class="t-label">关于</p>
       <h2 class="t-h1 about__title" id="about-title">在图纸与硬件的结合处工作。</h2>
+
+      <div class="about__bio">
+        <p class="t-body" data-reveal="up">就读于湖南师范大学设计系数字媒体方向。实习期间，先后在联想的 UIUX 组与百度的 AI 产品组做过一些工作。相比于单纯的产品 or 设计，我更希望自己是一名兼具全局产品观、精细化设计与交互执行力的用户体验设计师。</p>
+        <p class="t-body" data-reveal="up" data-reveal-delay="0.08">接触 AI 产品后，对设计的看法也有了新的认识，从一味追求设计审美，到 AI 时代我们的产品到底要解决什么样的问题，如何管理 AI 体验设计中的不确定性。进而通过用户洞察、逻辑拆解及跨团队协作，从业务目标和技术可行性出发来推进体验创新。结合自身的设计优势，利用动态视觉建立生动的反馈机制，让静态界面充满节奏感。更能够将理性逻辑与感性美学相融合，推动高品质产品落地。</p>
+      </div>
+
+      <blockquote class="about__quote" data-reveal="up">
+        <p class="t-h2">Steve Jobs 曾说，用户不知道自己想要什么，直到你把产品放在他们面前。<br />
+        我相信好的产品，从来都是与用户产生联系，并回馈以各个细节。</p>
+      </blockquote>
+
       <div class="about__grid" id="aboutRows"></div>
+      <div class="about__skills" id="aboutSkills"></div>
     </div>
   </section>
 

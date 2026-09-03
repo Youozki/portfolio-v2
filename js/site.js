@@ -44,39 +44,78 @@
     scrollTo(el);
   });
 
-  /* ---- 入场：只动 transform 和 opacity ------------------------------- */
+  /* ---- 入场 -----------------------------------------------------------
+     参数来自 mandandan.cn 的实测：它的 journey-screen-reveal 是
+     opacity .08→1 / blur(4px)→0 / translateY 82px→0 / scale .955→1，
+     缓动 cubic-bezier(0.22,1,0.36,1)，时长 0.72–0.92s。
+     模糊+缩放一起给，比单纯位移"贵"很多，这是它高级感的主要来源。 */
+  const EASE_REVEAL = 'cubic-bezier(0.22, 1, 0.36, 1)';
+
   function revealAll() {
     const items = document.querySelectorAll('[data-reveal]');
     if (!hasGsap || reduced) {
-      items.forEach((el) => { el.style.opacity = '1'; el.style.transform = 'none'; });
+      items.forEach((el) => {
+        el.style.opacity = '1'; el.style.transform = 'none'; el.style.filter = 'none';
+      });
       document.querySelectorAll('.line-inner').forEach((el) => { el.style.transform = 'none'; });
       return;
     }
+    if (window.CustomEase && !gsap.parseEase('reveal')) {
+      gsap.registerPlugin(CustomEase);
+      CustomEase.create('reveal', '0.22, 1, 0.36, 1');
+    }
 
-    // 标题按行上推：行容器 clip，内层从 105% 推上来
     gsap.utils.toArray('.line-clip').forEach((clip) => {
       const inner = clip.querySelector('.line-inner');
       if (!inner) return;
       gsap.to(inner, {
-        y: '0%',
-        duration: 1.1,
-        ease: 'expo.out',
-        scrollTrigger: { trigger: clip, start: 'top 88%', once: true },
+        y: '0%', duration: 1.15, ease: 'expo.out',
+        scrollTrigger: { trigger: clip, start: 'top 90%', once: true },
       });
     });
 
     items.forEach((el) => {
       const mode = el.dataset.reveal;
       const delay = parseFloat(el.dataset.revealDelay || '0');
-      gsap.to(el, {
-        opacity: 1,
-        y: mode === 'up' ? 0 : undefined,
-        duration: 0.9,
-        delay,
-        ease: 'expo.out',
-        scrollTrigger: { trigger: el, start: 'top 90%', once: true },
-      });
+      gsap.fromTo(el,
+        { opacity: 0.08, y: mode === 'soft' ? 34 : 68, scale: 0.972, filter: 'blur(4px)' },
+        {
+          opacity: 1, y: 0, scale: 1, filter: 'blur(0px)',
+          duration: 0.92, delay, ease: 'reveal', overwrite: 'auto',
+          scrollTrigger: { trigger: el, start: 'top 92%', once: true },
+        });
     });
+  }
+
+  /* ---- 导航随身下色带反色（augen 的做法：切 class，不是改内联样式） ---- */
+  function navInvert() {
+    const nav = document.getElementById('nav');
+    if (!nav) return;
+    const bands = [...document.querySelectorAll('.band')];
+    if (!bands.length) return;
+    const probeY = () => nav.getBoundingClientRect().bottom - 8;
+    const apply = () => {
+      const y = probeY();
+      let cur = null;
+      for (const b of bands) {
+        const r = b.getBoundingClientRect();
+        if (r.top <= y && r.bottom > y) cur = b;
+      }
+      const dark = cur && (cur.classList.contains('band--ink') || cur.classList.contains('band--accent'));
+      nav.classList.toggle('is-inverted', !!dark);
+    };
+    if (lenis) lenis.on('scroll', apply);
+    else addEventListener('scroll', apply, { passive: true });
+    addEventListener('resize', apply);
+    apply();
+  }
+
+  /* ---- 无限漂移带：两条不同速度，做出层次（mandandan 用 46s / 58s） ---- */
+  function marquee(el) {
+    if (!el || reduced) return;
+    const row = el.querySelector('.drift__row');
+    if (!row) return;
+    row.innerHTML = row.innerHTML + row.innerHTML;   // 复制一份才能无缝首尾相接
   }
 
   /* ---- 导航：向下滚收起，向上滚出现 ---------------------------------- */
@@ -94,6 +133,6 @@
     else addEventListener('scroll', onScroll, { passive: true });
   }
 
-  window.SITE = { lenis, reduced, hasGsap, scrollTo, revealAll, navBehaviour };
+  window.SITE = { lenis, reduced, hasGsap, scrollTo, revealAll, navBehaviour, navInvert, marquee, EASE_REVEAL };
 })();
 

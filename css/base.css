@@ -189,9 +189,20 @@ a { color: inherit; text-decoration: none; }
   background: var(--ink);
   color: var(--paper);
   font-size: var(--text-sm);
-  transition: background-color var(--dur-1) var(--ease-out);
+  transition: background-color var(--dur-2) var(--ease-out);
 }
 .nav__home:hover { background: var(--accent); }
+
+/* 自制标记：两片错开的圆角方，悬停分开 */
+.mark { overflow: visible; }
+.mark rect {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.4;
+  transition: transform var(--dur-3) var(--ease-out);
+}
+.nav__home:hover .mark__a { transform: translate(-1.4px, -1.4px); }
+.nav__home:hover .mark__b { transform: translate(1.4px, 1.4px); }
 .nav__list { display: flex; align-items: center; }
 .nav__link {
   padding: 0.55rem 0.9rem;
@@ -204,6 +215,32 @@ a { color: inherit; text-decoration: none; }
 }
 .nav__link:hover { background: rgba(14, 15, 17, 0.06); }
 .nav__link[aria-current='true'] { color: var(--accent); }
+
+/* 导航压到深色／强调色带上时整体反色（augen 的做法） */
+.nav {
+  transition: transform var(--dur-3) var(--ease-out), opacity var(--dur-2) var(--ease-out),
+    background-color var(--dur-3) var(--ease-out);
+}
+.nav.is-inverted { background: var(--veil-ink); }
+.nav.is-inverted .nav__link { color: var(--on-ink); }
+.nav.is-inverted .nav__link:hover { background: rgba(242, 242, 244, 0.12); }
+.nav.is-inverted .nav__home { background: var(--paper); color: var(--ink); }
+.nav.is-inverted .nav__home:hover { background: var(--accent); color: var(--accent-ink); }
+
+/* ---- 无限漂移带：两条不同速度叠出层次（mandandan 用 46s / 58s） ------ */
+.drift { overflow: clip; width: 100%; }
+.drift__row {
+  display: flex;
+  width: max-content;
+  gap: var(--space-xl);
+  animation: drift var(--drift-dur, 46s) linear infinite;
+  will-change: transform;
+}
+.drift--slow .drift__row { animation-duration: var(--drift-dur, 58s); animation-direction: reverse; }
+@keyframes drift {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-50%, 0, 0); }
+}
 
 /* ---- 入场：JS 未接管时也要可读，所以默认可见，加 .js 后才隐藏 -------- */
 .js [data-reveal] { opacity: 0; }
