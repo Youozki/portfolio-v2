@@ -32,8 +32,8 @@
   renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
   renderer.setClearAlpha(0);
 
-  const INK = new THREE.Color('#0e0f11');
-  const ACCENT = new THREE.Color('#0071e3');
+  // 绿色取自主视觉里那丛苔藓的中间调，比纯绿灰一点，压在纸色上不跳
+  const MOSS = new THREE.Color('#6f9e4e');
 
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
@@ -45,7 +45,7 @@
   /* ---- 粒子场 ----------------------------------------------------------
      位置用确定性的伪随机（正弦哈希）而不是 Math.random，这样每次加载分布一致，
      排查和截图比对才有意义。 */
-  const COUNT = 760;
+  const COUNT = 320;
   const rand = (i, salt) => {
     const v = Math.sin((i + 1) * 12.9898 + salt * 78.233) * 43758.5453;
     return v - Math.floor(v);
@@ -63,36 +63,18 @@
   }
   const dotGeo = new THREE.BufferGeometry();
   dotGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  /* 发光靠两层叠加：一层实心小点 + 一层更大更透的光晕，
+     additive 混合在浅底上会越叠越白，所以光晕用普通混合、压低透明度。 */
   const dots = new THREE.Points(dotGeo, new THREE.PointsMaterial({
-    color: INK, size: 0.055, sizeAttenuation: true,
-    transparent: true, opacity: 0.16, depthWrite: false,
+    color: MOSS, size: 0.085, sizeAttenuation: true,
+    transparent: true, opacity: 0.62, depthWrite: false,
   }));
   world.add(dots);
-
-  /* ---- 两条自绘路径 ----------------------------------------------------
-     r149 的 LineDashedMaterial 没有 dashOffset，动不了虚线相位；改用
-     setDrawRange 逐段放出顶点，等于让线自己"画"出来，然后从头擦掉，循环。 */
-  const SEG = 240;
-  const paths = [0, 1].map((k) => {
-    const p = new Float32Array((SEG + 1) * 3);
-    for (let i = 0; i <= SEG; i += 1) {
-      const t = i / SEG;
-      const sweep = (t - 0.5) * 20;
-      p[i * 3] = sweep;
-      p[i * 3 + 1] = Math.sin(t * Math.PI * (1.6 + k * 0.9) + k * 2.1) * (2.4 - k * 0.7)
-        + (k ? 2.6 : -2.2);
-      p[i * 3 + 2] = Math.cos(t * Math.PI * (1.1 + k)) * 2.2;
-    }
-    const g = new THREE.BufferGeometry();
-    g.setAttribute('position', new THREE.BufferAttribute(p, 3));
-    g.setDrawRange(0, 0);
-    const line = new THREE.Line(g, new THREE.LineBasicMaterial({
-      color: k ? ACCENT : INK, transparent: true, opacity: k ? 0.3 : 0.18,
-      depthWrite: false,
-    }));
-    world.add(line);
-    return { geo: g, phase: k * 0.45 };
-  });
+  const halo = new THREE.Points(dotGeo, new THREE.PointsMaterial({
+    color: MOSS, size: 0.34, sizeAttenuation: true,
+    transparent: true, opacity: 0.13, depthWrite: false,
+  }));
+  world.add(halo);
 
   const resize = () => {
     const w = hero.clientWidth, h = hero.clientHeight;
@@ -129,15 +111,6 @@
       arr[i * 3 + 1] = base[i * 3 + 1] + Math.sin(t * drift[i] * 0.5 + i) * 0.22;
     }
     dotGeo.attributes.position.needsUpdate = true;
-
-    // 路径：0→1 画出来，1→1.35 停一下，再擦掉，周期 4.2s
-    paths.forEach((p) => {
-      const cycle = ((t / 4.2) + p.phase) % 1;
-      const grow = Math.min(1, cycle / 0.62);
-      const wipe = cycle > 0.82 ? (cycle - 0.82) / 0.18 : 0;
-      const from = Math.floor(wipe * SEG);
-      p.geo.setDrawRange(from, Math.max(0, Math.floor(grow * SEG) - from + 1));
-    });
 
     eye.x += (aim.x - eye.x) * 0.055;
     eye.y += (aim.y - eye.y) * 0.055;

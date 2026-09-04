@@ -22,8 +22,8 @@
   --accent-ink: #ffffff;
   --hair: rgba(14, 15, 17, 0.14);      /* 浅底发丝线 */
   --hair-on-ink: rgba(242, 242, 244, 0.16);
-  --veil: rgba(237, 237, 234, 0.72);   /* 毛玻璃底 */
-  --veil-ink: rgba(14, 15, 17, 0.6);
+  --veil: rgba(237, 237, 234, 0.4);    /* 毛玻璃底，按反馈调得更透 */
+  --veil-ink: rgba(14, 15, 17, 0.34);
 
   /* ---- 字体 ---------------------------------------------------------- */
   --font-sans: 'Geist', 'Noto Sans SC Subset', -apple-system, 'PingFang SC',
@@ -84,7 +84,7 @@
   --radius-sm: 10px;
   --radius-md: 18px;
   --rule: 1px;
-  --blur-veil: blur(20px);
+  --blur-veil: blur(28px);   /* 底色透了，模糊要更重才撑得住可读性 */
   --blur-veil-sm: blur(12px);
 
   /* ---- 动效 ---------------------------------------------------------- */

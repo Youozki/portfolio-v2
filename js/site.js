@@ -122,21 +122,30 @@
     row.innerHTML = row.innerHTML + row.innerHTML;   // 复制一份才能无缝首尾相接
   }
 
-  /* ---- 导航：向下滚收起，向上滚出现 ---------------------------------- */
-  function navBehaviour() {
-    const nav = document.getElementById('nav');
-    if (!nav) return;
-    let last = window.scrollY;
-    const onScroll = () => {
-      const y = window.scrollY;
-      if (y > 160 && y > last + 6) nav.classList.add('is-hidden');
-      else if (y < last - 6 || y <= 160) nav.classList.remove('is-hidden');
-      last = y;
-    };
-    if (lenis) lenis.on('scroll', onScroll);
-    else addEventListener('scroll', onScroll, { passive: true });
+  /* ---- 换页过渡：离场模糊渐隐，进场渐显 ------------------------------
+     站内 .html 跳转拦下来，先跑 320ms 的离场再真正导航；新页面加载时
+     is-leaving 已经不在，main 直接从 CSS 的过渡态渐显回来。
+     模糊只给 6px——按反馈"不用加太多"。 */
+  function pageFade() {
+    if (reduced) return;
+    const root = document.documentElement;
+
+    document.addEventListener('click', (e) => {
+      const a = e.target.closest('a[href]');
+      if (!a || a.target === '_blank' || e.metaKey || e.ctrlKey || e.shiftKey) return;
+      const href = a.getAttribute('href');
+      if (!href || href.startsWith('#') || /^(https?:|mailto:|tel:)/.test(href)) return;
+      e.preventDefault();
+      root.classList.add('is-leaving');
+      setTimeout(() => { location.href = href; }, 320);
+    });
+
+    // 从浏览器缓存回退回来时，别停在离场态
+    addEventListener('pageshow', () => root.classList.remove('is-leaving'));
   }
 
-  window.SITE = { lenis, reduced, hasGsap, scrollTo, revealAll, navBehaviour, navInvert, marquee, EASE_REVEAL };
+  pageFade();
+
+  window.SITE = { lenis, reduced, hasGsap, scrollTo, revealAll, navInvert, marquee, EASE_REVEAL };
 })();
 

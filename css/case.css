@@ -91,6 +91,8 @@
 /* ---- 吸顶章名 + 推进列（mandandan 把章节文案钉在 top:171px） --------- */
 .split {
   display: grid;
+  max-width: 60rem;
+  margin-inline: auto;
   grid-template-columns: minmax(0, 1fr) minmax(0, 2.6fr);
   column-gap: clamp(2rem, 6vw, 7rem);
   align-items: start;
@@ -120,6 +122,7 @@
 .step__fig--narrow img { max-width: 15rem; }
 
 /* 初步结论：四条发丝行，最后一条给强调色 */
+.conclusion { max-width: 60rem; margin-inline: auto; }
 .conclusion__head { margin-bottom: var(--space-lg); }
 .conclusion__row { grid-template-columns: 2rem minmax(0, 1fr); }
 .conclusion__row .t-body, .conclusion__row .t-lead { max-width: 44rem; }
@@ -129,34 +132,38 @@
 .fig { display: grid; gap: var(--space-sm); }
 .fig img { border-radius: var(--radius-sm); }
 .fig--wide img { width: 100%; }
-.fig--bleed img { width: 100%; border-radius: 0; }
-.fig--bleed figcaption { margin-top: var(--space-sm); }
-
-/* ---- 招牌一 · 钉住的横向情绪带 --------------------------------------- */
-.hstrip { height: 260vh; }
-.hstrip__pin {
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  overflow: clip;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: var(--space-2xl);
-}
-.hstrip__head { display: grid; gap: var(--space-xs); width: 100%; }
-.hstrip__lead { max-width: 36rem; }
-.hstrip__track {
-  width: max-content;
-  padding-left: var(--margin);
-  will-change: transform;
-}
-.hstrip__track img {
-  height: clamp(16rem, 42vh, 26rem);
-  width: auto;
-  max-width: none;
+/* augen 的内页正文都收在页面中部，两侧大量留白。满幅图看着臃肿，
+   所以图版统一走这条窄栏，只有首屏那种主视觉才铺满。 */
+.fig--mid { max-width: 52rem; margin-inline: auto; }
+.fig--mid img { width: 100%; }
+.ces img {
   border-radius: var(--radius-sm);
+  transition: transform var(--dur-3) var(--ease-out), box-shadow var(--dur-3) var(--ease-out);
 }
+/* 悬停时轻轻抬起并推近，给这张现场照一点可交互的暗示 */
+.ces:hover img {
+  transform: scale(1.02) translateY(-4px);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.38);
+}
+.emo__item img { transition: transform var(--dur-3) var(--ease-out); }
+.emo__item:hover img { transform: scale(1.03); }
+
+/* ---- 四种情绪：2×2 平铺，一共就四张，不值得做钉住横滚 --------------- */
+.emo { display: grid; gap: var(--space-2xl); }
+.emo__head { display: grid; gap: var(--space-xs); max-width: 34rem; }
+.emo__lead { max-width: none; }
+.emo__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2xl) var(--space-xl);
+  max-width: 52rem;
+  margin-inline: auto;
+}
+.emo__item { display: grid; gap: var(--space-sm); }
+.emo__item img { width: 100%; height: auto; border-radius: var(--radius-sm); }
+.emo__name { color: var(--ink); letter-spacing: 0; }
+.emo__bars { display: grid; gap: 5px; max-width: 7.5rem; }
+.emo__bars i { display: block; height: 9px; border-radius: 2px; }
 
 /* ---- 图文对开 -------------------------------------------------------- */
 .grid2 {
@@ -177,6 +184,8 @@
   align-content: center;
 }
 .deck__inner {
+  max-width: 60rem;
+  margin-inline: auto;
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 3fr);
   column-gap: clamp(2rem, 6vw, 7rem);
@@ -212,6 +221,8 @@
 
 /* ---- Pet Tracking 四步：不同画幅并排，底线对齐 ----------------------- */
 .seq {
+  max-width: 60rem;
+  margin-inline: auto;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   column-gap: var(--gutter);
@@ -280,10 +291,6 @@
   .stage__pin { position: static; height: auto; min-height: 78vh; }
   .stage__copy { padding-block: var(--space-4xl) var(--space-2xl); }
 
-  .hstrip { height: auto; }
-  .hstrip__pin { position: static; height: auto; gap: var(--space-lg); }
-  .hstrip__track { overflow-x: auto; width: auto; padding-inline: var(--margin); }
-  .hstrip__track img { height: 14rem; }
 
   .grid2 { grid-template-columns: minmax(0, 1fr); row-gap: var(--space-lg); }
 
@@ -296,4 +303,5 @@
   .deck__caption { grid-column: 1; }
 
   .seq { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: var(--space-xl); }
+  .emo__grid { grid-template-columns: minmax(0, 1fr); }
 }

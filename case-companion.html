@@ -132,24 +132,43 @@
       </div>
     </div>
 
-    <figure class="fig fig--bleed" data-reveal="soft">
+    <figure class="page fig fig--mid" data-reveal="soft">
       <img src="assets/cases/companion/moodboard.webp" alt="九种表情处理与六个本体造型的探索板"
            width="2753" height="638" loading="lazy" />
-      <figcaption class="page t-cap">视觉方案初次迭代 · 交互方案初次迭代</figcaption>
+      <figcaption class="t-cap">视觉方案初次迭代 · 交互方案初次迭代</figcaption>
     </figure>
 
-    <!-- 招牌段落：四种情绪横向铺开，跟着滚动横移 -->
-    <div class="hstrip" id="emotionStrip">
-      <div class="hstrip__pin">
-        <div class="page hstrip__head">
-          <p class="t-label">四种情绪</p>
-          <p class="t-lead hstrip__lead">在 Tiko 视觉方案最终设定上，我们确定了四种情绪变化，也制作了上百种不同的表情动效。</p>
-        </div>
-        <div class="hstrip__track">
-          <img src="assets/cases/companion/emotions.webp" alt="Positive、Warm、Calm、Process 四种情绪状态及其色板"
-               width="3600" height="822" loading="lazy" />
-        </div>
+    <!-- 四种情绪：一共就四张，平铺成 2×2，不做横向滚动。
+         四张面板是从原来那条长图里切出来的，统一切了 26px 圆角——
+         原图里有的带圆角有的不带，切开重排才能真正统一。
+         标签和色板改成用 HTML/CSS 排，颜色取自原图。 -->
+    <div class="page emo">
+      <div class="emo__head">
+        <p class="t-label">四种情绪</p>
+        <p class="t-body emo__lead">在 Tiko 视觉方案最终设定上，我们确定了四种情绪变化，也制作了上百种不同的表情动效。</p>
       </div>
+      <ul class="emo__grid">
+        <li class="emo__item" data-reveal="soft">
+          <img src="assets/cases/companion/emo-positive.webp" alt="Positive 情绪状态" width="676" height="422" loading="lazy" />
+          <p class="t-cap emo__name">Positive</p>
+          <span class="emo__bars"><i style="background:#df5191"></i><i style="background:#bd57b7"></i><i style="background:#d07365"></i></span>
+        </li>
+        <li class="emo__item" data-reveal="soft" data-reveal-delay="0.06">
+          <img src="assets/cases/companion/emo-warm.webp" alt="Warm 情绪状态" width="676" height="422" loading="lazy" />
+          <p class="t-cap emo__name">Warm</p>
+          <span class="emo__bars"><i style="background:#d6433e"></i><i style="background:#e87340"></i><i style="background:#e13d9d"></i></span>
+        </li>
+        <li class="emo__item" data-reveal="soft" data-reveal-delay="0.12">
+          <img src="assets/cases/companion/emo-calm.webp" alt="Calm 情绪状态" width="676" height="422" loading="lazy" />
+          <p class="t-cap emo__name">Calm</p>
+          <span class="emo__bars"><i style="background:#5abeea"></i><i style="background:#456ff9"></i><i style="background:#a335c7"></i></span>
+        </li>
+        <li class="emo__item" data-reveal="soft" data-reveal-delay="0.18">
+          <img src="assets/cases/companion/emo-process.webp" alt="Process 情绪状态" width="676" height="422" loading="lazy" />
+          <p class="t-cap emo__name">Process</p>
+          <span class="emo__bars"><i style="background:#33a254"></i><i style="background:#b4d701"></i><i style="background:#32b8ef"></i></span>
+        </li>
+      </ul>
     </div>
 
     <div class="page split">
@@ -159,9 +178,10 @@
       </div>
     </div>
 
-    <figure class="fig fig--bleed" data-reveal="soft">
+    <figure class="page fig fig--mid" data-reveal="soft">
       <img src="assets/cases/companion/expressions.webp" alt="表情动效帧：眨眼、点赞、墨镜、爱心、相机、咖啡、蛋糕、音符、睡眠等"
            width="3200" height="931" loading="lazy" />
+      <figcaption class="t-cap">上百种表情动效里的一部分</figcaption>
     </figure>
 
     <div class="page grid2">
@@ -271,10 +291,10 @@
       </div>
     </div>
 
-    <figure class="fig fig--bleed" data-reveal="soft">
+    <figure class="page fig fig--mid ces" data-reveal="soft">
       <img src="assets/cases/companion/ces.webp" alt="CES 2026 展台现场，展板上是 11 项 Best of CES 媒体奖项"
            width="2560" height="1484" loading="lazy" />
-      <figcaption class="page t-cap">CES 2026 展台现场</figcaption>
+      <figcaption class="t-cap">CES 2026 展台现场</figcaption>
     </figure>
   </section>
 

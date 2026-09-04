@@ -194,14 +194,14 @@ a { color: inherit; text-decoration: none; }
   padding: 0.35rem;
   border-radius: var(--radius-pill-lg);
   background: var(--veil);
-  -webkit-backdrop-filter: var(--blur-veil);
-  backdrop-filter: var(--blur-veil);
+  -webkit-backdrop-filter: var(--blur-veil) saturate(150%);
+  backdrop-filter: var(--blur-veil) saturate(150%);
+  border: var(--rule) solid rgba(14, 15, 17, 0.06);
   transform: translate(-50%, 0);
   transition: transform var(--dur-3) var(--ease-out),
     opacity var(--dur-2) var(--ease-out);
   will-change: transform;
 }
-.nav.is-hidden { transform: translate(-50%, calc(-100% - var(--space-lg) * 2)); opacity: 0; }
 .nav__home {
   display: grid;
   place-items: center;
@@ -243,7 +243,7 @@ a { color: inherit; text-decoration: none; }
   transition: transform var(--dur-3) var(--ease-out), opacity var(--dur-2) var(--ease-out),
     background-color var(--dur-3) var(--ease-out);
 }
-.nav.is-inverted { background: var(--veil-ink); }
+.nav.is-inverted { background: var(--veil-ink); border-color: rgba(242, 242, 244, 0.1); }
 .nav.is-inverted .nav__link { color: var(--on-ink); }
 .nav.is-inverted .nav__link:hover { background: rgba(242, 242, 244, 0.12); }
 .nav.is-inverted .nav__home { background: var(--paper); color: var(--ink); }
@@ -273,6 +273,14 @@ a { color: inherit; text-decoration: none; }
 .line-clip { overflow: clip; }
 .js .line-inner { transform: translate3d(0, 105%, 0); }
 
+/* ---- 换页过渡：轻微模糊 + 渐隐渐显（augen 的做法） -------------------
+   只作用在 main 上，导航和过渡层本身不参与，避免整屏"抖一下"。 */
+.js main { will-change: opacity, filter; }
+.js.is-leaving main { opacity: 0; filter: blur(6px); }
+.js main {
+  transition: opacity 320ms var(--ease-in-out), filter 320ms var(--ease-in-out);
+}
+
 /* ---- 无障碍 ---------------------------------------------------------- */
 .visually-hidden {
   position: absolute;
@@ -295,7 +303,6 @@ a { color: inherit; text-decoration: none; }
   :root { --cols: 2; --nav-h: 4rem; }
   .row { grid-template-columns: minmax(0, 1fr); row-gap: var(--space-sm); }
   .nav { top: auto; bottom: var(--space-md); }
-  .nav.is-hidden { transform: translate(-50%, calc(100% + var(--space-lg) * 2)); }
 }
 @media (max-width: 479px) {
   .t-display { overflow-wrap: anywhere; min-width: 0; }

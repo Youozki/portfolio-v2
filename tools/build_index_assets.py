@@ -105,9 +105,23 @@ def build_logos():
             print('缺 logo %s' % rel)
             continue
         im = Image.open(path).convert('RGBA')
-        box = im.getchannel('A').point(lambda v: 255 if v > 8 else 0).getbbox()
+        alpha = im.getchannel('A').point(lambda v: 255 if v > 8 else 0)
+        box = alpha.getbbox()
         if box:
             im = im.crop(box)
+            alpha = alpha.crop(box)
+        # 按"墨水重心"而不是外框中心对齐：百度的爪子高出字母一截，
+        # 只按外框居中会让字母整体偏低，和旁边的公司名对不齐。
+        rows = [sum(1 for x in range(0, im.width, 2) if alpha.getpixel((x, y)))
+                for y in range(im.height)]
+        total = sum(rows) or 1
+        cy = sum(y * n for y, n in enumerate(rows)) / total
+        pad = int(round(abs(im.height / 2 - cy) * 2))
+        if pad:
+            top = pad if cy > im.height / 2 else 0
+            plate = Image.new('RGBA', (im.width, im.height + pad), (0, 0, 0, 0))
+            plate.alpha_composite(im, (0, top))
+            im = plate
         im = im.resize((max(1, round(im.width * H / im.height)), H), Image.LANCZOS)
         dst = os.path.join(out_dir, name + '.webp')
         im.save(dst, 'WEBP', quality=92, method=6)

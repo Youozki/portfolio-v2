@@ -161,5 +161,5 @@ ${SKILLS.map(([k, v]) => `<div class="row about__row" data-reveal="up">
   focusLadder();
   heroIntro();
   rowIntro();
-  if (S) { S.revealAll(); S.navBehaviour(); S.navInvert(); }
+  if (S) { S.revealAll(); S.navInvert(); }
 })();

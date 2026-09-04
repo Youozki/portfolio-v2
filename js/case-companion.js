@@ -8,7 +8,6 @@
   const { hasGsap, reduced } = S;
 
   S.revealAll && S.revealAll();
-  S.navBehaviour && S.navBehaviour();
   S.navInvert && S.navInvert();
 
   /* ---- 顶部进度：整页阅读进度，ease:none 才跟手 ----------------------- */
@@ -66,20 +65,6 @@
 
       if (l1) tl.add(line(l1, true), 0.06);
       if (l2) tl.add(line(l2, false), 0.5);
-    }
-
-    /* ---- 招牌一 · 四种情绪横向铺开，滚动即横移 ------------------------ */
-    const strip = document.getElementById('emotionStrip');
-    if (strip) {
-      const track = strip.querySelector('.hstrip__track');
-      const distance = () => Math.max(0, track.scrollWidth - window.innerWidth + 64);
-      gsap.fromTo(track, { x: 0 }, {
-        x: () => -distance(), ease: 'none',
-        scrollTrigger: {
-          trigger: strip, start: 'top top', end: 'bottom bottom',
-          scrub: 0.25, invalidateOnRefresh: true,
-        },
-      });
     }
 
     /* ---- 招牌二 · 六屏接管同一个位置 ---------------------------------- */
