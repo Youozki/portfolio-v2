@@ -129,78 +129,42 @@
      进场——胶囊从图标宽度伸到自然宽度，文字再逐条从下滚上来。
      两半首尾相接，看起来就是一个连续动作。
      胶囊宽度得先量：先让它 auto 布局拿到自然宽，再从窄的一端补起来。 */
-  const NAV_STEP = 0.055;          // 每条文字之间的错开
-  const R = '94px';                // 与 --radius-pill-lg 一致，裁切也要圆角
-
-  /* 胶囊"伸长"不用动 width——width 变化会让 flex 子项被压缩，padding 塌掉、
-     文字挤成一坨。改成裁 clip-path：胶囊始终是自然宽度，只把右边裁掉一段，
-     inset 带 round 所以裁出来的右端仍是圆头。子项完全不参与重排。 */
-  const clipTo = (nav, rightPx) => `inset(0px ${rightPx}px 0px 0px round ${R})`;
-  const hiddenRight = (nav) => {
-    const home = nav.querySelector('.nav__home');
-    const pad = parseFloat(getComputedStyle(nav).paddingLeft) || 0;
-    const keep = (home ? home.offsetWidth : 24) + pad * 2;
-    return Math.max(0, nav.offsetWidth - keep);
-  };
+  /* ---- 导航文字滚动 ---------------------------------------------------
+     跨页的位移与胶囊伸缩已经交给 View Transition（见 base.css），这里只负责
+     文字：新页面的标签逐条从下往上滚进来。旧标签不用管——浏览器的旧快照会
+     自己淡出，再手动做一遍离场就是两套动画打架，也正是之前卡顿的来源。
+     不支持 View Transition 的浏览器退化成"只滚文字"，不做胶囊裁切：
+     宁可少一个效果，也不要一个会闪的效果。 */
+  const NAV_STEP = 0.055;
+  const hasVT = typeof document.startViewTransition === 'function';
 
   function navEnter() {
     const nav = document.getElementById('nav');
     if (!nav) return;
     const texts = [...nav.querySelectorAll('.nav__text')];
-    if (reduced || !hasGsap) { nav.classList.add('is-ready'); return; }
+    if (reduced || !hasGsap || !texts.length) { nav.classList.add('is-ready'); return; }
 
     nav.classList.add('is-ready');
     gsap.set(texts, { yPercent: 110 });
-    gsap.set(nav, { clipPath: clipTo(nav, hiddenRight(nav)) });
-
-    gsap.timeline({ delay: 0.12 })
-      .to(nav, {
-        clipPath: clipTo(nav, 0), duration: 0.72, ease: 'expo.out',
-      }, 0)
-      .to(texts, {
-        yPercent: 0, duration: 0.5, ease: 'expo.out', stagger: NAV_STEP,
-      }, 0.18)
-      .set(nav, { clearProps: 'clipPath' });
+    gsap.to(texts, {
+      yPercent: 0, duration: 0.5, ease: 'expo.out', stagger: NAV_STEP,
+      // View Transition 期间不要抢帧：等浏览器把快照过渡跑完再滚文字
+      delay: hasVT ? 0.34 : 0.12,
+    });
   }
 
-  function navLeave(done) {
-    const nav = document.getElementById('nav');
-    if (!nav || reduced || !hasGsap) { done(); return; }
-    const texts = [...nav.querySelectorAll('.nav__text')];
-
-    gsap.timeline({ onComplete: done })
-      .to(texts, {
-        yPercent: -110, duration: 0.32, ease: 'power2.in', stagger: NAV_STEP,
-      }, 0)
-      .fromTo(nav, { clipPath: clipTo(nav, 0) }, {
-        clipPath: clipTo(nav, hiddenRight(nav)), duration: 0.46, ease: 'power2.inOut',
-      }, 0.12);
-  }
-
-  function pageFade() {
-    if (reduced) { navEnter(); return; }
-    const root = document.documentElement;
-    navEnter();
-
+  /* 站内跳转不再拦截——拦下来手动淡出再 location.href 就是"整页刷新 + 导航
+     跳一帧"的直接原因。原生跨文档过渡由 @view-transition 接管。
+     唯一要做的是离开项目页时把返回箭头滚回站点标记，让前后两页的图标对得上。 */
+  function navHandoff() {
     document.addEventListener('click', (e) => {
       const a = e.target.closest('a[href]');
-      if (!a || a.target === '_blank' || e.metaKey || e.ctrlKey || e.shiftKey) return;
+      if (!a) return;
       const href = a.getAttribute('href');
       if (!href || href.startsWith('#') || /^(https?:|mailto:|tel:)/.test(href)) return;
-      e.preventDefault();
-
-      // 项目页返回首页：图标先滚回站点标记，和胶囊收缩一起走
       const home = document.getElementById('navHome');
-      if (home && home.classList.contains('is-back')) home.classList.remove('is-back');
-
-      let gone = false;
-      const go = () => { if (!gone) { gone = true; location.href = href; } };
-      root.classList.add('is-leaving');
-      navLeave(go);
-      setTimeout(go, 900);                       // 兜底，动画卡住也要跳
+      if (home) home.classList.remove('is-back');
     });
-
-    addEventListener('pageshow', () => root.classList.remove('is-leaving'));
   }
 
   /* 项目页：进场后把顶栏图标向上滚一格，换成返回箭头。
@@ -212,7 +176,8 @@
     setTimeout(() => home.classList.add('is-back'), 420);
   }
 
-  pageFade();
+  navEnter();
+  navHandoff();
   navGlyph();
 
   window.SITE = { lenis, reduced, hasGsap, scrollTo, revealAll, navInvert, marquee, EASE_REVEAL };

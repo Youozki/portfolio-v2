@@ -40,6 +40,38 @@
   src: url('../fonts/notosanssc-400.woff2') format('woff2');
 }
 
+/* ---- 跨文档换页：交给浏览器的 View Transition ------------------------
+   之前是自己拦下跳转、手动淡出再 location.href——那必然会闪：旧文档已经卸掉、
+   新文档从零布局，导航是重新渲染出来的，第一帧位置对不上就是那一下位移。
+   声明 navigation: auto 之后，浏览器会在两个文档之间做快照过渡；给导航一个
+   view-transition-name，它就成了跨页保持的同一个元素——胶囊由浏览器按前后
+   两个真实尺寸插值，天然从中心向两端伸缩，不再有刷新感。 */
+@view-transition { navigation: auto; }
+
+::view-transition-group(nav) {
+  animation-duration: 520ms;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+/* 导航的新旧快照直接交叉淡入淡出，位置与尺寸由 group 插值 */
+::view-transition-old(nav), ::view-transition-new(nav) {
+  animation-duration: 260ms;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  height: 100%;
+}
+/* 正文：轻微模糊 + 渐隐渐显，模糊量按反馈保持很小 */
+::view-transition-old(page) {
+  animation: page-out 260ms cubic-bezier(0.7, 0, 0.84, 0) both;
+}
+::view-transition-new(page) {
+  animation: page-in 380ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes page-out { to { opacity: 0; filter: blur(6px); } }
+@keyframes page-in { from { opacity: 0; filter: blur(6px); } }
+
+@media (prefers-reduced-motion: reduce) {
+  @view-transition { navigation: none; }
+}
+
 /* ---- 复位 ------------------------------------------------------------ */
 *, *::before, *::after { box-sizing: border-box; }
 
@@ -67,6 +99,7 @@ body {
 }
 
 img, svg, video { display: block; max-width: 100%; height: auto; }
+main { view-transition-name: page; }
 h1, h2, h3, h4, p, figure, blockquote { margin: 0; }
 ul, ol { margin: 0; padding: 0; list-style: none; }
 button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
@@ -185,6 +218,7 @@ a { color: inherit; text-decoration: none; }
 
 /* ---- 悬浮胶囊导航（augen 用的就是这种 N5） --------------------------- */
 .nav {
+  view-transition-name: nav;
   position: fixed;
   top: var(--space-lg);
   left: 50%;
@@ -304,12 +338,6 @@ a { color: inherit; text-decoration: none; }
 
 /* ---- 换页过渡：轻微模糊 + 渐隐渐显（augen 的做法） -------------------
    只作用在 main 上，导航和过渡层本身不参与，避免整屏"抖一下"。 */
-.js main { will-change: opacity, filter; }
-.js main {
-  transition: opacity 320ms var(--ease-in-out), filter 320ms var(--ease-in-out);
-}
-.js.is-leaving main { opacity: 0; filter: blur(6px); }
-
 /* 换页时的导航动作（胶囊伸缩 + 文字逐条滚动）由 js/site.js 驱动，
    因为要先量出胶囊的自然宽度。这里只把初始态藏好，免得没跑动画就闪一下。 */
 .js .nav__text { transform: translateY(110%); }
