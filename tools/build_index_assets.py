@@ -1,22 +1,19 @@
 #!/usr/bin/env python3
-"""索引页素材：首屏主视觉 + 五张项目预览图的调性归一。
+"""索引页素材：首屏主视觉 + 两个公司 logo。
 
-两件事：
-1. 首屏主视觉。原图底色是 rgb(207,205,201)，比站内纸色 #EDEDEA 暗一档，
-   直接放上去会像贴了一块灰板。这里用分段 LUT 把「底色→纸色」，暗部保持不动，
-   所以主体不会被洗白，而图的边缘和纸张无缝相接，不需要再做羽化遮罩。
-2. 五张预览图来源差异极大（实拍笔记本、UI 截图、营销页、三维场景），
-   放在一起配色和明度都打架。统一裁成 16:10，再做同一套白点归一 + 轻微降饱和，
-   剩下的形状统一交给 CSS 的样机卡片去做。
+首屏主视觉原图底色是 rgb(207,205,201)，比站内纸色 #EDEDEA 暗一档，直接放上去
+会像贴了一块灰板。这里用分段 LUT 把「底色→纸色」，暗部保持不动，所以主体不会被
+洗白；再切掉 2% 的暗角并做一圈羽化，边缘和纸张之间不留接缝。
+
+（项目预览图那套样机卡片已按反馈撤掉，相关代码一并删了。）
 """
 import os
 
-from PIL import Image, ImageStat
+from PIL import Image
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC = os.path.expanduser('~/Documents/所有的图')
 PAPER = (237, 237, 234)
-CARD = (244, 244, 242)      # --paper-2，样机窗口里的底
 KNEE = 110                  # 这个亮度以下原样保留，避免主体被提亮
 
 
@@ -61,22 +58,6 @@ def border_colour(img, pad=10):
     return tuple(out)
 
 
-def crop_to(img, ratio):
-    w, h = img.size
-    if w / h > ratio:
-        nw = int(round(h * ratio))
-        box = ((w - nw) // 2, 0, (w - nw) // 2 + nw, h)
-    else:
-        nh = int(round(w / ratio))
-        box = (0, (h - nh) // 2, w, (h - nh) // 2 + nh)
-    return img.crop(box)
-
-
-def desaturate(img, factor):
-    from PIL import ImageEnhance
-    return ImageEnhance.Color(img).enhance(factor)
-
-
 def feather(img, px):
     """给四边做一圈线性透明羽化。
     主视觉原图带一点暗角，即使把中位底色精确映到纸色，最外面一两个像素还是会
@@ -107,21 +88,36 @@ def build_hero():
           % (os.path.basename(out), im.width, im.height, os.path.getsize(out) / 1024))
 
 
-def build_previews():
-    d = os.path.join(ROOT, 'assets', 'preview')
-    for name in ('companion', 'justpaper', 'oreate', 'terabox', 'practices'):
-        path = os.path.join(d, name + '.webp')
-        im = Image.open(path).convert('RGB')
-        im = crop_to(im, 1.6)
-        im = im.resize((2080, 1300), Image.LANCZOS)
-        im = lut_to(im, border_colour(im), CARD)
-        im = desaturate(im, 0.88)
-        im.save(path, 'WEBP', quality=86, method=6)
-        print('预览 %-11s %dx%d  %.0f KB'
-              % (name, im.width, im.height, os.path.getsize(path) / 1024))
+def build_logos():
+    """联想 / 百度 logo。用户自己文件里的原图，只做尺寸与底衬处理，不重绘。
+    两张都放在墨色带上：Lenovo 本身带红底方块，直接留；百度是透明底，
+    深蓝爪子压在纯黑上会糊，所以垫一层很浅的白衬底再切圆角。"""
+    src = os.path.join(SRC, '简历', '作品集')
+    out_dir = os.path.join(ROOT, 'assets', 'logos')
+    os.makedirs(out_dir, exist_ok=True)
+    jobs = [('lenovo', 'Lenovo_idDXuX8rvi_0 1.png', False),
+            ('baidu', 'Baidu 1.png', True)]
+    for name, rel, pad_white in jobs:
+        path = os.path.join(src, rel)
+        if not os.path.exists(path):
+            print('缺 logo %s' % rel)
+            continue
+        im = Image.open(path).convert('RGBA')
+        h = 112                                      # 56px 显示，二倍
+        im = im.resize((round(im.width * h / im.height), h), Image.LANCZOS)
+        if pad_white:
+            pad = 14
+            plate = Image.new('RGBA', (im.width + pad * 2, im.height + pad * 2),
+                              (255, 255, 255, 255))
+            plate.alpha_composite(im, (pad, pad))
+            im = plate
+        dst = os.path.join(out_dir, name + '.webp')
+        im.save(dst, 'WEBP', quality=92, method=6)
+        print('logo %-7s %dx%d  %.1f KB'
+              % (name, im.width, im.height, os.path.getsize(dst) / 1024))
 
 
 if __name__ == '__main__':
     build_hero()
-    build_previews()
+    build_logos()
 

@@ -27,23 +27,19 @@
 </nav>
 
 <main>
-  <!-- 幕一：入口。一张主视觉 + 一句话，职位只出现一次 -->
+  <!-- 幕一：入口。一张满幅主视觉 + 一行身份 + 直达入口，不放大字 -->
   <header class="band band--paper hero" id="top">
-    <div class="page hero__inner">
-      <div class="hero__id">
+    <div class="hero__inner">
+      <div class="page hero__id">
         <p class="t-label">朱晨宇 · Zhu Chenyu</p>
         <p class="t-label">用户体验设计师</p>
       </div>
       <figure class="hero__key" id="heroKey">
-        <span class="hero__dust" id="heroDust" aria-hidden="true"></span>
         <img src="assets/graphics/hero-key.webp"
-             alt="一组等距视角的旋钮模块与苔藓植物，界面与实体控件长在一起" width="2880" height="1607" />
+             alt="一组等距视角的旋钮模块与苔藓植物，界面与实体控件长在一起" width="2880" height="1555" />
+        <canvas class="hero__gl" id="heroGL" aria-hidden="true"></canvas>
       </figure>
-      <div class="hero__foot">
-        <h1 class="t-display hero__line">
-          <span class="line-clip"><span class="line-inner">兼具全局产品观、</span></span>
-          <span class="line-clip"><span class="line-inner hero__dim">精细化设计与交互执行力。</span></span>
-        </h1>
+      <div class="page hero__foot">
         <div class="hero__jump">
           <span class="t-cap">直接看</span>
           <a class="pill" href="case-companion.html">Companion App</a>
@@ -56,11 +52,14 @@
     </div>
   </header>
 
-  <!-- 幕二：关于。放在作品之前，和作品同为纸色，不做色带切换 -->
-  <section class="band band--paper about" id="about" aria-labelledby="about-title">
+  <!-- 幕二：关于。深色带做分章 -->
+  <section class="band band--ink about" id="about" aria-labelledby="about-title">
     <div class="page">
       <p class="t-label">关于</p>
-      <h2 class="t-h1 about__title" id="about-title">在图纸与硬件的结合处工作。</h2>
+      <h2 class="t-display about__title" id="about-title">
+        在图纸与硬件的结合处工作。<br />
+        <span class="about__dim">兼具全局产品观、精细化设计与交互执行力。</span>
+      </h2>
 
       <div class="about__bio">
         <p class="t-body" data-reveal="up">就读于湖南师范大学设计系数字媒体方向。实习期间，先后在联想的 UIUX 组与百度的 AI 产品组做过一些工作。相比于单纯的产品 or 设计，我更希望自己是一名兼具全局产品观、精细化设计与交互执行力的用户体验设计师。</p>
@@ -117,5 +116,9 @@
 <script src="vendor/lenis.min.js"></script>
 <script src="js/site.js"></script>
 <script src="js/index.js"></script>
+<!-- three 放最后并且 defer：首屏的图是 <img>，着色器只是叠上去的一层，
+     加载失败或不支持 WebGL 时页面完全不受影响。 -->
+<script defer src="vendor/three.min.js"></script>
+<script defer src="js/hero-gl.js"></script>
 </body>
 </html>

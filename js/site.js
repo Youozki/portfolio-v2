@@ -10,14 +10,18 @@
   const hasGsap = typeof window.gsap !== 'undefined';
   if (hasGsap && window.ScrollTrigger) gsap.registerPlugin(ScrollTrigger);
 
-  /* ---- Lenis：唯一的滚动权威，ScrollTrigger 挂在它后面 ---------------- */
+  /* ---- Lenis：唯一的滚动权威，ScrollTrigger 挂在它后面 ----------------
+     用 lerp 而不是 duration。duration 模式是「每次滚轮事件都跑一条固定时长的
+     补间」，1.1s 的曲线堆起来就是明显的拖尾和不跟手；lerp 是每帧朝目标插值，
+     响应立刻开始，只在尾巴上收得软。0.12 ≈ 120ms 内走完 ~63%，跟手且不生硬。 */
   let lenis = null;
   if (!reduced && typeof window.Lenis !== 'undefined') {
     lenis = new Lenis({
-      duration: 1.1,            // 惯性时长，越大越"重"
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      lerp: 0.12,
+      wheelMultiplier: 1,
       smoothWheel: true,
       touchMultiplier: 1.6,
+      syncTouch: false,          // 触屏交回系统，原生滚动比模拟的跟手
     });
     if (hasGsap) {
       lenis.on('scroll', ScrollTrigger.update);
@@ -30,7 +34,7 @@
   }
 
   const scrollTo = (target) => {
-    if (lenis) lenis.scrollTo(target, { offset: 0, duration: 1.2 });
+    if (lenis) lenis.scrollTo(target, { offset: 0, duration: 0.9 });
     else target.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth' });
   };
 

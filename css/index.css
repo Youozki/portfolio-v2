@@ -1,14 +1,19 @@
 /* 索引页专属版式。结构参照 augen.pro 实测：5 栏、发丝分隔行、整屏色带、胶囊。 */
 
-/* ---- 幕一 · 入口：一张主视觉压场，文字退到边上 ----------------------- */
-.hero { min-height: 100svh; display: flex; }
+/* ---- 幕一 · 入口：一张满幅主视觉压场，文字退到上下两条边 --------------
+   高度写死一屏（不是 min-height）——只有容器被限高，中间那张图才会真的
+   flex-shrink，否则它按图的原始高度把胶囊挤到折线以下。 */
+.hero { height: 100svh; display: flex; }
 .hero__inner {
   width: 100%;
   display: flex;
   flex-direction: column;
   gap: var(--space-lg);
-  padding-block: calc(var(--nav-h) + var(--space-md)) var(--space-2xl);
+  padding-block: calc(var(--nav-h) + var(--space-md)) var(--space-xl);
 }
+/* .page 自带 margin-inline:auto。作为 flex 子项时 auto 边距会吸走剩余空间、
+   把元素按内容宽度居中，看起来就像版心塌了——所以这里必须显式给 100%。 */
+.hero__inner > .page { width: 100%; }
 .hero__id {
   display: flex;
   justify-content: space-between;
@@ -17,47 +22,32 @@
   border-bottom: var(--rule) solid var(--hair);
 }
 
-/* 主视觉：底色已在 tools/build_index_assets.py 里映到纸色，所以不用画框。
-   高度直接用 svh 卡住，首屏一定装得下——图撑满是好看，但把标题挤到折线以下
-   就不对了。这里不写 clip-path，静态的 inset(0%) 会在图的边缘留一道 1px 接缝，
-   揭幕动画由 js/index.js 用内联样式驱动。 */
+/* 主视觉走满整个视口宽度：留边会在图周围留出一圈"断裂"的空白，
+   augen 的首屏图是贴边的。图本身的底色已经映到纸色，所以不需要描边。 */
 .hero__key {
   position: relative;
-  flex: 0 0 auto;
+  flex: 1 1 auto;
+  min-height: 0;
   margin: 0;
-  display: grid;
-  place-items: center;
+  overflow: clip;
 }
-.hero__key img {
-  max-height: 46svh;
-  width: auto;
-  max-width: 100%;
-  will-change: transform, filter;
+.hero__key img,
+.hero__gl {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
-
-/* 尘点：飘在主视觉上的一层极轻的粒子，只跑 transform 和 opacity */
-.hero__dust { position: absolute; inset: -6% -4%; pointer-events: none; z-index: 1; }
-.hero__dust i {
+.hero__gl {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 3px;
-  height: 3px;
-  border-radius: 50%;
-  background: var(--ink);
-  opacity: 0;
-  will-change: transform, opacity;
+  inset: 0;
+  opacity: 0;                 /* 由 js/hero-gl.js 在着色器就绪后淡入 */
+  transition: opacity 600ms var(--ease-out);
+  pointer-events: none;
 }
+.hero__key.is-gl img { visibility: hidden; }
 
-.hero__foot {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-lg);
-  margin-top: auto;
-}
-.hero__line { max-width: 48rem; }
-.hero__line .line-clip { display: block; }
-.hero__line .line-inner { display: block; will-change: transform; }
+.hero__foot { display: flex; flex-direction: column; gap: var(--space-lg); }
 .hero__dim { color: var(--ink-soft); }
 
 .hero__jump {
@@ -87,9 +77,8 @@
 
 @media (max-width: 767px) {
   .interlude__inner { grid-template-columns: minmax(0, 1fr); row-gap: var(--space-xl); }
-  .hero { min-height: 0; }
-  .hero__key { flex: 0 0 auto; }
-  .hero__key img { max-height: none; width: 100%; }
+  .hero { height: auto; }
+  .hero__key { flex: 0 0 auto; aspect-ratio: 16 / 11; }
 }
 
 /* ---- 幕三 · 作品索引 -------------------------------------------------- */
@@ -98,7 +87,7 @@
 
 .work__row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 2.3fr) minmax(0, 1.1fr);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 3fr);
   column-gap: var(--gutter);
   align-items: start;
   padding-block: clamp(1.75rem, 3vw, 2.75rem);
@@ -168,57 +157,18 @@
 .work__list.is-focusing .work__item[data-far='4'] { filter: blur(2.4px); opacity: 0.32; }
 .work__list.is-focusing .work__item[data-far='0'] { opacity: 1; filter: none; }
 
-/* ---- 行内样机卡片：五张来源天差地别的图，靠同一个壳统一 ----------------
-   五张原图分别是实拍笔记本、UI 截图、营销页、桌面截图、三维场景，形状和配色
-   都不一致。白点与饱和度已在 tools/build_index_assets.py 里归一，形状这一层
-   交给这个卡片：同样的圆角、同样的描边、同样的内衬、同样的 16:10 窗口。
-   常显而不是悬停才出——第三列本来就要给它留位，藏起来只是浪费版面。 */
-.work__thumb {
-  grid-column: 3;
-  align-self: center;
-  width: 100%;
-  padding: 0.5rem;
-  border: var(--rule) solid var(--hair);
-  border-radius: 14px;
-  background: var(--paper-2);
-  will-change: transform;
-  transition: border-color var(--dur-2) var(--ease-out);
-}
-.work__win {
-  display: block;
-  aspect-ratio: 16 / 10;
-  border-radius: 8px;
-  overflow: clip;
-  background: var(--paper-3);
-}
-.work__win img { width: 100%; height: 100%; object-fit: cover; will-change: transform; }
-.work__row:hover .work__thumb { border-color: var(--accent); }
-.work__plate {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.4rem 0.15rem 0.05rem;
-}
-.work__plate .t-num { color: var(--accent); }
-.work__dots { display: flex; gap: 3px; }
-.work__dots i {
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: var(--hair);
-}
-
-/* ---- 幕二 · 关于：和作品同为纸色，中间不切色带 ------------------------ */
+/* ---- 幕二 · 关于：深色带做分章 ---------------------------------------- */
 .about { padding-block: var(--space-4xl) var(--space-3xl); }
-.about__title { max-width: 32rem; margin: var(--space-md) 0 var(--space-2xl); }
+.about__title { max-width: 42rem; margin: var(--space-sm) 0 var(--space-2xl); }
+.about__dim { color: var(--on-ink-soft); }
 
 .about__bio {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 24rem), 1fr));
-  gap: var(--space-xl);
+  gap: var(--space-lg);
   max-width: 64rem;
 }
-.about__bio .t-body { color: var(--ink-soft); max-width: none; }
+.about__bio .t-body { color: var(--on-ink-soft); max-width: none; }
 
 .about__quote {
   margin: var(--space-3xl) 0;
@@ -233,12 +183,16 @@
   gap: var(--space-2xl);
 }
 .about__row { grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); }
-.about__row > span:last-child { display: flex; flex-direction: column; gap: 0.1rem; }
-.about__sub { color: var(--ink-soft); }
+.about__row > span:last-child { display: flex; flex-direction: column; gap: 0.35rem; }
+.about__sub { color: var(--on-ink-soft); }
+
+/* 公司 logo：和公司名同一行，高度锁在 1.6rem，免得把行距压垮 */
+.about__org { display: flex; align-items: center; gap: var(--space-sm); }
+.about__logo { height: 1.6rem; width: auto; border-radius: 3px; }
 
 .about__skills { margin-top: var(--space-3xl); }
 .about__skills .about__row { grid-template-columns: minmax(0, 1fr) minmax(0, 4fr); }
-.about__skillval { color: var(--ink-soft); max-width: none; }
+.about__skillval { color: var(--on-ink-soft); max-width: none; }
 
 /* ---- 幕四 · 联系 ------------------------------------------------------ */
 .contact { padding-block: var(--space-4xl); }
@@ -256,6 +210,5 @@
   .work__row { grid-template-columns: minmax(0, 1fr); row-gap: var(--space-md); }
   .work__meta { flex-direction: row; gap: var(--space-sm); }
   .about__row { grid-template-columns: minmax(0, 1fr); row-gap: var(--space-2xs); }
-  .work__thumb { grid-column: 1; }
 }
 

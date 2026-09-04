@@ -29,11 +29,11 @@
   --font-sans: 'Geist', 'Noto Sans SC Subset', -apple-system, 'PingFang SC',
     'HarmonyOS Sans SC', 'Microsoft YaHei', system-ui, sans-serif;
 
-  /* 字阶：augen 的 140px 放在这份内容上太吵，整体降一档，靠留白撑气口。
-     60 / 30 / 21 / 17 / 15 / 13 / 11，全部流体化。 */
-  --text-display: clamp(2rem, 4.17vw, 3.75rem);      /* 32 → 60 */
-  --text-h1: clamp(1.375rem, 2.08vw, 1.875rem);      /* 22 → 30 */
-  --text-h2: clamp(1.125rem, 1.46vw, 1.3125rem);     /* 18 → 21 */
+  /* 字阶：augen 的 140px 放在这份内容上太吵，整体降两档，靠留白撑气口。
+     44 / 26 / 20 / 17 / 15 / 13 / 11，全部流体化。 */
+  --text-display: clamp(1.75rem, 3.06vw, 2.75rem);   /* 28 → 44 */
+  --text-h1: clamp(1.25rem, 1.81vw, 1.625rem);       /* 20 → 26 */
+  --text-h2: clamp(1.0625rem, 1.39vw, 1.25rem);      /* 17 → 20 */
   --text-lg: clamp(1rem, 1.18vw, 1.0625rem);         /* 16 → 17 */
   --text-base: 0.9375rem;                            /* 15 */
   --text-sm: 0.8125rem;                              /* 13 */
@@ -45,7 +45,7 @@
   --weight-text: 400;
 
   /* 字距：西文越大越收，中文一律不收 */
-  --track-display: -0.015em;  /* 76px 上要略收，140px 时的正字距不适用了 */
+  --track-display: -0.01em;   /* 44px 上只需要轻微收一点 */
   --track-h1: -0.02em;
   --track-h2: -0.02em;
   --track-tight: -0.01em;
@@ -64,15 +64,17 @@
   --measure: 34rem;           /* 正文单列最大宽度 */
   --nav-h: 4.75rem;
 
+  /* 大档间距收紧过一轮：原来 3xl/4xl 是 6.5/10rem，组与组之间太散，
+     整页显得又满又空。留白靠字号小和行距撑，不靠堆间距。 */
   --space-2xs: 0.25rem;
   --space-xs: 0.5rem;
   --space-sm: 0.75rem;
   --space-md: 1rem;
   --space-lg: 1.5rem;
-  --space-xl: 2.5rem;
-  --space-2xl: 4rem;
-  --space-3xl: 6.5rem;
-  --space-4xl: 10rem;
+  --space-xl: 2rem;
+  --space-2xl: 3rem;
+  --space-3xl: 4.5rem;
+  --space-4xl: 6.5rem;
 
   /* ---- 形状 ---------------------------------------------------------- */
   --radius-pill: 54px;
