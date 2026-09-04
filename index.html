@@ -118,9 +118,23 @@
 <script src="vendor/lenis.min.js"></script>
 <script src="js/site.js"></script>
 <script src="js/index.js"></script>
-<!-- three 放最后并且 defer：首屏的图是 <img>，着色器只是叠上去的一层，
-     加载失败或不支持 WebGL 时页面完全不受影响。 -->
-<script defer src="vendor/three.min.js"></script>
-<script defer src="js/hero-gl.js"></script>
+<!-- three 有 608KB。用 defer 会挤在新文档首帧之前解析，跨页过渡的预算被它吃掉，
+     结果就是"有时候有胶囊动画、有时候瞬间切过去"。改成空闲后再注入：
+     首屏那张图是 <img>，粒子层只是叠上去的一层，晚一点出现完全不影响阅读。 -->
+<script>
+  (() => {
+    const load = (src) => new Promise((ok) => {
+      const el = document.createElement('script');
+      el.src = src;
+      el.onload = ok;
+      el.onerror = ok;              // 加载失败就当没有这一层，页面照常
+      document.body.appendChild(el);
+    });
+    const boot = () => load('vendor/three.min.js').then(() => load('js/hero-gl.js'));
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if ('requestIdleCallback' in window) requestIdleCallback(boot, { timeout: 2500 });
+    else setTimeout(boot, 1200);
+  })();
+</script>
 </body>
 </html>
