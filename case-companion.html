@@ -33,8 +33,11 @@
   </ul>
 </nav>
 
-<!-- 滚动进度：贴在视口顶端的一条发丝，宽度跟着阅读进度走 -->
-<div class="progress" id="progress" aria-hidden="true"><span></span></div>
+<!-- 章节进度：贴在视口底边的一条发丝，上面跑一个发光的点 -->
+<div class="progress" id="progress" aria-hidden="true">
+  <span class="progress__track"></span>
+  <span class="progress__dot" id="progressDot"></span>
+</div>
 
 <main>
   <header class="band band--paper case-head">

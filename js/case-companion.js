@@ -10,15 +10,15 @@
   S.revealAll && S.revealAll();
   S.navInvert && S.navInvert();
 
-  /* ---- 顶部进度：整页阅读进度，ease:none 才跟手 ----------------------- */
-  const bar = document.querySelector('#progress > span');
-  if (bar && hasGsap && !reduced) {
-    gsap.to(bar, {
-      scaleX: 1, ease: 'none',
+  /* ---- 章节进度：发光的点沿着发丝线前进 ------------------------------
+     用 x 的百分比而不是 left，避免每帧触发布局；scrub 0.25 跟手。 */
+  const dot = document.getElementById('progressDot');
+  if (dot && hasGsap && !reduced) {
+    gsap.fromTo(dot, { x: 0 }, {
+      x: () => document.getElementById('progress').clientWidth,
+      ease: 'none', invalidateOnRefresh: true,
       scrollTrigger: { trigger: document.body, start: 'top top', end: 'bottom bottom', scrub: 0.25 },
     });
-  } else if (bar) {
-    bar.style.transform = 'scaleX(0)';
   }
 
   /* ---- 导航当前章 ------------------------------------------------------ */
