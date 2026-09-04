@@ -194,6 +194,7 @@ a { color: inherit; text-decoration: none; }
   gap: var(--space-xs);
   padding: 0.35rem;
   border-radius: var(--radius-pill-lg);
+  overflow: hidden;
   background: var(--veil);
   -webkit-backdrop-filter: var(--blur-veil) saturate(150%);
   backdrop-filter: var(--blur-veil) saturate(150%);
@@ -209,6 +210,7 @@ a { color: inherit; text-decoration: none; }
   width: 2.25rem;
   height: 2.25rem;
   border-radius: 50%;
+  overflow: hidden;          /* 悬停位移不许跑出圆形按钮 */
   background: var(--ink);
   color: var(--paper);
   font-size: var(--text-sm);
@@ -236,15 +238,15 @@ a { color: inherit; text-decoration: none; }
 .nav__home.is-back:hover .nav__roll { transform: translateY(-22px); }
 
 /* 自制标记：两片错开的圆角方，悬停分开 */
-.mark { overflow: visible; }
+.mark { overflow: hidden; }
 .mark rect {
   fill: none;
   stroke: currentColor;
   stroke-width: 1.4;
   transition: transform var(--dur-3) var(--ease-out);
 }
-.nav__home:hover .mark__a { transform: translate(-1.4px, -1.4px); }
-.nav__home:hover .mark__b { transform: translate(1.4px, 1.4px); }
+.nav__home:hover .mark__a { transform: translate(-0.7px, -0.7px); }
+.nav__home:hover .mark__b { transform: translate(0.7px, 0.7px); }
 .nav__list { display: flex; align-items: center; }
 .nav__link {
   padding: 0.55rem 0.9rem;
@@ -296,10 +298,26 @@ a { color: inherit; text-decoration: none; }
 /* ---- 换页过渡：轻微模糊 + 渐隐渐显（augen 的做法） -------------------
    只作用在 main 上，导航和过渡层本身不参与，避免整屏"抖一下"。 */
 .js main { will-change: opacity, filter; }
-.js.is-leaving main { opacity: 0; filter: blur(6px); }
 .js main {
   transition: opacity 320ms var(--ease-in-out), filter 320ms var(--ease-in-out);
 }
+.js.is-leaving main { opacity: 0; filter: blur(6px); }
+
+/* 导航跟着一起走，不再硬切：胶囊上浮淡出，链接按顺序退场 */
+.js .nav {
+  transition: transform var(--dur-3) var(--ease-out),
+    opacity var(--dur-2) var(--ease-out),
+    background-color var(--dur-3) var(--ease-out);
+}
+.js.is-leaving .nav { transform: translate(-50%, -8px); opacity: 0; }
+.js .nav__link, .js .nav__home {
+  transition: opacity 220ms var(--ease-out), transform 260ms var(--ease-out),
+    background-color var(--dur-1) var(--ease-out), color var(--dur-1) var(--ease-out);
+}
+.js.is-leaving .nav__link { opacity: 0; transform: translateY(-6px); }
+.js.is-leaving .nav__link:nth-child(2) { transition-delay: 40ms; }
+.js.is-leaving .nav__link:nth-child(3) { transition-delay: 80ms; }
+.js.is-leaving .nav__link:nth-child(4) { transition-delay: 120ms; }
 
 /* ---- 无障碍 ---------------------------------------------------------- */
 .visually-hidden {

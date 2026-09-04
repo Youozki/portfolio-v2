@@ -34,10 +34,7 @@
 </nav>
 
 <!-- 章节进度：贴在视口底边的一条发丝，上面跑一个发光的点 -->
-<div class="progress" id="progress" aria-hidden="true">
-  <span class="progress__track"></span>
-  <span class="progress__dot" id="progressDot"></span>
-</div>
+<div class="progress" id="progress" aria-hidden="true"><span></span></div>
 
 <main>
   <header class="band band--paper case-head">
@@ -140,6 +137,77 @@
       <div class="split__main">
         <p class="t-lead" data-reveal="soft">可视化视觉系统。</p>
         <p class="t-body" data-reveal="soft">我们通过设计（理念、框架、风格、规则）来串联起硬件、系统和智能体的联系。形成软硬件结合的产品体验，赋予其智能的高感知力外在显性化，让用户感受只能科技的温度，展现出品牌的活力与年轻化，同时也即是构建了一套形式增强功能的可视化视觉系统。</p>
+      </div>
+    </div>
+
+    <!-- 设计策略：文字与结构全部来自设计稿（Figma 节点 4218:4925），
+         形式重做过——原稿是两张并排的静态板，这里拆成"推演线 + 体验地图"两段，
+         连线上的光点随滚动跑一遍，把"从人到机器"这条链路读出来。 -->
+    <div class="page stack" id="stack" data-reveal="soft">
+      <p class="t-label">从人到机器的推演</p>
+      <ol class="stack__stages" aria-label="智能体的七个环节">
+        <li class="is-dim">记忆</li><li>感知</li><li class="is-dim">规划</li><li>思考</li>
+        <li class="is-dim">解决</li><li>反馈</li><li class="is-dim">行动</li>
+      </ol>
+      <div class="stack__lane">
+        <span class="stack__line"><i class="stack__spark"></i></span>
+        <ul class="stack__chips">
+          <li>Human</li><li>Agent</li><li>Machine</li>
+        </ul>
+      </div>
+      <div class="stack__lane stack__lane--low">
+        <span class="stack__line stack__line--short"><i class="stack__spark"></i></span>
+        <ul class="stack__chips stack__chips--low">
+          <li>辅助工具</li><li>互动生命</li>
+        </ul>
+      </div>
+      <figure class="stack__orb">
+        <img src="assets/cases/companion/tiko-orb.webp" alt="Tiko 本体：环形光圈里的一对眼睛"
+             width="911" height="673" loading="lazy" />
+      </figure>
+    </div>
+
+    <div class="page emap" data-reveal="soft">
+      <p class="t-label emap__head">体验地图</p>
+      <div class="emap__row">
+        <p class="t-num emap__key">Journey</p>
+        <ul class="emap__cells emap__cells--3"><li>空闲状态</li><li>交互中</li><li>任务后台</li></ul>
+      </div>
+      <div class="emap__row">
+        <p class="t-num emap__key">Action</p>
+        <ul class="emap__cells emap__cells--6"><li>打开</li><li>输入</li><li>进程</li><li>输出</li><li>任务处理</li><li>error/待机</li></ul>
+      </div>
+      <div class="emap__row">
+        <p class="t-num emap__key">Contact Point</p>
+        <ul class="emap__cells emap__cells--4"><li>Companion App</li><li>执行任务</li><li>主动唤醒</li><li>PC/手机</li></ul>
+      </div>
+      <div class="emap__row">
+        <p class="t-num emap__key">Feeling</p>
+        <ul class="emap__cells emap__cells--4"><li>Positive</li><li>Warm</li><li>Calm</li><li>Process</li></ul>
+      </div>
+      <div class="emap__row emap__row--last">
+        <p class="t-num emap__key">Opportunity</p>
+        <ul class="emap__cells emap__cells--3 emap__cells--notes">
+          <li>
+            <span>通过桌面快捷方式进入</span>
+            <span>休眠之后，用户说出唤醒词如："Hi Tiko"</span>
+            <span>设备无操作自动触发</span>
+            <span>语音助手唤起 Companion mode</span>
+            <span>keyboard 触发唤起 Companion mode</span>
+          </li>
+          <li>
+            <span>展示交互中状态，如打字动画、加载动画等</span>
+            <span>减少等待感知：你是想问 xxxx 吗？好的，我在思考怎么帮你解决这个问题…</span>
+            <span>动画/动作效果要易于理解</span>
+            <span>动画要有吸引力，增加用户兴趣度与使用欲</span>
+            <span>抢断发生时的动画衔接</span>
+          </li>
+          <li>
+            <span>根据表情自动生成相关 Motion</span>
+            <span>尝试在不同端设计动画及其裁切方案的可行性</span>
+            <span>待机表情可感知性的平衡</span>
+          </li>
+        </ul>
       </div>
     </div>
 

@@ -10,13 +10,11 @@
   S.revealAll && S.revealAll();
   S.navInvert && S.navInvert();
 
-  /* ---- 章节进度：发光的点沿着发丝线前进 ------------------------------
-     用 x 的百分比而不是 left，避免每帧触发布局；scrub 0.25 跟手。 */
-  const dot = document.getElementById('progressDot');
-  if (dot && hasGsap && !reduced) {
-    gsap.fromTo(dot, { x: 0 }, {
-      x: () => document.getElementById('progress').clientWidth,
-      ease: 'none', invalidateOnRefresh: true,
+  /* ---- 顶部进度：整页阅读进度，ease:none 才跟手 ----------------------- */
+  const bar = document.querySelector('#progress > span');
+  if (bar && hasGsap && !reduced) {
+    gsap.to(bar, {
+      scaleX: 1, ease: 'none',
       scrollTrigger: { trigger: document.body, start: 'top top', end: 'bottom bottom', scrub: 0.25 },
     });
   }
@@ -103,6 +101,35 @@
     // gsap.matchMedia 会在断点失配时自动回滚上面创建的所有动画与 ScrollTrigger
   });
 
+
+  /* ---- 推演线上的光点：进入视口时沿着虚线跑一遍并点亮环节 --------------
+     这是他要的"小段落里的光点"——只在这一段出现，不是整页进度条。
+     两条轨道错开 0.35s，读起来是"先人机链路、再工具与生命"。 */
+  function stackSpark() {
+    if (!hasGsap || reduced) return;
+    const stack = document.getElementById('stack');
+    if (!stack) return;
+    const lanes = gsap.utils.toArray('.stack__line', stack);
+    const stages = gsap.utils.toArray('.stack__stages li:not(.is-dim)', stack);
+
+    const tl = gsap.timeline({
+      scrollTrigger: { trigger: stack, start: 'top 78%', once: true },
+    });
+    lanes.forEach((line, i) => {
+      const spark = line.querySelector('.stack__spark');
+      if (!spark) return;
+      tl.fromTo(spark, { x: 0, opacity: 0 }, {
+        x: () => line.clientWidth, opacity: 1,
+        duration: 1.15, ease: 'power1.inOut',
+      }, i * 0.35)
+        .to(spark, { opacity: 0, duration: 0.25, ease: 'power2.in' }, i * 0.35 + 1.05);
+    });
+    tl.fromTo(stages, { opacity: 0.35 }, {
+      opacity: 1, duration: 0.4, ease: 'power2.out', stagger: 0.12,
+    }, 0.2);
+  }
+
+  stackSpark();
 
   ScrollTrigger.refresh();
 })();

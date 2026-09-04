@@ -136,6 +136,14 @@
       const href = a.getAttribute('href');
       if (!href || href.startsWith('#') || /^(https?:|mailto:|tel:)/.test(href)) return;
       e.preventDefault();
+      // 从项目页返回首页时，先把图标滚回站点标记，让"换回来"这个动作被看见
+      const home = document.getElementById('navHome');
+      if (home && home.classList.contains('is-back')) {
+        home.classList.remove('is-back');
+        setTimeout(() => root.classList.add('is-leaving'), 180);
+        setTimeout(() => { location.href = href; }, 500);
+        return;
+      }
       root.classList.add('is-leaving');
       setTimeout(() => { location.href = href; }, 320);
     });
