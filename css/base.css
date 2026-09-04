@@ -21,14 +21,23 @@
     U+1E00-1E9F, U+2020, U+20A0-20AB, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 
-/* 中文：思源黑变量字重，按站内实际用字裁的子集（tools/subset_cn.py）。
-   自托管而不是靠系统字，否则 Windows 会回退到微软雅黑、细字重直接消失。 */
+/* 中文：思源黑，按站内实际用字裁的子集（tools/subset_cn.py）。
+   自托管而不是靠系统字，否则 Windows 会回退到微软雅黑、细字重直接消失。
+   裁成两个静态实例并按 Geist 光学对齐——同一个 font-weight 下思源黑本来更重，
+   直接用变量轴混排就会中文发黑、英文偏细。 */
 @font-face {
   font-family: 'Noto Sans SC Subset';
   font-style: normal;
-  font-weight: 100 900;
+  font-weight: 300;
   font-display: swap;
-  src: url('../fonts/notosanssc-subset.woff2') format('woff2');
+  src: url('../fonts/notosanssc-300.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Noto Sans SC Subset';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../fonts/notosanssc-400.woff2') format('woff2');
 }
 
 /* ---- 复位 ------------------------------------------------------------ */
@@ -49,12 +58,12 @@ body {
   color: var(--ink);
   font-family: var(--font-sans);
   font-size: var(--text-base);
-  font-weight: 350;
+  font-weight: var(--weight-text);
   line-height: var(--leading-body);
   letter-spacing: var(--track-tight);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
-  font-synthesis-weight: none;
+  font-synthesis-weight: none;   /* 缺字重时宁可不显示，也不要合成假粗 */
 }
 
 img, svg, video { display: block; max-width: 100%; height: auto; }
@@ -69,26 +78,26 @@ a { color: inherit; text-decoration: none; }
   border-radius: 2px;        /* 焦点环不做动画，必须立刻出现 */
 }
 
-/* ---- 排版角色 -------------------------------------------------------- */
+/* ---- 排版角色：字重只有 300（display）和 400（其余）两档 -------------- */
 .t-display {
   font-size: var(--text-display);
-  font-weight: 300;
+  font-weight: var(--weight-display);
   letter-spacing: var(--track-display);
   line-height: var(--leading-display);
 }
 .t-h1 {
   font-size: var(--text-h1);
-  font-weight: 350;
+  font-weight: var(--weight-text);
   letter-spacing: var(--track-h1);
   line-height: var(--leading-tight);
 }
 .t-h2 {
   font-size: var(--text-h2);
-  font-weight: 350;
+  font-weight: var(--weight-text);
   letter-spacing: var(--track-h2);
   line-height: var(--leading-tight);
 }
-.t-lead { font-size: var(--text-lg); font-weight: 350; line-height: var(--leading-cn); }
+.t-lead { font-size: var(--text-lg); font-weight: var(--weight-text); line-height: var(--leading-cn); }
 .t-body { font-size: var(--text-base); line-height: var(--leading-cn); max-width: var(--measure); }
 .t-body + .t-body { margin-top: 1.1em; }
 .t-cap { font-size: var(--text-sm); color: var(--ink-soft); line-height: 1.45; }

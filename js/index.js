@@ -45,7 +45,11 @@
       <span class="work__tags">${p.tags.map((t) => `<span class="tag">${esc(t)}</span>`).join('')}</span>
     </span>
     <span class="work__thumb" aria-hidden="true">
-      <img src="assets/preview/${p.id}.webp" alt="" width="1040" height="660" loading="lazy" />
+      <span class="work__win"><img src="assets/preview/${p.id}.webp" alt="" width="2080" height="1300" loading="lazy" /></span>
+      <span class="work__plate">
+        <span class="t-num">${esc(p.no)}</span>
+        <span class="work__dots"><i></i><i></i><i></i></span>
+      </span>
     </span>
   </${tag}>
 </li>`;
@@ -98,7 +102,9 @@ ${SKILLS.map(([k, v]) => `<div class="row about__row" data-reveal="up">
 </div>`).join('')}`;
   }
 
-  /* ---- 行内缩略图：贴着行右端揭开，不再用跟随光标的大卡片 ------------- */
+  /* ---- 样机卡片：常显，悬停时抬起 + 里面的图轻微推近 -------------------
+     不再用"从右抹开"那种揭示动作——卡片常显更有信息量，悬停要做的只是
+     把它从版面里抬出来一点，并且让图有一点被推近的错位感。 */
   function rowThumbs() {
     if (!S || S.reduced || !S.hasGsap || matchMedia('(hover: none)').matches) return;
 
@@ -107,22 +113,21 @@ ${SKILLS.map(([k, v]) => `<div class="row about__row" data-reveal="up">
       const img = thumb && thumb.querySelector('img');
       if (!thumb || !img) return;
 
-      // 揭开：从右向左抹开 + 图片本身反向位移，做出"被推出来"的错位感
-      const open = gsap.timeline({ paused: true })
-        .to(thumb, { clipPath: 'inset(0% 0% 0% 0%)', duration: 0.62, ease: 'expo.out' }, 0)
-        .fromTo(img, { xPercent: 12 }, { xPercent: 0, duration: 0.78, ease: 'expo.out' }, 0)
-        .to(thumb, { autoAlpha: 1, duration: 0.2, ease: 'none' }, 0);
+      const lift = gsap.timeline({ paused: true })
+        .to(thumb, { y: -8, scale: 1.035, duration: 0.55, ease: 'expo.out' }, 0)
+        .to(img, { scale: 1.07, duration: 0.9, ease: 'expo.out' }, 0);
 
-      // 轻微视差：光标在行内横向移动时缩略图反向偏一点，量很小，只做"活"的感觉
+      // 轻微视差：光标横向移动时卡片反向偏一点，量很小，只做"活"的感觉
       const px = gsap.quickTo(thumb, 'x', { duration: 0.7, ease: 'power3.out' });
-      const py = gsap.quickTo(thumb, 'y', { duration: 0.7, ease: 'power3.out' });
+      const rot = gsap.quickTo(thumb, 'rotate', { duration: 0.8, ease: 'power3.out' });
 
-      row.addEventListener('pointerenter', () => open.play());
-      row.addEventListener('pointerleave', () => { open.reverse(); px(0); py(0); });
+      row.addEventListener('pointerenter', () => lift.play());
+      row.addEventListener('pointerleave', () => { lift.reverse(); px(0); rot(0); });
       row.addEventListener('pointermove', (e) => {
         const r = row.getBoundingClientRect();
-        px(((e.clientX - r.left) / r.width - 0.5) * -18);
-        py(((e.clientY - r.top) / r.height - 0.5) * -12);
+        const nx = (e.clientX - r.left) / r.width - 0.5;
+        px(nx * -14);
+        rot(nx * 1.4);
       });
     });
   }
@@ -145,19 +150,74 @@ ${SKILLS.map(([k, v]) => `<div class="row about__row" data-reveal="up">
     });
   }
 
-  /* ---- 铝板随滚动缓慢下沉：只是一层很轻的视差，别抢注意力 -------------- */
-  function heroParallax() {
-    if (!S || S.reduced || !S.hasGsap) return;
-    const obj = document.querySelector('.hero__object');
-    if (!obj) return;
-    gsap.to(obj, {
-      yPercent: 16, rotate: -2.5, ease: 'none',
+  /* ---- 首屏主视觉：进场是「揭幕」，不是淡入 ----------------------------
+     从下往上把 clip-path 拉开，同时图本身稍微退比例并去掉模糊——三条曲线叠在
+     一起才有"揭幕"的重量感，单做淡入就是普通过渡。 */
+  function heroKey() {
+    if (!S || !S.hasGsap) return;
+    const fig = document.getElementById('heroKey');
+    const img = fig && fig.querySelector('img');
+    if (!fig || !img) return;
+
+    if (S.reduced) { gsap.set(fig, { clipPath: 'inset(0%)' }); return; }
+
+    gsap.timeline({ delay: 0.15 })
+      .fromTo(fig, { clipPath: 'inset(14% 6% 0% 6%)' },
+        { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.5, ease: 'expo.out' }, 0)
+      .fromTo(img, { scale: 1.14, filter: 'blur(14px)', opacity: 0.5 },
+        { scale: 1, filter: 'blur(0px)', opacity: 1, duration: 1.7, ease: 'expo.out' }, 0);
+
+    // 滚动时极缓地压下去并轻微失焦，把注意力交给下一段
+    gsap.to(img, {
+      yPercent: 9, scale: 1.04, ease: 'none',
       scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: 0.8 },
+    });
+  }
+
+  /* ---- 尘点：24 个 3px 的点在主视觉上做无规律漂移 ----------------------
+     不用 canvas——数量这么少时 DOM + transform 更省，而且能跟着 GSAP 的
+     ticker 一起走，不会和 Lenis 抢帧。位置和时长按索引错开，不用随机数，
+     这样每次加载的节奏一致，也方便排查。 */
+  function dust() {
+    if (!S || S.reduced || !S.hasGsap) return;
+    const box = document.getElementById('heroDust');
+    if (!box) return;
+    const N = 24;
+    box.innerHTML = new Array(N).fill('<i></i>').join('');
+    [...box.children].forEach((dot, i) => {
+      const x = ((i * 37) % 100), y = ((i * 61) % 100);
+      const span = 26 + (i % 5) * 9;          // 漂移幅度 26–62px
+      gsap.set(dot, { left: x + '%', top: y + '%', scale: 0.6 + (i % 4) * 0.25 });
+      gsap.to(dot, {
+        opacity: 0.1 + (i % 3) * 0.06,
+        duration: 1.4, delay: 0.6 + i * 0.05, ease: 'sine.out',
+      });
+      gsap.to(dot, {
+        x: (i % 2 ? span : -span), y: (i % 3 ? -span * 0.7 : span * 0.7),
+        duration: 9 + (i % 7) * 2.4, ease: 'sine.inOut',
+        repeat: -1, yoyo: true, delay: i * 0.18,
+      });
+    });
+  }
+
+  /* ---- 作品行：入场时发丝线自己画出来，标签错落跟上 -------------------- */
+  function rowIntro() {
+    if (!S || S.reduced || !S.hasGsap) return;
+    gsap.utils.toArray('.work__item').forEach((item) => {
+      const row = item.querySelector('.work__row');
+      const tags = item.querySelectorAll('.tag');
+      if (!row) return;
+      gsap.timeline({ scrollTrigger: { trigger: item, start: 'top 88%', once: true } })
+        .fromTo(row, { '--rule-scale': 0 }, { '--rule-scale': 1, duration: 0.9, ease: 'expo.out' }, 0)
+        .fromTo(tags, { y: 10, opacity: 0 },
+          { y: 0, opacity: 1, duration: 0.5, ease: 'power2.out', stagger: 0.05 }, 0.18);
     });
   }
 
   rowThumbs();
   focusLadder();
-  heroParallax();
+  heroKey();
+  dust();
+  rowIntro();
   if (S) { S.revealAll(); S.navBehaviour(); S.navInvert(); }
 })();

@@ -5,6 +5,11 @@
 每次改完文案就重跑一次：
     python3 tools/subset_cn.py
 主字体（17.7MB，不进仓库）放在 MASTER 指的位置，没有时脚本会告诉你去哪下。
+
+为什么裁成两个静态实例而不是保留变量轴：
+思源黑在同一个 font-weight 上比 Geist 看起来更重（CJK 笔画多、字面密度高），
+混排时就会出现"英文正常、中文发黑"的粗细不齐。所以这里把 CJK 单独按
+WEIGHTS 里的数值实例化，再映射到 CSS 的 300 / 400 两档，让中英光学上齐平。
 """
 import os
 import re
@@ -13,9 +18,12 @@ import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MASTER = os.path.expanduser('~/.local/share/fonts-src/NotoSansSC[wght].ttf')
-OUT = os.path.join(ROOT, 'fonts', 'notosanssc-subset.woff2')
+FONT_DIR = os.path.join(ROOT, 'fonts')
 SCAN_EXT = ('.html', '.js', '.css', '.svg')
 SKIP_DIRS = {'vendor', 'fonts', 'assets', '.git', 'tools'}
+
+# CSS 里声明的字重 -> 实际实例化的思源黑字重。中文比 Geist 各降一档左右。
+WEIGHTS = {300: 300, 400: 365}
 
 # 中日韩统一表意文字 + 常用扩展 + 中文标点 + 全角字符
 CJK = re.compile(
@@ -52,19 +60,28 @@ def main():
     print('用到的 CJK 字符数：%d' % len(chars))
     text = ''.join(sorted(chars))
 
-    cmd = [
-        sys.executable, '-m', 'fontTools.subset', MASTER,
-        '--text=%s' % text,
-        '--output-file=%s' % OUT,
-        '--flavor=woff2',
-        '--layout-features=kern,vert,vrt2,ccmp,locl,mark,mkmk',
-        '--name-IDs=1,2,3,4,6',
-        '--drop-tables+=DSIG',
-        '--no-hinting',
-        '--desubroutinize',
-    ]
-    subprocess.run(cmd, check=True)
-    print('输出 %s  %.1f KB' % (OUT, os.path.getsize(OUT) / 1024))
+    for css_weight, real_weight in sorted(WEIGHTS.items()):
+        inst = os.path.join('/tmp', 'notosanssc-%d.ttf' % real_weight)
+        subprocess.run([
+            sys.executable, '-m', 'fontTools.varLib.instancer', MASTER,
+            'wght=%d' % real_weight, '-o', inst,
+        ], check=True, stdout=subprocess.DEVNULL)
+
+        out = os.path.join(FONT_DIR, 'notosanssc-%d.woff2' % css_weight)
+        subprocess.run([
+            sys.executable, '-m', 'fontTools.subset', inst,
+            '--text=%s' % text,
+            '--output-file=%s' % out,
+            '--flavor=woff2',
+            '--layout-features=kern,vert,vrt2,ccmp,locl,mark,mkmk',
+            '--name-IDs=1,2,3,4,6',
+            '--drop-tables+=DSIG',
+            '--no-hinting',
+            '--desubroutinize',
+        ], check=True)
+        os.remove(inst)
+        print('输出 %s（思源黑 wght=%d）  %.1f KB'
+              % (out, real_weight, os.path.getsize(out) / 1024))
 
 
 if __name__ == '__main__':

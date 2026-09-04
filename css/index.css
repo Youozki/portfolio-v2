@@ -1,28 +1,63 @@
 /* 索引页专属版式。结构参照 augen.pro 实测：5 栏、发丝分隔行、整屏色带、胶囊。 */
 
-/* ---- 幕一 · 入口 ------------------------------------------------------ */
+/* ---- 幕一 · 入口：一张主视觉压场，文字退到边上 ----------------------- */
 .hero { min-height: 100svh; display: flex; }
 .hero__inner {
   width: 100%;
   display: flex;
   flex-direction: column;
-  padding-block: calc(var(--nav-h) + var(--space-2xl)) var(--space-2xl);
-  position: relative;
+  gap: var(--space-lg);
+  padding-block: calc(var(--nav-h) + var(--space-md)) var(--space-2xl);
 }
-.hero__mark { margin-bottom: var(--space-xl); }
+.hero__id {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-md);
+  padding-bottom: var(--space-md);
+  border-bottom: var(--rule) solid var(--hair);
+}
 
-/* 140px 细体大字，正字距 —— augen 在同尺寸上给的就是 +0.008em */
-.hero__name { margin-bottom: auto; }
-.hero__name .line-clip { display: block; }
-.hero__name .line-inner { display: block; will-change: transform; }
+/* 主视觉：底色已在 tools/build_index_assets.py 里映到纸色，所以不用画框。
+   高度直接用 svh 卡住，首屏一定装得下——图撑满是好看，但把标题挤到折线以下
+   就不对了。这里不写 clip-path，静态的 inset(0%) 会在图的边缘留一道 1px 接缝，
+   揭幕动画由 js/index.js 用内联样式驱动。 */
+.hero__key {
+  position: relative;
+  flex: 0 0 auto;
+  margin: 0;
+  display: grid;
+  place-items: center;
+}
+.hero__key img {
+  max-height: 46svh;
+  width: auto;
+  max-width: 100%;
+  will-change: transform, filter;
+}
+
+/* 尘点：飘在主视觉上的一层极轻的粒子，只跑 transform 和 opacity */
+.hero__dust { position: absolute; inset: -6% -4%; pointer-events: none; z-index: 1; }
+.hero__dust i {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--ink);
+  opacity: 0;
+  will-change: transform, opacity;
+}
 
 .hero__foot {
   display: flex;
   flex-direction: column;
-  gap: var(--space-xl);
-  padding-top: var(--space-3xl);
+  gap: var(--space-lg);
+  margin-top: auto;
 }
-.hero__statement { max-width: 42rem; }
+.hero__line { max-width: 48rem; }
+.hero__line .line-clip { display: block; }
+.hero__line .line-inner { display: block; will-change: transform; }
 .hero__dim { color: var(--ink-soft); }
 
 .hero__jump {
@@ -33,41 +68,9 @@
 }
 .hero__jump .t-cap { margin-right: var(--space-2xs); }
 
-.hero__cue {
-  position: absolute;
-  right: 0;
-  bottom: var(--space-2xl);
-  width: 2.5rem;
-  height: 2.5rem;
-  display: grid;
-  place-items: center;
-  border: var(--rule) solid var(--hair);
-  border-radius: 50%;
-  font-size: var(--text-sm);
-}
-.hero__cue span { display: block; animation: cue 2.4s var(--ease-in-out) infinite; }
-@keyframes cue {
-  0%, 100% { transform: translateY(0); opacity: 0.55; }
-  50% { transform: translateY(3px); opacity: 1; }
-}
-
 /* 从入口胶囊跳过来时，让目标行亮一下，交代"你到了这里" */
 .work__item:target .work__row::before { opacity: 1; }
 .work__item:target .work__no { color: var(--accent); }
-
-/* 铝板：漂在大字右侧，随滚动做极缓的位移，量很小 */
-.hero__mark, .hero__name, .hero__foot { position: relative; z-index: 1; }
-.hero__object {
-  position: absolute;
-  right: calc(var(--margin) * -0.25);
-  top: 14%;
-  width: clamp(16rem, 34vw, 32rem);
-  margin: 0;
-  pointer-events: none;
-  z-index: 0;                 /* 在文字之下、在色带之上 */
-  will-change: transform;
-}
-.hero__object img { width: 100%; height: auto; }
 
 /* ---- 过场带 ----------------------------------------------------------- */
 .interlude { padding-block: var(--space-3xl); overflow: clip; }
@@ -84,10 +87,12 @@
 
 @media (max-width: 767px) {
   .interlude__inner { grid-template-columns: minmax(0, 1fr); row-gap: var(--space-xl); }
-  .hero__object { position: static; width: 60%; margin: var(--space-xl) 0 0 auto; }
+  .hero { min-height: 0; }
+  .hero__key { flex: 0 0 auto; }
+  .hero__key img { max-height: none; width: 100%; }
 }
 
-/* ---- 幕二 · 作品索引 -------------------------------------------------- */
+/* ---- 幕三 · 作品索引 -------------------------------------------------- */
 .work { padding-block: var(--space-3xl) var(--space-4xl); }
 .work__title { margin-bottom: var(--space-3xl); }
 
@@ -97,9 +102,18 @@
   column-gap: var(--gutter);
   align-items: start;
   padding-block: clamp(1.75rem, 3vw, 2.75rem);
-  border-top: var(--rule) solid var(--hair);
   position: relative;
   transition: color var(--dur-2) var(--ease-out);
+}
+/* 顶部发丝线做成 ::after，入场时靠 --rule-scale 从左画出来 */
+.work__row::after {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: var(--rule);
+  background: var(--hair);
+  transform: scaleX(var(--rule-scale, 1));
+  transform-origin: 0 50%;
 }
 .work__item:last-child .work__row { border-bottom: var(--rule) solid var(--hair); }
 
@@ -154,23 +168,47 @@
 .work__list.is-focusing .work__item[data-far='4'] { filter: blur(2.4px); opacity: 0.32; }
 .work__list.is-focusing .work__item[data-far='0'] { opacity: 1; filter: none; }
 
-/* ---- 行内缩略图：占住第三列，贴右端从右往左抹开 ---------------------- */
+/* ---- 行内样机卡片：五张来源天差地别的图，靠同一个壳统一 ----------------
+   五张原图分别是实拍笔记本、UI 截图、营销页、桌面截图、三维场景，形状和配色
+   都不一致。白点与饱和度已在 tools/build_index_assets.py 里归一，形状这一层
+   交给这个卡片：同样的圆角、同样的描边、同样的内衬、同样的 16:10 窗口。
+   常显而不是悬停才出——第三列本来就要给它留位，藏起来只是浪费版面。 */
 .work__thumb {
   grid-column: 3;
   align-self: center;
   width: 100%;
-  aspect-ratio: 1040 / 660;
-  border-radius: var(--radius-sm);
+  padding: 0.5rem;
+  border: var(--rule) solid var(--hair);
+  border-radius: 14px;
+  background: var(--paper-2);
+  will-change: transform;
+  transition: border-color var(--dur-2) var(--ease-out);
+}
+.work__win {
+  display: block;
+  aspect-ratio: 16 / 10;
+  border-radius: 8px;
   overflow: clip;
   background: var(--paper-3);
-  opacity: 0;
-  visibility: hidden;
-  clip-path: inset(0% 0% 0% 100%);
-  will-change: clip-path, transform, opacity;
 }
-.work__thumb img { width: 100%; height: 100%; object-fit: cover; will-change: transform; }
+.work__win img { width: 100%; height: 100%; object-fit: cover; will-change: transform; }
+.work__row:hover .work__thumb { border-color: var(--accent); }
+.work__plate {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.4rem 0.15rem 0.05rem;
+}
+.work__plate .t-num { color: var(--accent); }
+.work__dots { display: flex; gap: 3px; }
+.work__dots i {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--hair);
+}
 
-/* ---- 幕三 · 关于 ------------------------------------------------------ */
+/* ---- 幕二 · 关于：和作品同为纸色，中间不切色带 ------------------------ */
 .about { padding-block: var(--space-4xl) var(--space-3xl); }
 .about__title { max-width: 32rem; margin: var(--space-md) 0 var(--space-2xl); }
 
@@ -180,7 +218,7 @@
   gap: var(--space-xl);
   max-width: 64rem;
 }
-.about__bio .t-body { color: var(--on-ink-soft); max-width: none; }
+.about__bio .t-body { color: var(--ink-soft); max-width: none; }
 
 .about__quote {
   margin: var(--space-3xl) 0;
@@ -196,11 +234,11 @@
 }
 .about__row { grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); }
 .about__row > span:last-child { display: flex; flex-direction: column; gap: 0.1rem; }
-.about__sub { color: var(--on-ink-soft); }
+.about__sub { color: var(--ink-soft); }
 
 .about__skills { margin-top: var(--space-3xl); }
 .about__skills .about__row { grid-template-columns: minmax(0, 1fr) minmax(0, 4fr); }
-.about__skillval { color: var(--on-ink-soft); max-width: none; }
+.about__skillval { color: var(--ink-soft); max-width: none; }
 
 /* ---- 幕四 · 联系 ------------------------------------------------------ */
 .contact { padding-block: var(--space-4xl); }
@@ -218,11 +256,6 @@
   .work__row { grid-template-columns: minmax(0, 1fr); row-gap: var(--space-md); }
   .work__meta { flex-direction: row; gap: var(--space-sm); }
   .about__row { grid-template-columns: minmax(0, 1fr); row-gap: var(--space-2xs); }
-  .work__thumb {
-    grid-column: 1;
-    opacity: 1;
-    visibility: visible;
-    clip-path: none;              /* 触屏没有 hover，直接常显 */
-  }
+  .work__thumb { grid-column: 1; }
 }
 

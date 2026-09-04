@@ -20,29 +20,30 @@
     </svg>
   </a>
   <ul class="nav__list">
-    <li><a class="nav__link" href="#work">作品</a></li>
     <li><a class="nav__link" href="#about">关于</a></li>
+    <li><a class="nav__link" href="#work">作品</a></li>
     <li><a class="nav__link" href="#contact">联系</a></li>
   </ul>
 </nav>
 
 <main>
-  <!-- 幕一：入口。只做一句定位，不抢作品的位置 -->
+  <!-- 幕一：入口。一张主视觉 + 一句话，职位只出现一次 -->
   <header class="band band--paper hero" id="top">
     <div class="page hero__inner">
-      <p class="t-label hero__mark">朱晨宇 · Zhu Chenyu</p>
-      <h1 class="t-display hero__name">
-        <span class="line-clip"><span class="line-inner">Experience</span></span>
-        <span class="line-clip"><span class="line-inner hero__dim">Designer</span></span>
-      </h1>
-      <figure class="hero__object" aria-hidden="true">
-        <img src="assets/graphics/plates.webp" alt="" width="1200" height="960" />
+      <div class="hero__id">
+        <p class="t-label">朱晨宇 · Zhu Chenyu</p>
+        <p class="t-label">用户体验设计师</p>
+      </div>
+      <figure class="hero__key" id="heroKey">
+        <span class="hero__dust" id="heroDust" aria-hidden="true"></span>
+        <img src="assets/graphics/hero-key.webp"
+             alt="一组等距视角的旋钮模块与苔藓植物，界面与实体控件长在一起" width="2880" height="1607" />
       </figure>
       <div class="hero__foot">
-        <p class="t-h2 hero__statement">
-          用户体验设计师。<br />
-          <span class="hero__dim">兼具全局产品观、精细化设计与交互执行力。</span>
-        </p>
+        <h1 class="t-display hero__line">
+          <span class="line-clip"><span class="line-inner">兼具全局产品观、</span></span>
+          <span class="line-clip"><span class="line-inner hero__dim">精细化设计与交互执行力。</span></span>
+        </h1>
         <div class="hero__jump">
           <span class="t-cap">直接看</span>
           <a class="pill" href="case-companion.html">Companion App</a>
@@ -52,36 +53,11 @@
           <a class="pill" href="#row-practices">Practices</a>
         </div>
       </div>
-      <a class="hero__cue" href="#work" aria-label="向下浏览作品"><span>↓</span></a>
     </div>
   </header>
 
-  <!-- 幕二：作品索引。五个项目并列直达，顺序承载信息但不强制线性 -->
-  <section class="band band--paper work" id="work" aria-labelledby="work-title">
-    <div class="page">
-      <h2 class="t-display work__title" id="work-title">Selected Work</h2>
-      <ol class="work__list" id="workList"></ol>
-    </div>
-  </section>
-
-  <!-- 过场：把两幕之间的转折用一张图承接，同时交代"硬件那一侧"的工作 -->
-  <section class="band band--ink interlude" aria-labelledby="interlude-title">
-    <div class="page interlude__inner">
-      <figure class="interlude__fig" data-reveal="soft">
-        <img src="assets/graphics/blueprint.webp" alt="铰链旋转轴与开合角度的线框推演图" width="1536" height="1024" />
-      </figure>
-      <div class="interlude__copy">
-        <p class="t-num">0.0</p>
-        <h2 class="t-h2" id="interlude-title" data-reveal="soft">设计不是悬在空中的闭门思考。</h2>
-        <p class="t-cap interlude__note" data-reveal="soft" data-reveal-delay="0.1">
-          从梳理项目需求与实际机器运作情况，到视觉交互，再到研发测试。
-        </p>
-      </div>
-    </div>
-  </section>
-
-  <!-- 幕三：关于。深色带做分章 -->
-  <section class="band band--ink about" id="about" aria-labelledby="about-title">
+  <!-- 幕二：关于。放在作品之前，和作品同为纸色，不做色带切换 -->
+  <section class="band band--paper about" id="about" aria-labelledby="about-title">
     <div class="page">
       <p class="t-label">关于</p>
       <h2 class="t-h1 about__title" id="about-title">在图纸与硬件的结合处工作。</h2>
@@ -98,6 +74,30 @@
 
       <div class="about__grid" id="aboutRows"></div>
       <div class="about__skills" id="aboutSkills"></div>
+    </div>
+  </section>
+
+  <!-- 幕三：作品索引。五个项目并列直达，顺序承载信息但不强制线性 -->
+  <section class="band band--paper work" id="work" aria-labelledby="work-title">
+    <div class="page">
+      <h2 class="t-display work__title" id="work-title">Selected Work</h2>
+      <ol class="work__list" id="workList"></ol>
+    </div>
+  </section>
+
+  <!-- 过场：进联系页之前用一张线框图收一下，交代"硬件那一侧"的工作 -->
+  <section class="band band--ink interlude" aria-labelledby="interlude-title">
+    <div class="page interlude__inner">
+      <figure class="interlude__fig" data-reveal="soft">
+        <img src="assets/graphics/blueprint.webp" alt="铰链旋转轴与开合角度的线框推演图" width="1536" height="1024" />
+      </figure>
+      <div class="interlude__copy">
+        <p class="t-num">0.0</p>
+        <h2 class="t-h2" id="interlude-title" data-reveal="soft">设计不是悬在空中的闭门思考。</h2>
+        <p class="t-cap interlude__note" data-reveal="soft" data-reveal-delay="0.1">
+          从梳理项目需求与实际机器运作情况，到视觉交互，再到研发测试。
+        </p>
+      </div>
     </div>
   </section>
 

@@ -116,7 +116,22 @@
 }
 .step__claim { max-width: 36rem; }
 .step__fig { margin-top: var(--space-sm); }
-.step__fig--narrow { max-width: 20rem; }
+.step__fig img { max-width: 34rem; }
+.step__fig--narrow img { max-width: 15rem; }
+
+/* 重画的线框图：描边用当前文字色，笔画随滚动画出来（js/case-companion.js） */
+.step__fig--draw { max-width: 34rem; }
+.wire { width: 100%; height: auto; overflow: visible; }
+.wire rect, .wire path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+.wire .wire__fill { fill: rgba(14, 15, 17, 0.05); stroke-width: 1; }
+.wire__arrow path { stroke: var(--accent); stroke-width: 1.6; }
 
 /* 初步结论：四条发丝行，最后一条给强调色 */
 .conclusion__head { margin-bottom: var(--space-lg); }
@@ -195,8 +210,9 @@
 .deck__idx.is-on .t-cap { color: var(--ink); }
 .deck__idx.is-on .t-num { color: var(--accent); }
 
-/* 六张屏叠在同一格里，后一张从下方裁进来接管 */
-.deck__stack { position: relative; aspect-ratio: 1004 / 628; }
+/* 六张屏叠在同一格里，后一张从下方裁进来接管。
+   宽度卡在 46rem：原图只有 1004px，铺满 3fr 那一栏（约 900px）在二倍屏上就发虚。 */
+.deck__stack { position: relative; aspect-ratio: 1004 / 628; width: 100%; max-width: 46rem; }
 .deck__card {
   position: absolute;
   inset: 0;
@@ -254,6 +270,58 @@
 .next__link:hover .next__arrow { transform: translate3d(0.6rem, 0, 0); }
 .next__desc { color: var(--ink-soft); }
 
+/* ---- 转轴实验台：可拖动的线框控件 ------------------------------------- */
+.lab__inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr);
+  column-gap: clamp(2rem, 5vw, 5rem);
+  align-items: center;
+}
+.lab__copy { display: grid; gap: var(--space-sm); align-content: center; }
+.lab__copy .t-body { color: var(--on-ink-soft); }
+.lab__note { max-width: 22rem; }
+.lab__readout {
+  margin-top: var(--space-sm);
+  font-size: var(--text-lg);
+  color: var(--on-ink);
+}
+.lab__readout span { color: var(--accent); font-variant-numeric: tabular-nums; }
+
+.lab__stage {
+  position: relative;
+  cursor: ew-resize;
+  touch-action: pan-y;              /* 纵向留给页面滚动，横向给控件 */
+  border-radius: var(--radius-md);
+}
+.lab__stage:focus-visible { outline-offset: 6px; }
+.lab__svg { width: 100%; height: auto; }
+/* 下面几条都要挂在 .lab__svg 下面：单靠 .lab__glass 这种单类选择器，
+   优先级低于上面的 .lab__svg rect，颜色会被吃掉。 */
+.lab__svg path, .lab__svg rect, .lab__svg circle {
+  fill: none;
+  stroke: var(--on-ink);
+  stroke-width: 1.4;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+.lab__svg .lab__hint { stroke: var(--hair-on-ink); }
+.lab__svg .lab__glass { fill: rgba(242, 242, 244, 0.04); stroke: var(--hair-on-ink); }
+.lab__svg .lab__spine { fill: rgba(242, 242, 244, 0.06); }
+.lab__svg .lab__eyes rect { fill: var(--on-ink); stroke: none; }
+.lab__svg .lab__arc { stroke: var(--accent); stroke-width: 1.6; }
+.lab__svg .lab__hinge circle { fill: var(--ink); stroke: var(--accent); }
+.lab__grab {
+  position: absolute;
+  right: 4%;
+  bottom: 6%;
+  padding: 0.3em 0.8em;
+  border: var(--rule) solid var(--hair-on-ink);
+  border-radius: var(--radius-pill);
+  color: var(--on-ink-soft);
+  transition: opacity var(--dur-2) var(--ease-out);
+}
+.lab__stage.is-dragging .lab__grab { opacity: 0; }
+
 /* ---- 降级：关掉动效偏好时，钉住段落全部摊平 -------------------------- */
 @media (prefers-reduced-motion: reduce) {
   .js .stage__line { opacity: 1; }
@@ -294,4 +362,5 @@
   .deck__caption { grid-column: 1; }
 
   .seq { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: var(--space-xl); }
+  .lab__inner { grid-template-columns: minmax(0, 1fr); row-gap: var(--space-xl); }
 }
