@@ -89,31 +89,29 @@ def build_hero():
 
 
 def build_logos():
-    """联想 / 百度 logo。用户自己文件里的原图，只做尺寸与底衬处理，不重绘。
-    两张都放在墨色带上：Lenovo 本身带红底方块，直接留；百度是透明底，
-    深蓝爪子压在纯黑上会糊，所以垫一层很浅的白衬底再切圆角。"""
+    """联想 / 百度 logo。用户自己文件里的原图，只做尺寸归一，不重绘。
+
+    两张原图的留白量完全不同（Lenovo 是带红底的整块 lockup，百度是透明底、
+    四周还留了一圈空白），按图片高度缩放就会一大一小。所以先各自裁到实心边界
+    （alpha > 8），再统一缩到同一个高度——这样"看得见的那部分"才是等高的。"""
     src = os.path.join(SRC, '简历', '作品集')
     out_dir = os.path.join(ROOT, 'assets', 'logos')
     os.makedirs(out_dir, exist_ok=True)
-    jobs = [('lenovo', 'Lenovo_idDXuX8rvi_0 1.png', False),
-            ('baidu', 'Baidu 1.png', True)]
-    for name, rel, pad_white in jobs:
+    H = 96                                   # 48px 显示，二倍
+    for name, rel in [('lenovo', 'Lenovo_idDXuX8rvi_0 1.png'),
+                      ('baidu', 'Baidu 1.png')]:
         path = os.path.join(src, rel)
         if not os.path.exists(path):
             print('缺 logo %s' % rel)
             continue
         im = Image.open(path).convert('RGBA')
-        h = 112                                      # 56px 显示，二倍
-        im = im.resize((round(im.width * h / im.height), h), Image.LANCZOS)
-        if pad_white:
-            pad = 14
-            plate = Image.new('RGBA', (im.width + pad * 2, im.height + pad * 2),
-                              (255, 255, 255, 255))
-            plate.alpha_composite(im, (pad, pad))
-            im = plate
+        box = im.getchannel('A').point(lambda v: 255 if v > 8 else 0).getbbox()
+        if box:
+            im = im.crop(box)
+        im = im.resize((max(1, round(im.width * H / im.height)), H), Image.LANCZOS)
         dst = os.path.join(out_dir, name + '.webp')
         im.save(dst, 'WEBP', quality=92, method=6)
-        print('logo %-7s %dx%d  %.1f KB'
+        print('logo %-7s %dx%d（实心区等高）  %.1f KB'
               % (name, im.width, im.height, os.path.getsize(dst) / 1024))
 
 

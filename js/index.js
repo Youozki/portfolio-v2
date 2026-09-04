@@ -5,19 +5,19 @@
 
   /* 全部文案与年份均取自第一版，未作改写；标签来自各案例正文里我自己写的参与范围。 */
   const PROJECTS = [
-    { id: 'companion', no: '0.1', title: 'Companion App', year: '2025', team: 'IDG UI/UX 组',
+    { id: 'companion', no: '1', title: 'Companion App', year: '2025', team: 'IDG UI/UX 组',
       desc: 'Tiko 是一位智能协作助手，能够帮助用户更快速地获取信息、完成决策并简化日常工作流程，为用户带来更顺畅的使用体验。',
       tags: ['交互体验', '视觉', '表情动效'], href: 'case-companion.html' },
-    { id: 'justpaper', no: '0.2', title: 'Just Paper', year: '2026', team: 'IDG UI/UX 组',
+    { id: 'justpaper', no: '2', title: 'Just Paper', year: '2026', team: 'IDG UI/UX 组',
       desc: '原生笔记软件，结合双屏的产品特点为用户构建笔记使用新体验。',
       tags: ['组件库', '设计规范', '双屏交互'], href: '' },
-    { id: 'oreate', no: '0.3', title: 'Oreate AI', year: '2026', team: 'PSIG 海外产品创新组',
+    { id: 'oreate', no: '3', title: 'Oreate AI', year: '2026', team: 'PSIG 海外产品创新组',
       desc: 'AI 全模态内容，快速生成 AI 图像、视频等多元需求，支持 PPT、助力深度研究与写作。',
       tags: ['多模态', '视觉范式', '模型交互'], href: '' },
-    { id: 'terabox', no: '0.4', title: 'Terabox', year: '2026', team: 'PSIG 海外产品创新组',
+    { id: 'terabox', no: '4', title: 'Terabox', year: '2026', team: 'PSIG 海外产品创新组',
       desc: '百度网盘海外版本，主打内容 + AI，海外方向强化多模态与 AI 能力。',
       tags: ['AI 编辑器', 'Agent', '海外迁移'], href: '' },
-    { id: 'practices', no: '0.5', title: 'Practices', year: '—', team: '个人练习',
+    { id: 'practices', no: '5', title: 'Practices', year: '—', team: '个人练习',
       desc: '个人技能练习作品，包括 UI 页面、MG 动效／三维动效（静帧展示）、建模视觉等。',
       tags: ['UI', 'MG 动效', '三维'], href: '' },
   ];
@@ -116,25 +116,32 @@ ${SKILLS.map(([k, v]) => `<div class="row about__row" data-reveal="up">
     });
   }
 
-  /* ---- 首屏主视觉：进场是「揭幕」，不是淡入 ----------------------------
-     从下往上把 clip-path 拉开，同时画面稍微退比例并去掉模糊——三条曲线叠在
-     一起才有"揭幕"的重量感，单做淡入就是普通过渡。
-     作用在 .hero__key 的两个子层上（<img> 和着色器 canvas），
-     这样开不开 WebGL 都是同一套运动；滚动时的淡出交给着色器的 uScroll。 */
-  function heroKey() {
+  /* ---- 首屏：先图，后字，最后图形 --------------------------------------
+     顺序照 augen：主视觉先从模糊到清晰、把画面立起来；等它基本清楚了文字才
+     模糊到清晰跟上；胶囊最后做位移。三段错开而不是一起淡入，才有"先看到画面
+     再读到字"的层次。 */
+  function heroIntro() {
     if (!S || !S.hasGsap) return;
     const fig = document.getElementById('heroKey');
-    if (!fig) return;
-    const layers = fig.querySelectorAll('img, canvas');
-    if (!layers.length) return;
+    const img = fig && fig.querySelector('img');
+    const texts = document.querySelectorAll('[data-hero="text"]');
+    const moves = document.querySelectorAll('[data-hero="move"]');
+    if (!img) return;
 
-    if (S.reduced) { gsap.set(fig, { clipPath: 'inset(0%)' }); return; }
+    if (S.reduced) return;
 
-    gsap.timeline({ delay: 0.15 })
-      .fromTo(fig, { clipPath: 'inset(12% 8% 0% 8%)' },
-        { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.4, ease: 'expo.out' }, 0)
-      .fromTo(layers, { scale: 1.1, filter: 'blur(12px)' },
-        { scale: 1, filter: 'blur(0px)', duration: 1.6, ease: 'expo.out' }, 0);
+    const tl = gsap.timeline({ delay: 0.1 });
+    tl.fromTo(img,
+      { filter: 'blur(26px)', scale: 1.09, opacity: 0.35 },
+      { filter: 'blur(0px)', scale: 1, opacity: 1, duration: 1.5, ease: 'expo.out' }, 0);
+    tl.fromTo(texts,
+      { filter: 'blur(10px)', opacity: 0, y: 14 },
+      { filter: 'blur(0px)', opacity: 1, y: 0, duration: 0.7, ease: 'expo.out', stagger: 0.09 },
+      0.75);
+    tl.fromTo(moves,
+      { y: 18, opacity: 0 },
+      { y: 0, opacity: 1, duration: 0.55, ease: 'expo.out', stagger: 0.055 },
+      1.05);
   }
 
   /* ---- 作品行：入场时发丝线自己画出来，标签错落跟上 -------------------- */
@@ -152,7 +159,7 @@ ${SKILLS.map(([k, v]) => `<div class="row about__row" data-reveal="up">
   }
 
   focusLadder();
-  heroKey();
+  heroIntro();
   rowIntro();
   if (S) { S.revealAll(); S.navBehaviour(); S.navInvert(); }
 })();

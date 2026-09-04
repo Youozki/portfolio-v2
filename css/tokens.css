@@ -60,7 +60,9 @@
   --cols: 5;
   --gutter: clamp(1rem, 1.67vw, 1.5rem);
   --margin: clamp(1.25rem, 4.44vw, 4rem);
-  --page-max: 1440px;
+  /* 版心从 1440 收到 1200：augen 把主要信息聚在页面中部，两侧留白，
+     1440 在 16 寸屏上会把一行拉到两米宽，读起来是散的。 */
+  --page-max: 1200px;
   --measure: 34rem;           /* 正文单列最大宽度 */
   --nav-h: 4.75rem;
 

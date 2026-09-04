@@ -49,10 +49,10 @@
   });
 
   /* ---- 入场 -----------------------------------------------------------
-     参数来自 mandandan.cn 的实测：它的 journey-screen-reveal 是
-     opacity .08→1 / blur(4px)→0 / translateY 82px→0 / scale .955→1，
-     缓动 cubic-bezier(0.22,1,0.36,1)，时长 0.72–0.92s。
-     模糊+缩放一起给，比单纯位移"贵"很多，这是它高级感的主要来源。 */
+     参数原型来自 mandandan.cn（opacity .08→1 / blur(4px)→0 / y / scale，
+     缓动 cubic-bezier(0.22,1,0.36,1)），但时长按反馈砍短了：原来 0.92s 起手
+     太晚、收得太慢，滚到文字跟前模糊还没散。现在 0.5s 并且提前到 top 97%
+     触发，等视线落上去就已经清楚了。 */
   const EASE_REVEAL = 'cubic-bezier(0.22, 1, 0.36, 1)';
 
   function revealAll() {
@@ -73,8 +73,8 @@
       const inner = clip.querySelector('.line-inner');
       if (!inner) return;
       gsap.to(inner, {
-        y: '0%', duration: 1.15, ease: 'expo.out',
-        scrollTrigger: { trigger: clip, start: 'top 90%', once: true },
+        y: '0%', duration: 0.7, ease: 'expo.out',
+        scrollTrigger: { trigger: clip, start: 'top 95%', once: true },
       });
     });
 
@@ -82,11 +82,11 @@
       const mode = el.dataset.reveal;
       const delay = parseFloat(el.dataset.revealDelay || '0');
       gsap.fromTo(el,
-        { opacity: 0.08, y: mode === 'soft' ? 34 : 68, scale: 0.972, filter: 'blur(4px)' },
+        { opacity: 0.08, y: mode === 'soft' ? 24 : 44, scale: 0.984, filter: 'blur(3px)' },
         {
           opacity: 1, y: 0, scale: 1, filter: 'blur(0px)',
-          duration: 0.92, delay, ease: 'reveal', overwrite: 'auto',
-          scrollTrigger: { trigger: el, start: 'top 92%', once: true },
+          duration: 0.5, delay: delay * 0.6, ease: 'reveal', overwrite: 'auto',
+          scrollTrigger: { trigger: el, start: 'top 97%', once: true },
         });
     });
   }

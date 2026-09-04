@@ -1,62 +1,72 @@
 /* 索引页专属版式。结构参照 augen.pro 实测：5 栏、发丝分隔行、整屏色带、胶囊。 */
 
-/* ---- 幕一 · 入口：一张满幅主视觉压场，文字退到上下两条边 --------------
-   高度写死一屏（不是 min-height）——只有容器被限高，中间那张图才会真的
-   flex-shrink，否则它按图的原始高度把胶囊挤到折线以下。 */
-.hero { height: 100svh; display: flex; }
-.hero__inner {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-lg);
-  padding-block: calc(var(--nav-h) + var(--space-md)) var(--space-xl);
-}
-/* .page 自带 margin-inline:auto。作为 flex 子项时 auto 边距会吸走剩余空间、
-   把元素按内容宽度居中，看起来就像版心塌了——所以这里必须显式给 100%。 */
-.hero__inner > .page { width: 100%; }
-.hero__id {
-  display: flex;
-  justify-content: space-between;
-  gap: var(--space-md);
-  padding-bottom: var(--space-md);
-  border-bottom: var(--rule) solid var(--hair);
-}
-
-/* 主视觉走满整个视口宽度：留边会在图周围留出一圈"断裂"的空白，
-   augen 的首屏图是贴边的。图本身的底色已经映到纸色，所以不需要描边。 */
-.hero__key {
+/* ---- 幕一 · 入口：整屏铺满的主视觉，文字压在左下角 --------------------
+   参照 augen 主页：图占满整个首屏（cover，不留边、不留横线），文案叠在左下。
+   主体在图的中间七成，所以左右裁掉的只是纸底，看不出裁切。 */
+.hero {
   position: relative;
-  flex: 1 1 auto;
-  min-height: 0;
-  margin: 0;
+  height: 100svh;
   overflow: clip;
-}
-.hero__key img,
-.hero__gl {
   display: block;
+}
+.hero__key { position: absolute; inset: 0; margin: 0; }
+.hero__key img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center;
+  will-change: transform, filter;
 }
+/* three 的粒子/路径层：铺在图上面、文字下面，不接指针事件 */
 .hero__gl {
   position: absolute;
   inset: 0;
-  opacity: 0;                 /* 由 js/hero-gl.js 在着色器就绪后淡入 */
-  transition: opacity 600ms var(--ease-out);
+  width: 100%;
+  height: 100%;
+  z-index: 1;
   pointer-events: none;
 }
-.hero__key.is-gl img { visibility: hidden; }
 
-.hero__foot { display: flex; flex-direction: column; gap: var(--space-lg); }
-.hero__dim { color: var(--ink-soft); }
-
+.hero__copy {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: clamp(3rem, 8vh, 6rem);
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+.hero__title { max-width: 26rem; }
 .hero__jump {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: var(--space-sm);
+  margin-top: var(--space-xs);
 }
 .hero__jump .t-cap { margin-right: var(--space-2xs); }
+
+.hero__cue {
+  position: absolute;
+  left: var(--margin);
+  bottom: var(--space-lg);
+  z-index: 2;
+  width: 2.25rem;
+  height: 2.25rem;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-pill);
+  background: var(--veil);
+  -webkit-backdrop-filter: var(--blur-veil-sm);
+  backdrop-filter: var(--blur-veil-sm);
+  font-size: var(--text-sm);
+}
+.hero__cue span { animation: cue 2.6s var(--ease-in-out) infinite; }
+@keyframes cue {
+  0%, 100% { transform: translateY(0); opacity: 0.5; }
+  50% { transform: translateY(3px); opacity: 1; }
+}
 
 /* 从入口胶囊跳过来时，让目标行亮一下，交代"你到了这里" */
 .work__item:target .work__row::before { opacity: 1; }
@@ -77,8 +87,8 @@
 
 @media (max-width: 767px) {
   .interlude__inner { grid-template-columns: minmax(0, 1fr); row-gap: var(--space-xl); }
-  .hero { height: auto; }
-  .hero__key { flex: 0 0 auto; aspect-ratio: 16 / 11; }
+  .hero { height: 100svh; }
+  .hero__copy { bottom: 5.5rem; }
 }
 
 /* ---- 幕三 · 作品索引 -------------------------------------------------- */
@@ -159,8 +169,7 @@
 
 /* ---- 幕二 · 关于：深色带做分章 ---------------------------------------- */
 .about { padding-block: var(--space-4xl) var(--space-3xl); }
-.about__title { max-width: 42rem; margin: var(--space-sm) 0 var(--space-2xl); }
-.about__dim { color: var(--on-ink-soft); }
+.about__title { max-width: 38rem; margin: var(--space-sm) 0 var(--space-2xl); }
 
 .about__bio {
   display: grid;

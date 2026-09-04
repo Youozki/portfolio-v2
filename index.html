@@ -27,39 +27,34 @@
 </nav>
 
 <main>
-  <!-- 幕一：入口。一张满幅主视觉 + 一行身份 + 直达入口，不放大字 -->
+  <!-- 幕一：入口。整屏铺满的主视觉，文字压在左下角（augen 的排法） -->
   <header class="band band--paper hero" id="top">
-    <div class="hero__inner">
-      <div class="page hero__id">
-        <p class="t-label">朱晨宇 · Zhu Chenyu</p>
-        <p class="t-label">用户体验设计师</p>
-      </div>
-      <figure class="hero__key" id="heroKey">
-        <img src="assets/graphics/hero-key.webp"
-             alt="一组等距视角的旋钮模块与苔藓植物，界面与实体控件长在一起" width="2880" height="1555" />
-        <canvas class="hero__gl" id="heroGL" aria-hidden="true"></canvas>
-      </figure>
-      <div class="page hero__foot">
-        <div class="hero__jump">
-          <span class="t-cap">直接看</span>
-          <a class="pill" href="case-companion.html">Companion App</a>
-          <a class="pill" href="#row-justpaper">Just Paper</a>
-          <a class="pill" href="#row-oreate">Oreate AI</a>
-          <a class="pill" href="#row-terabox">Terabox</a>
-          <a class="pill" href="#row-practices">Practices</a>
-        </div>
+    <figure class="hero__key" id="heroKey">
+      <img src="assets/graphics/hero-key.webp"
+           alt="一组等距视角的旋钮模块与苔藓植物，界面与实体控件长在一起" width="2880" height="1555" />
+    </figure>
+    <canvas class="hero__gl" id="heroGL" aria-hidden="true"></canvas>
+
+    <div class="page hero__copy">
+      <p class="t-label hero__mark" data-hero="text">朱晨宇 · Zhu Chenyu</p>
+      <h1 class="t-display hero__title" data-hero="text">用户体验设计师。</h1>
+      <div class="hero__jump">
+        <span class="t-cap" data-hero="text">直接看</span>
+        <a class="pill" data-hero="move" href="case-companion.html">Companion App</a>
+        <a class="pill" data-hero="move" href="#row-justpaper">Just Paper</a>
+        <a class="pill" data-hero="move" href="#row-oreate">Oreate AI</a>
+        <a class="pill" data-hero="move" href="#row-terabox">Terabox</a>
+        <a class="pill" data-hero="move" href="#row-practices">Practices</a>
       </div>
     </div>
+    <a class="hero__cue" href="#about" aria-label="向下浏览"><span>↓</span></a>
   </header>
 
   <!-- 幕二：关于。深色带做分章 -->
   <section class="band band--ink about" id="about" aria-labelledby="about-title">
     <div class="page">
       <p class="t-label">关于</p>
-      <h2 class="t-display about__title" id="about-title">
-        在图纸与硬件的结合处工作。<br />
-        <span class="about__dim">兼具全局产品观、精细化设计与交互执行力。</span>
-      </h2>
+      <h2 class="t-display about__title" id="about-title">兼具全局产品观、精细化设计与交互执行力。</h2>
 
       <div class="about__bio">
         <p class="t-body" data-reveal="up">就读于湖南师范大学设计系数字媒体方向。实习期间，先后在联想的 UIUX 组与百度的 AI 产品组做过一些工作。相比于单纯的产品 or 设计，我更希望自己是一名兼具全局产品观、精细化设计与交互执行力的用户体验设计师。</p>
@@ -91,7 +86,6 @@
         <img src="assets/graphics/blueprint.webp" alt="铰链旋转轴与开合角度的线框推演图" width="1536" height="1024" />
       </figure>
       <div class="interlude__copy">
-        <p class="t-num">0.0</p>
         <h2 class="t-h2" id="interlude-title" data-reveal="soft">设计不是悬在空中的闭门思考。</h2>
         <p class="t-cap interlude__note" data-reveal="soft" data-reveal-delay="0.1">
           从梳理项目需求与实际机器运作情况，到视觉交互，再到研发测试。
@@ -103,7 +97,7 @@
   <!-- 幕四：联系。整屏强调色收尾 -->
   <section class="band band--accent contact" id="contact" aria-labelledby="contact-title">
     <div class="page contact__inner">
-      <p class="t-num">1.0</p>
+      <p class="t-num">6</p>
       <h2 class="t-h1" id="contact-title">大概就这些，期待面聊 ：）</h2>
       <ul class="contact__list" id="contactList"></ul>
     </div>
