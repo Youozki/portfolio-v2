@@ -64,7 +64,7 @@
   ${items.map(([a, b, c, logo]) => `<div class="row about__row">
     <span class="t-cap">${esc(c)}</span>
     <span><span class="t-lead about__org">${logo
-      ? `<img class="about__logo" src="assets/logos/${logo}.webp" alt="${esc(a)}" width="236" height="76" loading="lazy" />`
+      ? `<img class="about__logo" data-logo="${logo}" src="assets/logos/${logo}.webp" alt="${esc(a)}" width="294" height="96" loading="lazy" />`
       : ''}${esc(a)}</span><span class="t-cap about__sub">${esc(b)}</span></span>
   </div>`).join('')}
 </div>`).join('');

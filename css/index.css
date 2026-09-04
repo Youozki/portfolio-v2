@@ -195,17 +195,24 @@
 .about__row > span:last-child { display: flex; flex-direction: column; gap: 0.35rem; }
 .about__sub { color: var(--on-ink-soft); }
 
-/* 公司 logo：和公司名共用一条基线。inline-block 的基线就是它的下边缘，
-   所以 logo 的底边会正好落在中文的基线上——按外框居中怎么调都对不齐，
-   因为两张 logo 内部的字母位置本来就不一样。 */
+/* 公司 logo：和公司名共用一条基线。
+   inline-block 的基线是它的下边缘，所以只有"图片底边正好是字标基线"时才对得齐。
+   实测（tools 里量的）：百度的字标基线就在图片最底部（余量 0%），
+   而 Lenovo 是带红底的 lockup，字标基线在 68/96 处，下面还有 28.1% 的红底——
+   所以它会整体偏高。用 --logo-drop 把这段余量按比例补回去，两张就落在同一条线上。 */
 .about__org { display: block; }
 .about__logo {
   display: inline-block;
   vertical-align: baseline;
-  height: 1.35rem;
+  position: relative;
+  bottom: calc(var(--logo-h) * var(--logo-drop, 0) * -1);
+  height: var(--logo-h);
   width: auto;
   margin-right: var(--space-sm);
+  --logo-h: 1.35rem;
 }
+.about__logo[data-logo='lenovo'] { --logo-drop: 0.281; }
+.about__logo[data-logo='baidu'] { --logo-drop: 0; }
 
 .about__skills { margin-top: var(--space-3xl); }
 .about__skills .about__row { grid-template-columns: minmax(0, 1fr) minmax(0, 4fr); }

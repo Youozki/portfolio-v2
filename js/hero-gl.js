@@ -45,7 +45,7 @@
   /* ---- 粒子场 ----------------------------------------------------------
      位置用确定性的伪随机（正弦哈希）而不是 Math.random，这样每次加载分布一致，
      排查和截图比对才有意义。 */
-  const COUNT = 140;
+  const COUNT = 70;
   const rand = (i, salt) => {
     const v = Math.sin((i + 1) * 12.9898 + salt * 78.233) * 43758.5453;
     return v - Math.floor(v);
@@ -83,14 +83,14 @@
   })();
 
   const dots = new THREE.Points(dotGeo, new THREE.PointsMaterial({
-    color: MOSS, map: sprite, size: 0.42, sizeAttenuation: true,
-    transparent: true, opacity: 0.5, depthWrite: false,
+    color: MOSS, map: sprite, size: 0.21, sizeAttenuation: true,
+    transparent: true, opacity: 0.25, depthWrite: false,
   }));
   world.add(dots);
   // 第二层更大更透，叠出"微光"的晕。浅底上不能用 additive，会越叠越白。
   const halo = new THREE.Points(dotGeo, new THREE.PointsMaterial({
-    color: MOSS, map: sprite, size: 1.1, sizeAttenuation: true,
-    transparent: true, opacity: 0.1, depthWrite: false,
+    color: MOSS, map: sprite, size: 0.55, sizeAttenuation: true,
+    transparent: true, opacity: 0.05, depthWrite: false,
   }));
   world.add(halo);
 

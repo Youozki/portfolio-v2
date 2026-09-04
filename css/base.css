@@ -216,6 +216,25 @@ a { color: inherit; text-decoration: none; }
 }
 .nav__home:hover { background: var(--accent); }
 
+/* 图标滚动换位：两个字形上下叠在一个裁切框里，整条往上滚一格就换成另一个。
+   augen 进内页时最左侧那个图标就是这么换的。项目页给 .nav__home 加
+   .is-back，它会滚到返回箭头；悬停时再微微上顶一点，交代"可点"。 */
+.nav__glyphs {
+  display: block;
+  width: 20px;
+  height: 20px;
+  overflow: clip;
+}
+.nav__roll {
+  display: flex;
+  flex-direction: column;
+  transition: transform var(--dur-3) var(--ease-out);
+}
+.nav__roll > * { flex: 0 0 20px; height: 20px; }
+.nav__home.is-back .nav__roll { transform: translateY(-20px); }
+.nav__home:hover .nav__roll { transform: translateY(-2px); }
+.nav__home.is-back:hover .nav__roll { transform: translateY(-22px); }
+
 /* 自制标记：两片错开的圆角方，悬停分开 */
 .mark { overflow: visible; }
 .mark rect {

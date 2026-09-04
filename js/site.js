@@ -144,7 +144,17 @@
     addEventListener('pageshow', () => root.classList.remove('is-leaving'));
   }
 
+  /* 项目页：进场后把顶栏图标向上滚一格，换成返回箭头。
+     延迟 420ms 是等换页渐显走完，让人看得见"换"这个动作。 */
+  function navGlyph() {
+    const home = document.getElementById('navHome');
+    if (!home || !document.body.classList.contains('is-case')) return;
+    if (reduced) { home.classList.add('is-back'); return; }
+    setTimeout(() => home.classList.add('is-back'), 420);
+  }
+
   pageFade();
+  navGlyph();
 
   window.SITE = { lenis, reduced, hasGsap, scrollTo, revealAll, navInvert, marquee, EASE_REVEAL };
 })();
