@@ -11,6 +11,9 @@
 <body>
 
 <nav class="nav" id="nav" aria-label="主导航">
+  <!-- 胶囊的玻璃底单独一层：它才是伸缩的那个东西（transform 走合成层，
+       不碰布局，也就不会被首屏的脚本卡住） -->
+  <span class="nav__glass" aria-hidden="true"></span>
   <a class="nav__home" id="navHome" href="#top" aria-label="回到顶部">
     <!-- 自己设计的标记：两片错开的圆角方，取"图纸与硬件叠合"的意思。
          和项目页共用同一个滚动部件，只是首页不加 .is-back。 -->
@@ -33,6 +36,8 @@
     <li><a class="nav__link" href="#contact"><span class="nav__label"><span class="nav__text">联系</span></span></a></li>
   </ul>
 </nav>
+<!-- 紧跟导航同步执行：胶囊的伸缩要在首帧就起手，不能排在 gsap / lenis 后面 -->
+<script src="js/nav-enter.js"></script>
 
 <main>
   <!-- 幕一：入口。整屏铺满的主视觉，文字压在左下角（augen 的排法） -->

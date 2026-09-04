@@ -122,36 +122,9 @@
     row.innerHTML = row.innerHTML + row.innerHTML;   // 复制一份才能无缝首尾相接
   }
 
-  /* ---- 换页过渡 + 导航形变 --------------------------------------------
-     augen 的做法：胶囊自己伸长/缩短，导航文字一条条从下往上滚进来，
-     旧的那批则往上滚出去。跨页是真实的文档加载，所以拆成两半来演：
-     离场——文字逐条上滚出去 + 胶囊收到只剩图标的宽度；
-     进场——胶囊从图标宽度伸到自然宽度，文字再逐条从下滚上来。
-     两半首尾相接，看起来就是一个连续动作。
-     胶囊宽度得先量：先让它 auto 布局拿到自然宽，再从窄的一端补起来。 */
-  /* ---- 导航文字滚动 ---------------------------------------------------
-     跨页的位移与胶囊伸缩已经交给 View Transition（见 base.css），这里只负责
-     文字：新页面的标签逐条从下往上滚进来。旧标签不用管——浏览器的旧快照会
-     自己淡出，再手动做一遍离场就是两套动画打架，也正是之前卡顿的来源。
-     不支持 View Transition 的浏览器退化成"只滚文字"，不做胶囊裁切：
-     宁可少一个效果，也不要一个会闪的效果。 */
-  const NAV_STEP = 0.055;
-  const hasVT = typeof document.startViewTransition === 'function';
+  /* 导航的入场（胶囊伸缩 + 文字逐条滚动）不在这里——它被拆到 js/nav-enter.js，
+     紧跟 <nav> 同步执行，才能在首帧就起手。这里只留换页与图标的收尾。 */
 
-  function navEnter() {
-    const nav = document.getElementById('nav');
-    if (!nav) return;
-    const texts = [...nav.querySelectorAll('.nav__text')];
-    if (reduced || !hasGsap || !texts.length) { nav.classList.add('is-ready'); return; }
-
-    nav.classList.add('is-ready');
-    gsap.set(texts, { yPercent: 110 });
-    gsap.to(texts, {
-      yPercent: 0, duration: 0.5, ease: 'expo.out', stagger: NAV_STEP,
-      // View Transition 期间不要抢帧：等浏览器把快照过渡跑完再滚文字
-      delay: hasVT ? 0.34 : 0.12,
-    });
-  }
 
   /* 站内跳转不再拦截——拦下来手动淡出再 location.href 就是"整页刷新 + 导航
      跳一帧"的直接原因。原生跨文档过渡由 @view-transition 接管。
@@ -176,7 +149,6 @@
     setTimeout(() => home.classList.add('is-back'), 420);
   }
 
-  navEnter();
   navHandoff();
   navGlyph();
 
