@@ -122,13 +122,65 @@
     row.innerHTML = row.innerHTML + row.innerHTML;   // 复制一份才能无缝首尾相接
   }
 
-  /* ---- 换页过渡：离场模糊渐隐，进场渐显 ------------------------------
-     站内 .html 跳转拦下来，先跑 320ms 的离场再真正导航；新页面加载时
-     is-leaving 已经不在，main 直接从 CSS 的过渡态渐显回来。
-     模糊只给 6px——按反馈"不用加太多"。 */
+  /* ---- 换页过渡 + 导航形变 --------------------------------------------
+     augen 的做法：胶囊自己伸长/缩短，导航文字一条条从下往上滚进来，
+     旧的那批则往上滚出去。跨页是真实的文档加载，所以拆成两半来演：
+     离场——文字逐条上滚出去 + 胶囊收到只剩图标的宽度；
+     进场——胶囊从图标宽度伸到自然宽度，文字再逐条从下滚上来。
+     两半首尾相接，看起来就是一个连续动作。
+     胶囊宽度得先量：先让它 auto 布局拿到自然宽，再从窄的一端补起来。 */
+  const NAV_STEP = 0.055;          // 每条文字之间的错开
+  const R = '94px';                // 与 --radius-pill-lg 一致，裁切也要圆角
+
+  /* 胶囊"伸长"不用动 width——width 变化会让 flex 子项被压缩，padding 塌掉、
+     文字挤成一坨。改成裁 clip-path：胶囊始终是自然宽度，只把右边裁掉一段，
+     inset 带 round 所以裁出来的右端仍是圆头。子项完全不参与重排。 */
+  const clipTo = (nav, rightPx) => `inset(0px ${rightPx}px 0px 0px round ${R})`;
+  const hiddenRight = (nav) => {
+    const home = nav.querySelector('.nav__home');
+    const pad = parseFloat(getComputedStyle(nav).paddingLeft) || 0;
+    const keep = (home ? home.offsetWidth : 24) + pad * 2;
+    return Math.max(0, nav.offsetWidth - keep);
+  };
+
+  function navEnter() {
+    const nav = document.getElementById('nav');
+    if (!nav) return;
+    const texts = [...nav.querySelectorAll('.nav__text')];
+    if (reduced || !hasGsap) { nav.classList.add('is-ready'); return; }
+
+    nav.classList.add('is-ready');
+    gsap.set(texts, { yPercent: 110 });
+    gsap.set(nav, { clipPath: clipTo(nav, hiddenRight(nav)) });
+
+    gsap.timeline({ delay: 0.12 })
+      .to(nav, {
+        clipPath: clipTo(nav, 0), duration: 0.72, ease: 'expo.out',
+      }, 0)
+      .to(texts, {
+        yPercent: 0, duration: 0.5, ease: 'expo.out', stagger: NAV_STEP,
+      }, 0.18)
+      .set(nav, { clearProps: 'clipPath' });
+  }
+
+  function navLeave(done) {
+    const nav = document.getElementById('nav');
+    if (!nav || reduced || !hasGsap) { done(); return; }
+    const texts = [...nav.querySelectorAll('.nav__text')];
+
+    gsap.timeline({ onComplete: done })
+      .to(texts, {
+        yPercent: -110, duration: 0.32, ease: 'power2.in', stagger: NAV_STEP,
+      }, 0)
+      .fromTo(nav, { clipPath: clipTo(nav, 0) }, {
+        clipPath: clipTo(nav, hiddenRight(nav)), duration: 0.46, ease: 'power2.inOut',
+      }, 0.12);
+  }
+
   function pageFade() {
-    if (reduced) return;
+    if (reduced) { navEnter(); return; }
     const root = document.documentElement;
+    navEnter();
 
     document.addEventListener('click', (e) => {
       const a = e.target.closest('a[href]');
@@ -136,19 +188,18 @@
       const href = a.getAttribute('href');
       if (!href || href.startsWith('#') || /^(https?:|mailto:|tel:)/.test(href)) return;
       e.preventDefault();
-      // 从项目页返回首页时，先把图标滚回站点标记，让"换回来"这个动作被看见
+
+      // 项目页返回首页：图标先滚回站点标记，和胶囊收缩一起走
       const home = document.getElementById('navHome');
-      if (home && home.classList.contains('is-back')) {
-        home.classList.remove('is-back');
-        setTimeout(() => root.classList.add('is-leaving'), 180);
-        setTimeout(() => { location.href = href; }, 500);
-        return;
-      }
+      if (home && home.classList.contains('is-back')) home.classList.remove('is-back');
+
+      let gone = false;
+      const go = () => { if (!gone) { gone = true; location.href = href; } };
       root.classList.add('is-leaving');
-      setTimeout(() => { location.href = href; }, 320);
+      navLeave(go);
+      setTimeout(go, 900);                       // 兜底，动画卡住也要跳
     });
 
-    // 从浏览器缓存回退回来时，别停在离场态
     addEventListener('pageshow', () => root.classList.remove('is-leaving'));
   }
 

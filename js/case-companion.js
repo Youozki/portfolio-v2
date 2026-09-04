@@ -102,31 +102,23 @@
   });
 
 
-  /* ---- 推演线上的光点：进入视口时沿着虚线跑一遍并点亮环节 --------------
-     这是他要的"小段落里的光点"——只在这一段出现，不是整页进度条。
-     两条轨道错开 0.35s，读起来是"先人机链路、再工具与生命"。 */
+  /* ---- 推演线上的光点：沿轨道跑一遍，三列依次点亮 ----------------------
+     只在这一段出现（整页进度条是另一条细横条）。轨道左右各留 8%，
+     所以光点的行程也按 84% 算，末端正好停在最后一个节点上。 */
   function stackSpark() {
     if (!hasGsap || reduced) return;
     const stack = document.getElementById('stack');
-    if (!stack) return;
-    const lanes = gsap.utils.toArray('.stack__line', stack);
-    const stages = gsap.utils.toArray('.stack__stages li:not(.is-dim)', stack);
+    const rail = stack && stack.querySelector('.stack__rail');
+    const spark = stack && stack.querySelector('.stack__spark');
+    if (!rail || !spark) return;
+    const nodes = gsap.utils.toArray('.stack__node', stack);
 
-    const tl = gsap.timeline({
-      scrollTrigger: { trigger: stack, start: 'top 78%', once: true },
-    });
-    lanes.forEach((line, i) => {
-      const spark = line.querySelector('.stack__spark');
-      if (!spark) return;
-      tl.fromTo(spark, { x: 0, opacity: 0 }, {
-        x: () => line.clientWidth, opacity: 1,
-        duration: 1.15, ease: 'power1.inOut',
-      }, i * 0.35)
-        .to(spark, { opacity: 0, duration: 0.25, ease: 'power2.in' }, i * 0.35 + 1.05);
-    });
-    tl.fromTo(stages, { opacity: 0.35 }, {
-      opacity: 1, duration: 0.4, ease: 'power2.out', stagger: 0.12,
-    }, 0.2);
+    gsap.timeline({ scrollTrigger: { trigger: stack, start: 'top 78%', once: true } })
+      .fromTo(spark, { x: 0, opacity: 0 },
+        { x: () => rail.clientWidth * 0.84, opacity: 1, duration: 1.5, ease: 'power1.inOut' }, 0)
+      .to(spark, { opacity: 0, duration: 0.3, ease: 'power2.in' }, 1.35)
+      .fromTo(nodes, { opacity: 0.3, y: 10 },
+        { opacity: 1, y: 0, duration: 0.55, ease: 'expo.out', stagger: 0.42 }, 0.15);
   }
 
   stackSpark();

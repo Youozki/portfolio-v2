@@ -26,10 +26,10 @@
     </span>
   </a>
   <ul class="nav__list">
-    <li><a class="nav__link" href="#scene">现场</a></li>
-    <li><a class="nav__link" href="#problem">阻碍</a></li>
-    <li><a class="nav__link" href="#design">决策</a></li>
-    <li><a class="nav__link" href="#outcome">结果</a></li>
+    <li><a class="nav__link" href="#scene"><span class="nav__label"><span class="nav__text">现场</span></span></a></li>
+    <li><a class="nav__link" href="#problem"><span class="nav__label"><span class="nav__text">阻碍</span></span></a></li>
+    <li><a class="nav__link" href="#design"><span class="nav__label"><span class="nav__text">决策</span></span></a></li>
+    <li><a class="nav__link" href="#outcome"><span class="nav__label"><span class="nav__text">结果</span></span></a></li>
   </ul>
 </nav>
 
@@ -145,26 +145,39 @@
          连线上的光点随滚动跑一遍，把"从人到机器"这条链路读出来。 -->
     <div class="page stack" id="stack" data-reveal="soft">
       <p class="t-label">从人到机器的推演</p>
-      <ol class="stack__stages" aria-label="智能体的七个环节">
-        <li class="is-dim">记忆</li><li>感知</li><li class="is-dim">规划</li><li>思考</li>
-        <li class="is-dim">解决</li><li>反馈</li><li class="is-dim">行动</li>
-      </ol>
-      <div class="stack__lane">
-        <span class="stack__line"><i class="stack__spark"></i></span>
-        <ul class="stack__chips">
-          <li>Human</li><li>Agent</li><li>Machine</li>
-        </ul>
+
+      <div class="stack__rail">
+        <span class="stack__spark" aria-hidden="true"></span>
+        <div class="stack__node">
+          <p class="stack__stage">感知</p>
+          <p class="stack__role">Human</p>
+          <p class="stack__job">人给出意图</p>
+        </div>
+        <div class="stack__node">
+          <p class="stack__stage">思考</p>
+          <p class="stack__role">Agent</p>
+          <p class="stack__job">辅助工具</p>
+        </div>
+        <div class="stack__node">
+          <p class="stack__stage">反馈</p>
+          <p class="stack__role">Machine</p>
+          <p class="stack__job">互动生命</p>
+        </div>
       </div>
-      <div class="stack__lane stack__lane--low">
-        <span class="stack__line stack__line--short"><i class="stack__spark"></i></span>
-        <ul class="stack__chips stack__chips--low">
-          <li>辅助工具</li><li>互动生命</li>
-        </ul>
+
+      <p class="stack__ghosts" aria-label="未点亮的环节">
+        <span>记忆</span><span>规划</span><span>解决</span><span>行动</span>
+      </p>
+
+      <div class="stack__body">
+        <figure class="stack__orb">
+          <img src="assets/cases/companion/tiko-orb.webp" alt="Tiko 本体：环形光圈里的一对眼睛"
+               width="911" height="673" loading="lazy" />
+        </figure>
+        <p class="stack__note">七个环节里，感知、思考、反馈这三段落在 Tiko 身上；
+          记忆、规划、解决、行动仍由系统与人承担。它要做的不是全都接管，
+          而是把这三段做成能被看见的动作。</p>
       </div>
-      <figure class="stack__orb">
-        <img src="assets/cases/companion/tiko-orb.webp" alt="Tiko 本体：环形光圈里的一对眼睛"
-             width="911" height="673" loading="lazy" />
-      </figure>
     </div>
 
     <div class="page emap" data-reveal="soft">
@@ -183,7 +196,10 @@
       </div>
       <div class="emap__row">
         <p class="t-num emap__key">Feeling</p>
-        <ul class="emap__cells emap__cells--4"><li>Positive</li><li>Warm</li><li>Calm</li><li>Process</li></ul>
+        <ul class="emap__cells emap__cells--4 emap__cells--feel">
+          <li style="--dot:#df5191">Positive</li><li style="--dot:#d6433e">Warm</li>
+          <li style="--dot:#5abeea">Calm</li><li style="--dot:#33a254">Process</li>
+        </ul>
       </div>
       <div class="emap__row emap__row--last">
         <p class="t-num emap__key">Opportunity</p>

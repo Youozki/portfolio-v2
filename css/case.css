@@ -323,71 +323,87 @@
 .awards__row img:hover { opacity: 1; transform: translateY(-3px); }
 
 /* ---- 设计策略 · 推演线 -------------------------------------------------
-   原稿是一张静态板：七个环节标签 + 三段虚线 + 三个胶囊 + 本体。这里保留全部
-   文字与层级关系，把虚线做成能跑光点的轨道——他要的"小段落里的光点"就在这。 */
-.stack { position: relative; display: grid; gap: var(--space-lg); }
-.stack__stages {
-  display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
-  font-size: var(--text-sm);
-  color: var(--ink);
-}
-.stack__stages .is-dim { color: var(--ink-soft); opacity: 0.55; }
+   重做过，不再照原稿那张平铺的板：三个高亮环节各自成一列（感知→Human、
+   思考→Agent、反馈→Machine），列与列之间用一条轨道串起来，四个未点亮的
+   环节（记忆/规划/解决/行动）缩成轨道上的幽灵标签。轨道上跑光点。 */
+.stack { position: relative; display: grid; gap: var(--space-xl); }
 
-.stack__lane { position: relative; padding-top: var(--space-lg); }
-.stack__chips {
+.stack__stages { display: none; }              /* 环节改成随列走，不再单独一行 */
+
+.stack__rail {
+  position: relative;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  margin-bottom: var(--space-sm);
+  gap: var(--space-md);
+  padding-top: var(--space-2xl);
 }
-.stack__chips li {
-  justify-self: start;
-  padding: 0.3em 0.7em;
-  border-radius: var(--radius-sm);
-  background: var(--paper-3);
-  font-size: var(--text-sm);
-}
-.stack__chips--low { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-.stack__chips--low li:first-child { grid-column: 2; }
-.stack__chips--low li:last-child { grid-column: 3; }
-
-/* 轨道：虚线 + 三个节点点。光点由 js 沿着它跑。 */
-.stack__line {
-  position: relative;
-  display: block;
-  height: 1px;
-  background: repeating-linear-gradient(to right,
-    var(--hair) 0 4px, transparent 4px 9px);
-}
-.stack__line--short { margin-left: 33.33%; width: 66.67%; }
-.stack__line::before, .stack__line::after {
+.stack__rail::before {
   content: '';
   position: absolute;
-  top: 50%;
-  width: 5px;
-  height: 5px;
-  margin-top: -2.5px;
+  top: var(--space-lg);
+  left: 8%;
+  right: 8%;
+  height: 1px;
+  background: repeating-linear-gradient(to right,
+    var(--hair) 0 4px, transparent 4px 10px);
+}
+.stack__node { position: relative; display: grid; gap: var(--space-xs); justify-items: start; }
+.stack__node::before {
+  content: '';
+  position: absolute;
+  top: calc(var(--space-lg) - var(--space-2xl) - 3px);
+  left: 0;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
   background: var(--ink);
 }
-.stack__line::before { left: 0; }
-.stack__line::after { right: 0; }
+.stack__stage {
+  font-size: var(--text-h2);
+  letter-spacing: var(--track-h2);
+  line-height: 1.1;
+}
+.stack__role {
+  align-self: start;
+  padding: 0.25em 0.7em;
+  border: var(--rule) solid var(--accent);
+  border-radius: var(--radius-pill);
+  color: var(--accent);
+  font-size: var(--text-xs);
+  letter-spacing: 0;
+}
+.stack__job { color: var(--ink-soft); font-size: var(--text-sm); }
+.stack__ghosts {
+  display: flex;
+  gap: var(--space-lg);
+  color: var(--ink-soft);
+  opacity: 0.45;
+  font-size: var(--text-xs);
+  letter-spacing: var(--track-wide);
+}
 .stack__spark {
   position: absolute;
-  top: 50%;
-  left: 0;
-  width: 6px;
-  height: 6px;
+  top: var(--space-lg);
+  left: 8%;
+  width: 7px;
+  height: 7px;
   margin: -3px 0 0 -3px;
   border-radius: 50%;
   background: var(--accent);
-  box-shadow: 0 0 5px 1px rgba(0, 113, 227, 0.6), 0 0 14px 3px rgba(0, 113, 227, 0.25);
+  box-shadow: 0 0 6px 1px rgba(0, 113, 227, 0.6), 0 0 16px 4px rgba(0, 113, 227, 0.24);
   opacity: 0;
   will-change: transform, opacity;
 }
 
-.stack__orb { margin: 0; width: clamp(7rem, 12vw, 10rem); }
+.stack__body {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--space-lg);
+  align-items: center;
+}
+.stack__orb { margin: 0; width: clamp(8rem, 14vw, 12rem); }
 .stack__orb img { width: 100%; height: auto; }
+.stack__note { color: var(--ink-soft); font-size: var(--text-sm); max-width: 22rem; }
 
 /* ---- 设计策略 · 体验地图 ----------------------------------------------
    原稿是一张表。这里保留五行的行头与全部单元格文字，改成发丝分隔的行——
@@ -405,6 +421,22 @@
 .emap__row--last { border-bottom: var(--rule) solid var(--hair); }
 .emap__key { color: var(--accent); letter-spacing: 0; }
 .emap__cells { display: grid; gap: var(--space-sm) var(--space-md); font-size: var(--text-sm); }
+.emap__row:not(.emap__row--last) .emap__cells li {
+  justify-self: start;
+  padding: 0.28em 0.75em;
+  border-radius: var(--radius-pill);
+  background: var(--paper-3);
+  white-space: nowrap;
+}
+/* Feeling 四格带上情绪色点，和上面"四种情绪"那段对得上 */
+.emap__cells--feel li { display: inline-flex; align-items: center; gap: 0.45em; }
+.emap__cells--feel li::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--dot, var(--ink));
+}
 .emap__cells--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .emap__cells--4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .emap__cells--6 { grid-template-columns: repeat(6, minmax(0, 1fr)); }

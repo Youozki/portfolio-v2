@@ -194,7 +194,6 @@ a { color: inherit; text-decoration: none; }
   gap: var(--space-xs);
   padding: 0.35rem;
   border-radius: var(--radius-pill-lg);
-  overflow: hidden;
   background: var(--veil);
   -webkit-backdrop-filter: var(--blur-veil) saturate(150%);
   backdrop-filter: var(--blur-veil) saturate(150%);
@@ -205,6 +204,7 @@ a { color: inherit; text-decoration: none; }
   will-change: transform;
 }
 .nav__home {
+  flex: 0 0 auto;
   display: grid;
   place-items: center;
   width: 2.25rem;
@@ -247,8 +247,11 @@ a { color: inherit; text-decoration: none; }
 }
 .nav__home:hover .mark__a { transform: translate(-0.7px, -0.7px); }
 .nav__home:hover .mark__b { transform: translate(0.7px, 0.7px); }
-.nav__list { display: flex; align-items: center; }
+.nav__list { display: flex; align-items: center; flex: 0 0 auto; }
 .nav__link {
+  flex: 0 0 auto;
+  display: inline-flex;      /* 必须自己成块：里面有 display:block 的文字裁切层 */
+  align-items: center;
   padding: 0.55rem 0.9rem;
   border-radius: var(--radius-pill);
   font-size: var(--text-sm);
@@ -258,6 +261,10 @@ a { color: inherit; text-decoration: none; }
   transition: background-color var(--dur-1) var(--ease-out), color var(--dur-1) var(--ease-out);
 }
 .nav__link:hover { background: rgba(14, 15, 17, 0.06); }
+
+/* 文字滚动：外层裁切，内层上下位移。换页时旧的往上滚出、新的从下滚入。 */
+.nav__label { display: block; overflow: hidden; }
+.nav__text { display: block; will-change: transform; }
 .nav__link[aria-current='true'] { color: var(--accent); }
 
 /* 导航压到深色／强调色带上时整体反色（augen 的做法） */
@@ -303,21 +310,10 @@ a { color: inherit; text-decoration: none; }
 }
 .js.is-leaving main { opacity: 0; filter: blur(6px); }
 
-/* 导航跟着一起走，不再硬切：胶囊上浮淡出，链接按顺序退场 */
-.js .nav {
-  transition: transform var(--dur-3) var(--ease-out),
-    opacity var(--dur-2) var(--ease-out),
-    background-color var(--dur-3) var(--ease-out);
-}
-.js.is-leaving .nav { transform: translate(-50%, -8px); opacity: 0; }
-.js .nav__link, .js .nav__home {
-  transition: opacity 220ms var(--ease-out), transform 260ms var(--ease-out),
-    background-color var(--dur-1) var(--ease-out), color var(--dur-1) var(--ease-out);
-}
-.js.is-leaving .nav__link { opacity: 0; transform: translateY(-6px); }
-.js.is-leaving .nav__link:nth-child(2) { transition-delay: 40ms; }
-.js.is-leaving .nav__link:nth-child(3) { transition-delay: 80ms; }
-.js.is-leaving .nav__link:nth-child(4) { transition-delay: 120ms; }
+/* 换页时的导航动作（胶囊伸缩 + 文字逐条滚动）由 js/site.js 驱动，
+   因为要先量出胶囊的自然宽度。这里只把初始态藏好，免得没跑动画就闪一下。 */
+.js .nav__text { transform: translateY(110%); }
+.js .nav.is-ready .nav__text { transform: translateY(0); }
 
 /* ---- 无障碍 ---------------------------------------------------------- */
 .visually-hidden {
