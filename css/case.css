@@ -1,4 +1,12 @@
 /* 项目内页：长文档骨架。
+
+   版式的唯一规则：整页只有一根内容栏。页面里每个块都包在 .page 里，所以只在
+   这里收一次宽度，所有块的左边缘和宽度就必然一致。之前是给 split / fig /
+   emo / deck / seq 各自写了 52rem 或 60rem，左边缘对不齐、疏密也不一样——
+   那是"有些地方紧凑有些又没变"的根源。不要再给单个块加 max-width。 */
+.is-case .page { max-width: 60rem; }
+
+/* 项目内页：长文档骨架。
  * 一页 = 四幕，靠色带切章；每幕内部用「吸顶栏 + 推进列」承载顺序。
  * 招牌段落两处：钉住的横向情绪带、钉住的六屏接管。 */
 
@@ -43,8 +51,9 @@
 }
 
 /* ---- 幕：统一的纵向节奏 ---------------------------------------------- */
-.act { padding-block: var(--space-4xl); }
+.act { padding-block: var(--space-3xl); }
 .act > * + * { margin-top: var(--space-3xl); }
+.act:first-of-type { padding-top: var(--space-4xl); }
 
 /* ---- 幕一 · 钉住的舞台：整屏镜片 + 两句依次浮现 ---------------------- */
 .stage { height: 300vh; }                 /* 三屏的滚动量换一屏的停留 */
@@ -91,8 +100,6 @@
 /* ---- 吸顶章名 + 推进列（mandandan 把章节文案钉在 top:171px） --------- */
 .split {
   display: grid;
-  max-width: 60rem;
-  margin-inline: auto;
   grid-template-columns: minmax(0, 1fr) minmax(0, 2.6fr);
   column-gap: clamp(2rem, 6vw, 7rem);
   align-items: start;
@@ -122,7 +129,6 @@
 .step__fig--narrow img { max-width: 15rem; }
 
 /* 初步结论：四条发丝行，最后一条给强调色 */
-.conclusion { max-width: 60rem; margin-inline: auto; }
 .conclusion__head { margin-bottom: var(--space-lg); }
 .conclusion__row { grid-template-columns: 2rem minmax(0, 1fr); }
 .conclusion__row .t-body, .conclusion__row .t-lead { max-width: 44rem; }
@@ -134,7 +140,6 @@
 .fig--wide img { width: 100%; }
 /* augen 的内页正文都收在页面中部，两侧大量留白。满幅图看着臃肿，
    所以图版统一走这条窄栏，只有首屏那种主视觉才铺满。 */
-.fig--mid { max-width: 52rem; margin-inline: auto; }
 .fig--mid img { width: 100%; }
 .ces img {
   border-radius: var(--radius-sm);
@@ -156,8 +161,6 @@
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-2xl) var(--space-xl);
-  max-width: 52rem;
-  margin-inline: auto;
 }
 .emo__item { display: grid; gap: var(--space-sm); }
 .emo__item img { width: 100%; height: auto; border-radius: var(--radius-sm); }
@@ -184,8 +187,6 @@
   align-content: center;
 }
 .deck__inner {
-  max-width: 60rem;
-  margin-inline: auto;
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 3fr);
   column-gap: clamp(2rem, 6vw, 7rem);
@@ -221,8 +222,6 @@
 
 /* ---- Pet Tracking 四步：不同画幅并排，底线对齐 ----------------------- */
 .seq {
-  max-width: 60rem;
-  margin-inline: auto;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   column-gap: var(--gutter);
@@ -305,3 +304,20 @@
   .seq { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: var(--space-xl); }
   .emo__grid { grid-template-columns: minmax(0, 1fr); }
 }
+
+/* ---- CES 媒体奖项：十个牌子规格已在切图时统一，这里只排队 -------------- */
+.awards { margin-top: var(--space-xl); }
+.awards__head { margin-bottom: var(--space-md); }
+.awards__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+.awards__row img {
+  height: 2.5rem;
+  width: auto;
+  opacity: 0.86;
+  transform: translateY(0);
+  transition: transform var(--dur-2) var(--ease-out), opacity var(--dur-2) var(--ease-out);
+}
+.awards__row img:hover { opacity: 1; transform: translateY(-3px); }

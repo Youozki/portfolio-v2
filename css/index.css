@@ -37,7 +37,7 @@
   flex-direction: column;
   gap: var(--space-md);
 }
-.hero__title { max-width: 26rem; }
+.hero__title { max-width: 24rem; }
 .hero__jump {
   display: flex;
   flex-wrap: wrap;
@@ -195,9 +195,17 @@
 .about__row > span:last-child { display: flex; flex-direction: column; gap: 0.35rem; }
 .about__sub { color: var(--on-ink-soft); }
 
-/* 公司 logo：和公司名同一行，高度锁在 1.6rem，免得把行距压垮 */
-.about__org { display: flex; align-items: center; gap: var(--space-sm); }
-.about__logo { height: 1.6rem; width: auto; border-radius: 3px; }
+/* 公司 logo：和公司名共用一条基线。inline-block 的基线就是它的下边缘，
+   所以 logo 的底边会正好落在中文的基线上——按外框居中怎么调都对不齐，
+   因为两张 logo 内部的字母位置本来就不一样。 */
+.about__org { display: block; }
+.about__logo {
+  display: inline-block;
+  vertical-align: baseline;
+  height: 1.35rem;
+  width: auto;
+  margin-right: var(--space-sm);
+}
 
 .about__skills { margin-top: var(--space-3xl); }
 .about__skills .about__row { grid-template-columns: minmax(0, 1fr) minmax(0, 4fr); }

@@ -79,11 +79,12 @@ a { color: inherit; text-decoration: none; }
 }
 
 /* ---- 排版角色：字重只有 300（display）和 400（其余）两档 -------------- */
-.t-display {
-  font-size: var(--text-display);
+/* 只给"压在图上的一句陈述"用，页面标题不要用它 */
+.t-statement {
+  font-size: var(--text-statement);
   font-weight: var(--weight-display);
-  letter-spacing: var(--track-display);
-  line-height: var(--leading-display);
+  letter-spacing: var(--track-statement);
+  line-height: var(--leading-statement);
 }
 .t-h1 {
   font-size: var(--text-h1);
@@ -100,7 +101,7 @@ a { color: inherit; text-decoration: none; }
 .t-lead { font-size: var(--text-lg); font-weight: var(--weight-text); line-height: var(--leading-cn); }
 .t-body { font-size: var(--text-base); line-height: var(--leading-cn); max-width: var(--measure); }
 .t-body + .t-body { margin-top: 1.1em; }
-.t-cap { font-size: var(--text-sm); color: var(--ink-soft); line-height: 1.45; }
+.t-cap { font-size: var(--text-sm); color: var(--ink-soft); line-height: 1.35; }
 .t-label {
   font-size: var(--text-xs);
   letter-spacing: var(--track-wide);
@@ -305,5 +306,5 @@ a { color: inherit; text-decoration: none; }
   .nav { top: auto; bottom: var(--space-md); }
 }
 @media (max-width: 479px) {
-  .t-display { overflow-wrap: anywhere; min-width: 0; }
+  .t-statement { overflow-wrap: anywhere; min-width: 0; }
 }

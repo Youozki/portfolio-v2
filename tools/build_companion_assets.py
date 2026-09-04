@@ -95,3 +95,45 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+
+def build_awards():
+    """CES 媒体奖项的十个媒体 logo。原图是十张零散小图，尺寸、留白、底色都不一致，
+    统一做法：裁到实心边界 → 按"墨水高度"等高 → 垫同样的白色圆角板。
+    这样放在墨色带上是一排规格一致的牌子，而不是十张大小不一的贴图。"""
+    from PIL import ImageDraw
+    files = ['image 1918.png', 'image 1919.png', 'image 1920.png', 'image 1921.png',
+             'image 1922.png', 'image 1923.png', 'image 1924.png', 'image 1925.png',
+             'QQ20260322-215201 1.png', 'QQ20260322-215201 2.png']
+    names = ['crn', 'findarticles', 'gadgeteer', 'mashable', 'netzwelt',
+             'pcwelt', 'pcworld', 'tomsguide', 'ubergizmo', 'zdnet']
+    d = os.path.join(SRC, '作品1集')
+    out_dir = os.path.join(OUT, 'awards')
+    os.makedirs(out_dir, exist_ok=True)
+    INK_H, PAD, R = 56, 22, 10
+    for rel, name in zip(files, names):
+        path = os.path.join(d, rel)
+        if not os.path.exists(path):
+            print('缺奖项图 %s' % rel)
+            continue
+        im = Image.open(path).convert('RGBA')
+        # 白底截图没有 alpha，用"非白"当墨水
+        if im.getchannel('A').getextrema()[0] == 255:
+            g = im.convert('L').point(lambda v: 255 if v < 238 else 0)
+        else:
+            g = im.getchannel('A').point(lambda v: 255 if v > 8 else 0)
+        box = g.getbbox()
+        if box:
+            im = im.crop(box)
+        im = im.resize((max(1, round(im.width * INK_H / im.height)), INK_H), Image.LANCZOS)
+        plate = Image.new('RGBA', (im.width + PAD * 2, im.height + PAD * 2), (0, 0, 0, 0))
+        mask = Image.new('L', plate.size, 0)
+        ImageDraw.Draw(mask).rounded_rectangle(
+            [0, 0, plate.width - 1, plate.height - 1], radius=R, fill=255)
+        white = Image.new('RGBA', plate.size, (255, 255, 255, 255))
+        white.alpha_composite(im, (PAD, PAD))
+        white.putalpha(mask)
+        dst = os.path.join(out_dir, name + '.webp')
+        white.save(dst, 'WEBP', quality=92, method=6)
+        print('award %-13s %dx%d  %.1f KB'
+              % (name, white.width, white.height, os.path.getsize(dst) / 1024))

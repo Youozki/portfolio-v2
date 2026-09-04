@@ -29,32 +29,32 @@
   --font-sans: 'Geist', 'Noto Sans SC Subset', -apple-system, 'PingFang SC',
     'HarmonyOS Sans SC', 'Microsoft YaHei', system-ui, sans-serif;
 
-  /* 字阶：augen 的 140px 放在这份内容上太吵，整体降两档，靠留白撑气口。
-     44 / 26 / 20 / 17 / 15 / 13 / 11，全部流体化。 */
-  --text-display: clamp(1.75rem, 3.06vw, 2.75rem);   /* 28 → 44 */
-  --text-h1: clamp(1.25rem, 1.81vw, 1.625rem);       /* 20 → 26 */
-  --text-h2: clamp(1.0625rem, 1.39vw, 1.25rem);      /* 17 → 20 */
-  --text-lg: clamp(1rem, 1.18vw, 1.0625rem);         /* 16 → 17 */
-  --text-base: 0.9375rem;                            /* 15 */
-  --text-sm: 0.8125rem;                              /* 13 */
-  --text-xs: 0.6875rem;                              /* 11 */
+  /* 字阶：直接来自对 augen.pro 的实测（1440px 宽，CDP 取 computed style）：
+     140 / 38 / 27 / 20 / 18 / 16 / 14 / 12，权重只有 300 和 350。
+     关键一点是它的 140px 全站只出现一次——是压在产品图上的那句陈述，
+     不是页面标题。首屏标题 "Beyond Humanware." 实测只有 27px。
+     所以这里把 statement 单独拆出来备用，页面标题一律走 h1/h2。 */
+  --text-statement: clamp(3.5rem, 9.72vw, 8.75rem);  /* 56 → 140，仅压图陈述用 */
+  --text-h1: clamp(1.75rem, 2.64vw, 2.375rem);       /* 28 → 38 */
+  --text-h2: clamp(1.375rem, 1.875vw, 1.6875rem);    /* 22 → 27 */
+  --text-lg: clamp(1.125rem, 1.39vw, 1.25rem);       /* 18 → 20 */
+  --text-base: 1rem;                                 /* 16 */
+  --text-sm: 0.875rem;                               /* 14 */
+  --text-xs: 0.75rem;                                /* 12 */
 
-  /* 字重只留两档：300 只给 display，其余一律 400。
-     多一档就会出现"有些粗有些细"。中文子集已按 Geist 光学对齐过。 */
-  --weight-display: 300;
-  --weight-text: 400;
-
-  /* 字距：西文越大越收，中文一律不收 */
-  --track-display: -0.01em;   /* 44px 上只需要轻微收一点 */
+  /* 字距：augen 除 140px 那句是 +0.008em，其余一律 -0.02em */
+  --track-statement: 0.008em;
   --track-h1: -0.02em;
   --track-h2: -0.02em;
-  --track-tight: -0.01em;
-  --track-wide: 0.06em;       /* 小号全大写标签 */
+  --track-tight: -0.02em;
+  --track-wide: 0.06em;
 
-  --leading-display: 1.2;
+  /* 行高：augen 全站 1.2，包括正文。这是它"紧凑"的主要来源。
+     中文正文 1.2 会挤，取 1.55——仍然比原来的 1.78 紧一档。 */
+  --leading-statement: 1.2;
   --leading-tight: 1.2;
-  --leading-body: 1.62;
-  --leading-cn: 1.78;         /* 中文正文要更松 */
+  --leading-body: 1.45;
+  --leading-cn: 1.55;
 
   /* ---- 网格与间距（4pt） --------------------------------------------- */
   --cols: 5;

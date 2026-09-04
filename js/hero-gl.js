@@ -45,7 +45,7 @@
   /* ---- 粒子场 ----------------------------------------------------------
      位置用确定性的伪随机（正弦哈希）而不是 Math.random，这样每次加载分布一致，
      排查和截图比对才有意义。 */
-  const COUNT = 320;
+  const COUNT = 140;
   const rand = (i, salt) => {
     const v = Math.sin((i + 1) * 12.9898 + salt * 78.233) * 43758.5453;
     return v - Math.floor(v);
@@ -63,16 +63,34 @@
   }
   const dotGeo = new THREE.BufferGeometry();
   dotGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-  /* 发光靠两层叠加：一层实心小点 + 一层更大更透的光晕，
-     additive 混合在浅底上会越叠越白，所以光晕用普通混合、压低透明度。 */
+  /* PointsMaterial 不给 map 的时候，每个点渲染出来就是一个硬边正方形——
+     这是上一版"看着像撒了一把绿方块"的直接原因。这里用 canvas 画一张
+     径向渐变贴图当 sprite，点才是有柔边的圆形光斑。 */
+  const sprite = (() => {
+    const S = 64;
+    const c = document.createElement('canvas');
+    c.width = c.height = S;
+    const g = c.getContext('2d').createRadialGradient(S / 2, S / 2, 0, S / 2, S / 2, S / 2);
+    g.addColorStop(0, 'rgba(255,255,255,1)');
+    g.addColorStop(0.35, 'rgba(255,255,255,0.55)');
+    g.addColorStop(1, 'rgba(255,255,255,0)');
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, S, S);
+    const t = new THREE.Texture(c);
+    t.needsUpdate = true;
+    return t;
+  })();
+
   const dots = new THREE.Points(dotGeo, new THREE.PointsMaterial({
-    color: MOSS, size: 0.085, sizeAttenuation: true,
-    transparent: true, opacity: 0.62, depthWrite: false,
+    color: MOSS, map: sprite, size: 0.42, sizeAttenuation: true,
+    transparent: true, opacity: 0.5, depthWrite: false,
   }));
   world.add(dots);
+  // 第二层更大更透，叠出"微光"的晕。浅底上不能用 additive，会越叠越白。
   const halo = new THREE.Points(dotGeo, new THREE.PointsMaterial({
-    color: MOSS, size: 0.34, sizeAttenuation: true,
-    transparent: true, opacity: 0.13, depthWrite: false,
+    color: MOSS, map: sprite, size: 1.1, sizeAttenuation: true,
+    transparent: true, opacity: 0.1, depthWrite: false,
   }));
   world.add(halo);
 
