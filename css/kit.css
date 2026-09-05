@@ -1,0 +1,363 @@
+/* Hallmark · macrostructure: Long Document（项目内页）· theme: studied-DNA
+ * source: url https://augen.pro/ + https://mandandan.cn/（tools/measure_ref.js 实测）
+ * 五个项目内页共用的这一层。上一轮只把【字阶与配色】按 augen 实测落进了 tokens，
+ * 构图 / 图片规格 / 动效这三层还是猜的——那是"看着普通"的真正来源。这个文件补的
+ * 就是这三层，所有页面都从这里取原语，不要在单页 CSS 里另发明一套。
+ *
+ * 实测差距（1440px 宽）：
+ *   章节留白  augen 130/144/220px · mandandan 120/144/173px · 我们原来只有 72/104
+ *   图片圆角  augen 全站 0px      · mandandan 仅手机屏 44px  · 我们原来每张都 10px
+ *   栏宽      augen 1302/1035/767/500 四档 · 我们原来只有一根 960
+ *   视差幅度  章节 42px / 单图 10px（降级 16 / 4）
+ *   钉住章节  同一段里重复四次，文案吸顶 154px
+ */
+
+/* ---- 栏宽三档 ---------------------------------------------------------
+   全部左对齐、按外框取百分比，所以左边缘天然齐平——这是"一根内容栏"那条
+   不变量真正要保住的东西（对齐），而不是"只准有一个宽度"。 */
+/* 内层元素上用档位，就是直接给宽度。:not(.page) 是必须的——
+   .page 自带 margin-inline: auto，直接给它收窄的宽度会把整块居中、
+   左边缘立刻和别的块错开。给 .page 挂档位走下面那组规则。 */
+.tier { width: 100%; }
+.tier--wide:not(.page) { width: var(--tier-wide); }
+.tier--text:not(.page) { width: var(--tier-text); }
+.tier--narrow:not(.page) { width: var(--tier-narrow); }
+/* 需要贴住右边缘时用它，做出 augen 那种一左一右的错落 */
+.tier--end:not(.page) { margin-left: auto; }
+
+/* 直接给 .page 挂档位时不能动它自己的宽度：.page 自带 margin-inline: auto，
+   一收窄就整块居中、左边缘立刻和别的块错开——这正是上一轮"有些地方紧凑有些又
+   没变，完全乱了"的成因。也不能用百分比内边距：百分比是按【外层】宽度算的，
+   1440 视口下 61.6% 会算成 887px，直接把内容挤成负宽（已经踩过）。
+   所以档位收在 .page 的【直接子元素】上——百分比这时按 .page 的内容盒算，
+   左边缘一动不动，只把栏从右边收进来。 */
+.page.tier--wide > * { max-width: var(--tier-wide); }
+.page.tier--text > * { max-width: var(--tier-text); }
+.page.tier--narrow > * { max-width: var(--tier-narrow); }
+.page.tier--end > * { margin-left: auto; }
+
+/* ---- 统一图版容器 -----------------------------------------------------
+   来源不一的图必须套同一个容器，这条是既定判据。容器负责三件事：
+   统一底色（透明 PNG 不会漏出色带）、统一圆角（0）、给视差留一个裁切框。 */
+.plate {
+  position: relative;
+  overflow: clip;                    /* 视差要靠这一层裁掉溢出的部分 */
+  background: var(--paper-3);
+  border-radius: 0;                  /* augen 实测 0px，不要加圆角 */
+}
+.band--ink .plate { background: var(--ink-2); }
+.plate > img,
+.plate > video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* 视差是在图自己身上做的：容器裁切，图比容器高一点，再上下移 10px。
+     先放大一档，免得移动时露出容器底色。 */
+  transform: translate3d(0, var(--plate-shift, 0px), 0) scale(var(--plate-zoom, 1.06));
+  will-change: transform;
+}
+/* 不参与视差的图（截图规格已经很准，放大会发虚）用这个 */
+.plate--flat > img { transform: none; }
+.plate--flat { background: none; }
+.plate--flat > img { height: auto; object-fit: contain; }
+
+/* 同系列图必须同规格：画幅在容器上定，不看导出尺寸 */
+.plate--wide { aspect-ratio: 16 / 9; }
+.plate--screen { aspect-ratio: 1004 / 628; }
+.plate--phone { aspect-ratio: 0.46; }      /* mandandan 手机屏实测 0.437–0.489 */
+.plate--square { aspect-ratio: 1; }
+.plate--board { aspect-ratio: 4 / 3; }
+
+figcaption { color: var(--ink-soft); margin-top: var(--space-sm); }
+.band--ink figcaption { color: var(--on-ink-soft); }
+
+/* ---- 重复吸顶章节（mandandan 的招牌结构） -----------------------------
+   它的 journey-section 高 1084vh，里面【同一个结构重复四次】：每一章的文案
+   sticky 在 154px，右边的图一屏一屏滚过去。我们原来只有一处 .split__aside
+   做这件事，所以整页只有一个"停顿"，读起来就是平铺直叙。
+   用法：.chapters > .chapter × N，每个 .chapter 里一个 __copy 一个 __stage。 */
+.chapters { display: grid; }
+.chapter {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.9fr);
+  column-gap: clamp(2rem, 6vw, 6rem);
+  align-items: start;
+  padding-block: var(--act-pad);
+}
+.chapter__copy {
+  position: sticky;
+  top: var(--chapter-top);
+  display: grid;
+  gap: var(--space-sm);
+  /* 章节文案自己也有 42px 的视差，跟着 --chapter-progress 走 */
+  transform: translate3d(0, var(--chapter-shift, 0px), 0);
+}
+.chapter__no { color: var(--accent); }
+.chapter__lead { color: var(--ink-soft); margin-top: var(--space-xs); }
+.band--ink .chapter__lead { color: var(--on-ink-soft); }
+/* 章节进度轨：一条发丝，跟着 --chapter-progress 长出来。
+   比"又一个进度条"轻——它只在这一章里存在，读者知道自己在这一章的哪。 */
+.chapter__rail {
+  position: relative;
+  height: 1px;
+  margin-top: var(--space-md);
+  background: var(--hair);
+}
+.band--ink .chapter__rail { background: var(--hair-on-ink); }
+.chapter__rail::after {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: var(--route-progress, 0%);
+  background: var(--accent);
+}
+.chapter__stage { display: grid; gap: var(--space-xl); }
+.chapter__stage > figure { display: grid; gap: 0; }
+
+/* ==== 重制的"纯文字版"图 ================================================
+   原稿里有一批图其实是把文字排在 Figma 里再导出的（色板、字阶、图标规范、
+   交互对照表、4A 结构…）。这种图硬搬过来只会是一张糊的截图，还没法做动效。
+   下面这几个原语用真 HTML 重排同样的内容——意思不变，但字是活的、能入场、
+   能响应式换行。真正的产品设计图（界面截图、样机）不走这里，直接用原图。 */
+
+/* ---- 色板 ---- */
+.swatches {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(6.5rem, 1fr));
+  gap: var(--space-md);
+}
+.swatch { display: grid; gap: var(--space-xs); }
+.swatch i {
+  display: block;
+  height: 4.5rem;
+  background: var(--c);
+  border: var(--rule) solid var(--hair);
+}
+.band--ink .swatch i { border-color: var(--hair-on-ink); }
+.swatch b { font-weight: var(--weight-text); font-size: var(--text-sm); }
+.swatch span { color: var(--ink-soft); font-size: var(--text-xs); font-variant-numeric: tabular-nums; }
+.band--ink .swatch span { color: var(--on-ink-soft); }
+
+/* ---- 中性阶：11 格一条，格子里是纯色值，上面挂角色名 ---- */
+.ramp { display: grid; gap: var(--space-sm); margin-top: var(--space-lg); }
+.ramp__head { display: flex; align-items: baseline; gap: var(--space-md); }
+.ramp__row {
+  display: grid;
+  grid-template-columns: repeat(11, minmax(0, 1fr));
+  gap: 2px;
+}
+.ramp__cell { display: grid; gap: var(--space-2xs); min-width: 0; }
+.ramp__cell i { display: block; height: 3.25rem; background: var(--c); }
+.ramp__cell b,
+.ramp__cell span {
+  font-size: 0.625rem;
+  line-height: 1.3;
+  font-weight: var(--weight-text);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+.ramp__cell b { color: var(--ink); }
+.band--ink .ramp__cell b { color: var(--on-ink); }
+.ramp__cell span { color: var(--ink-soft); }
+.band--ink .ramp__cell span { color: var(--on-ink-soft); }
+/* 有角色名的那几格才标出来，其余留白——原稿也是只标关键档 */
+.ramp__cell em { font-style: normal; color: var(--accent); font-size: 0.625rem; }
+
+/* ---- 字阶梯：左边标号，右边同一句样张按字号排下来 ---- */
+.ladder { display: grid; }
+.ladder__row {
+  display: grid;
+  grid-template-columns: 5.5rem minmax(0, 1fr);
+  gap: var(--space-md);
+  align-items: baseline;
+  padding-block: var(--space-sm);
+  border-top: var(--rule) solid var(--hair);
+}
+.band--ink .ladder__row { border-top-color: var(--hair-on-ink); }
+.ladder__row:last-child { border-bottom: var(--rule) solid var(--hair); }
+.ladder__meta { color: var(--ink-soft); font-size: var(--text-xs); font-variant-numeric: tabular-nums; }
+.ladder__spec {
+  font-size: var(--s);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  overflow: clip;
+  text-overflow: ellipsis;
+}
+
+/* ---- 对照矩阵：行是操作，列是输入方式，格子里是具体手势 ----
+   原稿是一张 2490px 宽的深底表格图。重排成真表格之后，窄屏能自己换行、
+   手势文字可选中，也不会因为缩放而糊掉。 */
+.matrix-wrap { overflow-x: auto; }
+.matrix { width: 100%; border-collapse: collapse; font-size: var(--text-sm); }
+.matrix th, .matrix td {
+  text-align: left;
+  vertical-align: top;
+  padding: 0.6rem var(--space-sm);
+  border-top: var(--rule) solid var(--hair);
+  font-weight: var(--weight-text);
+}
+.band--ink .matrix th, .band--ink .matrix td { border-top-color: var(--hair-on-ink); }
+.matrix thead th {
+  color: var(--ink-soft);
+  font-size: var(--text-xs);
+  letter-spacing: var(--track-wide);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.band--ink .matrix thead th { color: var(--on-ink-soft); }
+/* 行头单独一列，跟着滚动横条钉在左边，横向翻的时候还知道在看哪一行 */
+.matrix tbody th {
+  position: sticky;
+  left: 0;
+  background: var(--paper);
+  white-space: nowrap;
+}
+.band--ink .matrix tbody th { background: var(--ink); }
+.matrix td ul { display: grid; gap: 0.2rem; }
+.matrix td li { line-height: 1.35; }
+/* 只有一条"/"的格子代表这种输入方式做不到，压暗，不要让它和有内容的格子等重 */
+.matrix td.is-na { color: var(--ink-soft); opacity: 0.55; }
+.band--ink .matrix td.is-na { color: var(--on-ink-soft); }
+.matrix tbody tr:last-child th, .matrix tbody tr:last-child td {
+  border-bottom: var(--rule) solid var(--hair);
+}
+.band--ink .matrix tbody tr:last-child th,
+.band--ink .matrix tbody tr:last-child td { border-bottom-color: var(--hair-on-ink); }
+
+/* ---- 节点链：横向推进的流程（Oreate 的推演线、4A 结构都走这个） ----
+   不做钉住横滚——那是招牌段才配得上的开销。这里是一条会自己画出来的轨道，
+   节点按轨道推进依次点亮。轨道用 scaleX，节点只动 opacity 与 y。 */
+.nodes { position: relative; display: grid; gap: var(--space-lg); }
+.nodes__track {
+  position: relative;
+  height: 1px;
+  background: var(--hair);
+}
+.band--ink .nodes__track { background: var(--hair-on-ink); }
+.nodes__track > i {
+  position: absolute;
+  inset: 0;
+  background: var(--accent);
+  transform: scaleX(var(--track-grow, 0));
+  transform-origin: 0 50%;
+}
+.nodes__row {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: var(--gutter);
+}
+.node { position: relative; display: grid; gap: var(--space-xs); align-content: start; padding-top: var(--space-lg); }
+.node::before {
+  content: '';
+  position: absolute;
+  top: calc(var(--space-lg) * -1 - 3px);
+  left: 0;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--ink-soft);
+  transition: background-color var(--dur-2) var(--ease-out), transform var(--dur-2) var(--ease-out);
+}
+.node.is-on::before { background: var(--accent); transform: scale(1.35); }
+.node__name { font-size: var(--text-base); }
+.node__act { color: var(--ink-soft); font-size: var(--text-sm); }
+.band--ink .node__act { color: var(--on-ink-soft); }
+.node__list { display: grid; gap: 0.3rem; margin-top: var(--space-xs); }
+.node__list li { color: var(--ink-soft); font-size: var(--text-xs); line-height: 1.5; }
+.band--ink .node__list li { color: var(--on-ink-soft); }
+.node__out {
+  justify-self: start;
+  margin-top: var(--space-xs);
+  padding: 0.22em 0.7em;
+  border: var(--rule) solid var(--hair);
+  border-radius: var(--radius-pill);
+  font-size: var(--text-xs);
+  letter-spacing: 0;
+  color: var(--ink-soft);
+}
+.band--ink .node__out { border-color: var(--hair-on-ink); color: var(--on-ink-soft); }
+
+/* ---- 四象限：两条判据交叉出四种处置 ---- */
+.quad { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--rule); background: var(--hair); }
+.band--ink .quad { background: var(--hair-on-ink); }
+.quad__cell { background: var(--paper); padding: var(--space-lg); display: grid; gap: var(--space-xs); align-content: start; }
+.band--ink .quad__cell { background: var(--ink); }
+.quad__cond { color: var(--accent); font-size: var(--text-sm); }
+.quad__do { font-size: var(--text-base); line-height: var(--leading-cn); }
+.quad__axes { display: flex; gap: var(--space-lg); margin-bottom: var(--space-sm); }
+.quad__axis { color: var(--ink-soft); font-size: var(--text-xs); letter-spacing: var(--track-wide); text-transform: uppercase; }
+
+/* ---- 陈述层：大字在后，产品图压在前（augen 的招牌构图） ---------------
+   这就是 tokens 里 --text-statement(140px) 唯一的用处：**全站只出现一次**，
+   而且不是页面标题，是压在产品图后面的那句话。字与图分两层、位移速率不同，
+   滚过去时字从图后面"漏"出来。图必须是去背的，否则会切掉字。 */
+.statement {
+  position: relative;
+  display: grid;
+  place-items: center;
+  padding-block: var(--band-pad);
+  overflow: clip;
+}
+.statement__type {
+  grid-area: 1 / 1;
+  margin: 0;
+  color: var(--accent);
+  text-align: center;
+  text-wrap: balance;
+  transform: translate3d(0, var(--type-shift, 0px), 0);
+  will-change: transform;
+}
+.statement__art {
+  grid-area: 1 / 1;
+  width: min(46%, 34rem);
+  transform: translate3d(0, var(--art-shift, 0px), 0) scale(var(--art-zoom, 1));
+  will-change: transform;
+  pointer-events: none;
+}
+.statement__art img { width: 100%; height: auto; }
+
+/* ---- 粒子文字：一句话拆成方点，入场从外围聚拢回位 ---------------------
+   实现照 mandandan：离屏 canvas 画一遍字 → getImageData 按步长取样 →
+   alpha 过阈值的像素成为一个粒子 → 每帧弹簧回位 + 指针斥力。
+   原文字留在 DOM 里（视觉隐藏但可读），canvas 只是它的一层皮，
+   所以无障碍与降级都不受影响。全站每页最多用一处。 */
+.pt { position: relative; display: block; }
+.pt canvas { display: block; width: 100%; }
+.pt__text { position: absolute; inset: 0; opacity: 0; pointer-events: none; }
+.pt.is-off canvas { display: none; }
+.pt.is-off .pt__text { position: static; opacity: 1; }
+
+/* ---- 降级 ------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  :root { --px-fig: 4px; --px-chapter: 16px; }   /* mandandan 自己的降级取值 */
+  .plate > img, .plate > video, .statement__type, .statement__art { transform: none; }
+  .chapter__copy { transform: none; position: static; }
+  .nodes__track > i { transform: scaleX(1); }
+  .node::before { background: var(--accent); }
+}
+
+/* ---- 移动端：钉住与横排全部摊平 --------------------------------------- */
+@media (max-width: 767px) {
+  .tier--wide, .tier--text, .tier--narrow { width: 100%; }
+  .tier--end { margin-left: 0; }
+  .page.tier--wide > *, .page.tier--text > *, .page.tier--narrow > * { max-width: none; }
+  .page.tier--end > * { margin-left: 0; }
+  .chapter { grid-template-columns: minmax(0, 1fr); row-gap: var(--space-lg); }
+  .chapter__copy { position: static; transform: none; }
+  .nodes__row { grid-auto-flow: row; grid-auto-columns: auto; gap: var(--space-lg); }
+  .nodes__track { display: none; }
+  .node { padding-top: var(--space-md); }
+  .node::before { top: 0; }
+  .quad { grid-template-columns: minmax(0, 1fr); }
+  .ladder__row { grid-template-columns: 4rem minmax(0, 1fr); }
+  .statement__art { width: 68%; }
+  .matrix { font-size: var(--text-xs); }
+  .matrix th, .matrix td { padding: 0.45rem 0.4rem; }
+}
+
+
+
+

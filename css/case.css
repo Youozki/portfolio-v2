@@ -134,24 +134,18 @@
 .conclusion__row .t-body, .conclusion__row .t-lead { max-width: 44rem; }
 .conclusion__row.is-final { border-bottom-width: 0; }
 
-/* ---- 图版 ------------------------------------------------------------ */
+/* ---- 图版 ------------------------------------------------------------
+   圆角改成 0：augen 实测全站图片 border-radius 都是 0px，mandandan 只有
+   手机屏那一层有 44px、外框仍是 0。原来每张图都挂 10px，凑在一起就是一叠
+   "卡片"，反而把版面切碎了。 */
 .fig { display: grid; gap: var(--space-sm); }
-.fig img { border-radius: var(--radius-sm); }
+.fig img { border-radius: 0; }
 .fig--wide img { width: 100%; }
 /* augen 的内页正文都收在页面中部，两侧大量留白。满幅图看着臃肿，
    所以图版统一走这条窄栏，只有首屏那种主视觉才铺满。 */
 .fig--mid img { width: 100%; }
-.ces img {
-  border-radius: var(--radius-sm);
-  transition: transform var(--dur-3) var(--ease-out), box-shadow var(--dur-3) var(--ease-out);
-}
-/* 悬停时轻轻抬起并推近，给这张现场照一点可交互的暗示 */
-.ces:hover img {
-  transform: scale(1.02) translateY(-4px);
-  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.38);
-}
-.emo__item img { transition: transform var(--dur-3) var(--ease-out); }
-.emo__item:hover img { transform: scale(1.03); }
+/* 图片不做 hover 缩放：impeccable 判为 image-hover-transform——
+   图不可点，放大只是无意义的骚动，而且会把已经对齐的画幅顶出容器。 */
 
 /* ---- 四种情绪：2×2 平铺，一共就四张，不值得做钉住横滚 --------------- */
 .emo { display: grid; gap: var(--space-2xl); }
@@ -163,7 +157,7 @@
   gap: var(--space-2xl) var(--space-xl);
 }
 .emo__item { display: grid; gap: var(--space-sm); }
-.emo__item img { width: 100%; height: auto; border-radius: var(--radius-sm); }
+.emo__item img { width: 100%; height: auto; border-radius: 0; }
 .emo__name { color: var(--ink); letter-spacing: 0; }
 .emo__bars { display: grid; gap: 5px; max-width: 7.5rem; }
 .emo__bars i { display: block; height: 9px; border-radius: 2px; }
@@ -212,7 +206,7 @@
 .deck__card {
   position: absolute;
   inset: 0;
-  border-radius: var(--radius-md);
+  border-radius: 0;
   overflow: clip;
   background: var(--paper-3);
   will-change: transform, clip-path;
@@ -237,14 +231,24 @@
 .seq__no { position: absolute; top: var(--space-sm); left: 0; }
 .seq__item img {
   width: 100%;
-  border-radius: var(--radius-sm);
+  border-radius: 0;
   background: var(--paper-3);
 }
 .seq__caption { margin-top: var(--space-md); }
 
-/* ---- 收尾 ------------------------------------------------------------ */
-.coda { padding-block: var(--space-4xl); }
-.coda__line { max-width: 38rem; }
+/* ---- 收尾 ------------------------------------------------------------
+   这句话是补白不是标题，字号跟正文一档；色带跟着收一档，不然一整屏蓝里
+   只飘着两行小字。左对齐（和全站一样），但要在色带里上下居中——
+   居中指的是与上下两条边等距，不是把字挪到画面中间。
+
+   写成 .act.coda 是必须的：上面那条 `.act:first-of-type { padding-top: 4xl }`
+   选择器权重更高，而在多数内页里结语正好是 main 里第一个 <section>，
+   于是上内边距 6.5rem、下 4.5rem，字就被压低了两厘米——那就是"偏下"的来源。 */
+.act.coda { padding-block: var(--space-3xl); }
+.coda__line {
+  max-width: none;
+  white-space: nowrap;
+}
 
 .next { padding-block: var(--space-3xl); }
 .next__link { display: grid; gap: var(--space-md); }
@@ -279,6 +283,8 @@
   .act > * + * { margin-top: var(--space-2xl); }
   .case-head { padding-block: var(--space-3xl) var(--space-2xl); }
   .case-head__intro { margin-top: var(--space-xl); }
+  /* 窄屏放不下整句，让它折行（居中保留） */
+  .coda__line { white-space: normal; }
 
   .split { grid-template-columns: minmax(0, 1fr); row-gap: var(--space-lg); }
   .split__aside { position: static; }
@@ -317,10 +323,10 @@
   height: 2.5rem;
   width: auto;
   opacity: 0.86;
-  transform: translateY(0);
-  transition: transform var(--dur-2) var(--ease-out), opacity var(--dur-2) var(--ease-out);
+  transition: opacity var(--dur-2) var(--ease-out);
 }
-.awards__row img:hover { opacity: 1; transform: translateY(-3px); }
+/* 只提亮，不位移：图不可点，hover 位移是 impeccable 点名的 image-hover-transform */
+.awards__row img:hover { opacity: 1; }
 
 /* ---- 设计策略 · 推演线 -------------------------------------------------
    重做过，不再照原稿那张平铺的板：三个高亮环节各自成一列（感知→Human、
@@ -344,8 +350,7 @@
   left: 8%;
   right: 8%;
   height: 1px;
-  background: repeating-linear-gradient(to right,
-    var(--hair) 0 4px, transparent 4px 10px);
+  background: var(--hair);
 }
 .stack__node { position: relative; display: grid; gap: var(--space-xs); justify-items: start; }
 .stack__node::before {
@@ -390,7 +395,8 @@
   margin: -3px 0 0 -3px;
   border-radius: 50%;
   background: var(--accent);
-  box-shadow: 0 0 6px 1px rgba(0, 113, 227, 0.6), 0 0 16px 4px rgba(0, 113, 227, 0.24);
+  /* 原来这里挂了两层零偏移的蓝色光晕，impeccable 判为 dark-glow：
+     零偏移彩色阴影是生成式 UI 最典型的"酷"默认。改成实心点，靠位移交代它在动。 */
   opacity: 0;
   will-change: transform, opacity;
 }

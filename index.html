@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>朱晨宇 — 用户体验设计师</title>
 <meta name="description" content="朱晨宇的作品集。用户体验设计师，联想体验设计、百度 AI 产品设计。" />
+<!-- 标签页头像：用的就是「关于我」那张个人插画，裁到头＋猫、垫上纸色底 -->
+<link rel="icon" href="assets/graphics/favicon.png" sizes="32x32" />
+<link rel="apple-touch-icon" href="assets/graphics/favicon-180.png" />
 <link rel="stylesheet" href="css/base.css" />
 <link rel="stylesheet" href="css/index.css" />
 </head>
@@ -52,12 +55,12 @@
       <p class="t-label hero__mark" data-hero="text">朱晨宇 · Zhu Chenyu</p>
       <h1 class="t-h2 hero__title" data-hero="text">用户体验设计师。</h1>
       <div class="hero__jump">
-        <span class="t-cap" data-hero="text">直接看</span>
-        <a class="pill" data-hero="move" href="case-companion.html">Companion App</a>
-        <a class="pill" data-hero="move" href="#row-justpaper">Just Paper</a>
-        <a class="pill" data-hero="move" href="#row-oreate">Oreate AI</a>
-        <a class="pill" data-hero="move" href="#row-terabox">Terabox</a>
-        <a class="pill" data-hero="move" href="#row-practices">Practices</a>
+        <span class="t-cap" data-hero="text">项目</span>
+        <a class="pill pill--roll" data-hero="move" href="#row-companion"><span class="pill__clip"><span class="pill__roll"><span class="pill__text">Companion App</span><span class="pill__text" aria-hidden="true">Companion App</span></span></span></a>
+        <a class="pill pill--roll" data-hero="move" href="#row-justpaper"><span class="pill__clip"><span class="pill__roll"><span class="pill__text">Just Paper</span><span class="pill__text" aria-hidden="true">Just Paper</span></span></span></a>
+        <a class="pill pill--roll" data-hero="move" href="#row-oreate"><span class="pill__clip"><span class="pill__roll"><span class="pill__text">Oreate AI</span><span class="pill__text" aria-hidden="true">Oreate AI</span></span></span></a>
+        <a class="pill pill--roll" data-hero="move" href="#row-terabox"><span class="pill__clip"><span class="pill__roll"><span class="pill__text">Terabox</span><span class="pill__text" aria-hidden="true">Terabox</span></span></span></a>
+        <a class="pill pill--roll" data-hero="move" href="#row-practices"><span class="pill__clip"><span class="pill__roll"><span class="pill__text">Practices</span><span class="pill__text" aria-hidden="true">Practices</span></span></span></a>
       </div>
     </div>
     <a class="hero__cue" href="#about" aria-label="向下浏览"><span>↓</span></a>
@@ -66,8 +69,15 @@
   <!-- 幕二：关于。深色带做分章 -->
   <section class="band band--ink about" id="about" aria-labelledby="about-title">
     <div class="page">
-      <p class="t-label">关于</p>
-      <h2 class="t-h1 about__title" id="about-title">兼具全局产品观、精细化设计与交互执行力。</h2>
+      <p class="t-label">关于我</p>
+      <!-- 自画像插画（头顶趴着猫）。原图是透明底的黑色线稿，压在深色带上会
+           整个消失，所以套一个纸色容器：方的、小、克制，全站唯一一处"我"。 -->
+      <figure class="about__avatar" data-about-head>
+        <img src="assets/graphics/avatar.webp" width="512" height="512"
+             alt="朱晨宇的自画像插画，头顶趴着一只猫" />
+      </figure>
+      <p class="t-h2 about__hello" data-about-head>Hola！我是朱晨宇</p>
+      <h2 class="t-h2 about__title" id="about-title" data-about-head>一个兼具全局产品观、精细化设计与交互执行力的设计师。</h2>
 
       <div class="about__bio">
         <p class="t-body" data-reveal="up">就读于湖南师范大学设计系数字媒体方向。实习期间，先后在联想的 UIUX 组与百度的 AI 产品组做过一些工作。相比于单纯的产品 or 设计，我更希望自己是一名兼具全局产品观、精细化设计与交互执行力的用户体验设计师。</p>
@@ -92,17 +102,92 @@
     </div>
   </section>
 
-  <!-- 过场：进联系页之前用一张线框图收一下，交代"硬件那一侧"的工作 -->
+  <!-- 过场：铰链开合的线框推演。图不是位图，是现画的 SVG 线框，
+       所以能跟着滚动从闭合转到 105°，并且留下过程残影。 -->
   <section class="band band--ink interlude" aria-labelledby="interlude-title">
-    <div class="page interlude__inner">
-      <figure class="interlude__fig" data-reveal="soft">
-        <img src="assets/graphics/blueprint.webp" alt="铰链旋转轴与开合角度的线框推演图" width="1536" height="1024" />
-      </figure>
-      <div class="interlude__copy">
-        <h2 class="t-h2" id="interlude-title" data-reveal="soft">设计不是悬在空中的闭门思考。</h2>
-        <p class="t-cap interlude__note" data-reveal="soft" data-reveal-delay="0.1">
-          从梳理项目需求与实际机器运作情况，到视觉交互，再到研发测试。
-        </p>
+    <div class="interlude__pin">
+      <div class="page interlude__inner">
+        <figure class="interlude__fig">
+          <svg class="wf" id="wf" viewBox="94 -6 800 706" role="img"
+               aria-label="双屏笔记本铰链开合的线框推演：从闭合转到 105 度，沿途留下过程残影">
+            <defs>
+              <!-- 上盖：坐标以铰链为原点，闭合时贴在下机身上方 -->
+              <g id="wfLid">
+                <rect class="wf__solid" x="14" y="-41" width="456" height="26" rx="6" />
+                <path class="wf__thin" d="M18 -18.5 H452" />
+                <path class="wf__thin" d="M18 -37.5 H452" />
+                <rect class="wf__thin" x="30" y="-36" width="426" height="19" rx="4" />
+                <rect class="wf__thin" x="38" y="-34" width="410" height="15" rx="2" />
+                <line class="wf__hair" x1="38" y1="-29" x2="448" y2="-29" />
+                <line class="wf__hair" x1="38" y1="-24.5" x2="448" y2="-24.5" />
+                <line class="wf__hair" x1="150" y1="-34" x2="150" y2="-19" />
+                <line class="wf__hair" x1="300" y1="-34" x2="300" y2="-19" />
+                <rect class="wf__thin" x="236" y="-40.5" width="12" height="3" rx="1.5" />
+                <path class="wf__solid" d="M26 -15 V-41 M40 -17 V-39" />
+                <line class="wf__hair" x1="110" y1="-41" x2="110" y2="-15" />
+                <line class="wf__hair" x1="220" y1="-41" x2="220" y2="-15" />
+                <line class="wf__hair" x1="330" y1="-41" x2="330" y2="-15" />
+                <line class="wf__hair" x1="440" y1="-41" x2="440" y2="-15" />
+              </g>
+            </defs>
+            <!-- 构造线：铰链的水平与垂直轴 -->
+            <line class="wf__hair" x1="150" y1="470" x2="790" y2="470" />
+            <line class="wf__hair" x1="250" y1="150" x2="250" y2="700" />
+            <!-- 蓝色开合弧：路径每帧重画，末端始终等于上盖当前的角度；
+                 箭头绕铰链旋转，所以永远切在弧的末端上。 -->
+            <path class="wf-arc wf__accent" d="M550 470" />
+            <g class="wf-arrow"><path class="wf__accent" d="M543.5 481 L550 470 L556.5 481" /></g>
+            <!-- 残影：五档中间位置，滚过去才逐档浮出来 -->
+            <g class="wf-ghost" data-a="16" transform="translate(250 470) rotate(-16)"><use href="#wfLid" /></g>
+            <g class="wf-ghost" data-a="35" transform="translate(250 470) rotate(-35)"><use href="#wfLid" /></g>
+            <g class="wf-ghost" data-a="54" transform="translate(250 470) rotate(-54)"><use href="#wfLid" /></g>
+            <g class="wf-ghost" data-a="73" transform="translate(250 470) rotate(-73)"><use href="#wfLid" /></g>
+            <g class="wf-ghost" data-a="92" transform="translate(250 470) rotate(-92)"><use href="#wfLid" /></g>
+            <!-- 当前位置的上盖 -->
+            <g class="wf-lid" transform="translate(250 470) rotate(0)"><use href="#wfLid" /></g>
+            <!-- 下机身：长度必须和上盖一样（都是从铰链算起 470），
+                 原来机身比屏幕长出 130，看着就是两个零件不是一台机器。 -->
+            <path class="wf__solid" d="M250 455 H708 q12 0 12 8 v21 q0 8 -12 8 H250 z" />
+            <line class="wf__thin" x1="258" y1="459" x2="714" y2="459" />
+            <line class="wf__thin" x1="258" y1="488" x2="714" y2="488" />
+            <line class="wf__thin" x1="296" y1="457" x2="688" y2="457" />
+            <path class="wf__thin" d="M700 455 L720 463" />
+            <rect class="wf__thin" x="398" y="468" width="38" height="12" rx="2" />
+            <rect class="wf__thin" x="452" y="469" width="26" height="10" rx="2" />
+            <rect class="wf__thin" x="496" y="470" width="18" height="8" rx="4" />
+            <rect class="wf__thin" x="308" y="492" width="38" height="6" rx="3" />
+            <rect class="wf__thin" x="632" y="492" width="48" height="6" rx="3" />
+            <g class="wf__hair" id="wfVents"></g>
+            <g class="wf__hair" id="wfKeys"></g>
+            <!-- 铰链：同心圆 + 十字中心线 -->
+            <circle class="wf__solid" cx="250" cy="470" r="14" />
+            <circle class="wf__thin" cx="250" cy="470" r="24" />
+            <circle class="wf__hair" cx="250" cy="470" r="38" />
+            <circle class="wf__hair" cx="250" cy="470" r="52" />
+            <circle class="wf__dot" cx="250" cy="470" r="3.5" />
+            <line class="wf__hair" x1="186" y1="470" x2="314" y2="470" />
+            <line class="wf__hair" x1="250" y1="406" x2="250" y2="534" />
+            <!-- 铰链轴的爆炸图 -->
+            <line class="wf__hair" x1="180" y1="590" x2="520" y2="590" />
+            <circle class="wf__thin" cx="250" cy="590" r="34" />
+            <circle class="wf__thin" cx="250" cy="590" r="22" />
+            <circle class="wf__solid" cx="250" cy="590" r="10" />
+            <g class="wf__thin" id="wfShaft"></g>
+            <!-- 闭合状态参照：长度同样是 470 -->
+            <line class="wf__hair" id="wfGround" x1="180" y1="682" x2="760" y2="682" />
+            <path class="wf__solid" d="M250 672 H708 q10 0 10 6 v8 q0 6 -10 6 H250 z" />
+            <path class="wf__solid" d="M250 652 H708 q10 0 10 6 v8 q0 6 -10 6 H250 z" />
+            <line class="wf__thin" x1="258" y1="662" x2="712" y2="662" />
+            <line class="wf__thin" x1="258" y1="682" x2="712" y2="682" />
+            <circle class="wf__thin" cx="256" cy="660" r="7" />
+            <circle class="wf__thin" cx="256" cy="680" r="7" />
+          </svg>
+        </figure>
+        <div class="interlude__lines">
+          <p class="t-lead interlude__line">设计师的任务就是提高信息的品质，增强传播的力量。技术的进步并不能直接带来信息品质的提高。</p>
+          <h2 class="t-lead interlude__line" id="interlude-title">如何更容易了解？如何令人更加舒适？如何更为简单的传达？如何才能让人感动？</h2>
+          <p class="t-lead interlude__line">这些才是衡量设计师的信息处理能力的尺度。</p>
+        </div>
       </div>
     </div>
   </section>

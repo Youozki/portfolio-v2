@@ -1,0 +1,215 @@
+/* 各页的招牌段。
+   共用语言在 tokens / base / kit 里；这个文件只放"每页各自一处"的形变段——
+   五页共用一套节奏与缓动，但每页的功能章节要有它内容对应的进场，不能长得一样。
+   一页一块，块与块之间不共享选择器，改一页不会连坐另一页。
+
+   母题分工（这是内部叫法，页面上不会出现这几个词）：
+     Companion  六屏接管同一个位置        （已在 case.css，最后一轮再统一）
+     Just Paper 上下双屏开合
+     Oreate AI  生成涌现
+     Terabox    GUI ↔ LUI 双向回流
+     Practices  网格聚散
+*/
+
+/* ======================================================================
+   Just Paper · 上下双屏开合
+   Tizio 是上下两块屏。整页就该有一处让人"看见"这件事：把同一张设备渲染图
+   横切成两条，滚动时上下分开，缝里长出一条强调色的线和两个屏的职责标签。
+   分开的幅度只给 34px——再大就变成两张图，读不出"同一台机器"。
+   两条带都是同一张图、同一个 background-size，靠 background-position 错位，
+   所以缝合处天然对得上，不会露出接缝。
+   ====================================================================== */
+/* 滚动量从三屏收到两屏：三屏时钉住段前后各留出一大片纯黑，看着就是"中间空太多"。 */
+.dual { height: 200vh; }
+.dual__pin {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: grid;
+  align-content: center;
+  overflow: clip;
+}
+/* 文案与设备分两栏：文案左、设备右。原来把文案绝对定位在 pin 底部，
+   分屏张开时下半屏正好压到它头上。两栏之后各占各的位置，怎么张都不会撞。 */
+.dual__pin > .page {
+  position: relative;
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  column-gap: clamp(2rem, 6vw, 5rem);
+  align-items: center;
+}
+.dual__stack {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1400 / 1752;
+  max-width: min(24rem, 40vh);
+  margin-inline: auto;
+}
+.dual__half {
+  position: absolute;
+  inset: 0;
+  will-change: transform;
+}
+/* 用两个真 <img>（同一个 src，只下载一次）而不是 background-image：
+   自定义属性里的相对 url() 会按【样式表】的位置解析，写在 HTML 内联样式里
+   照样会被解析成 css/assets/…，直接 404。这个坑踩过一次，别再改回去。 */
+.dual__half img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+/* 上半条：只露图的上半，往上走 */
+.dual__half--top {
+  clip-path: inset(0 0 50% 0);
+  transform: translate3d(0, calc(var(--split, 0) * -34px), 0);
+}
+/* 下半条：只露下半，往下走 */
+.dual__half--bottom {
+  clip-path: inset(50% 0 0 0);
+  transform: translate3d(0, calc(var(--split, 0) * 34px), 0);
+}
+/* 缝里那条线：跟着分开的进度从中间往两头画出去 */
+.dual__seam {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--accent);
+  transform: scaleX(var(--split, 0));
+  opacity: var(--split, 0);
+}
+
+/* 两个屏的职责标签，分开到一半才浮出来，贴着缝的上下沿 */
+.dual__tag {
+  position: absolute;
+  left: calc(100% + var(--space-lg));
+  white-space: nowrap;
+  color: var(--on-ink);
+  opacity: var(--tags, 0);
+  transform: translate3d(calc((1 - var(--tags, 0)) * -0.75rem), 0, 0);
+}
+.dual__tag--top { bottom: calc(50% + 34px); }
+.dual__tag--bottom { top: calc(50% + 34px); }
+.dual__tag b { display: block; font-weight: var(--weight-text); }
+.dual__tag span { color: var(--on-ink-soft); font-size: var(--text-sm); }
+
+/* 左边的文案：钉住段里唯一不动的东西，读者靠它知道自己在看什么。
+   硬件特性那两段说明原来排在下面画布的白底上，和这里的标题重复了一遍；
+   现在整段挪进这个黑段，标题只留"产品硬件特性"，正文接在下面。 */
+.dual__copy {
+  display: grid;
+  gap: var(--space-sm);
+  max-width: 32rem;
+}
+.dual__copy .dual__body {
+  margin: 0;
+  color: var(--on-ink-soft);
+  max-width: var(--measure);
+}
+.dual__copy .dual__body:first-of-type { margin-top: var(--space-xs); }
+
+@media (max-width: 900px) {
+  .dual__tag { position: static; left: auto; opacity: 1; transform: none; }
+}
+@media (max-width: 767px) {
+  .dual { height: auto; }
+  .dual__pin { position: static; height: auto; padding-block: var(--band-pad); }
+  .dual__pin > .page { grid-template-columns: minmax(0, 1fr); row-gap: var(--space-2xl); }
+  .dual__stack { max-width: 18rem; }
+  .dual__copy { max-width: none; }
+}
+
+/* 陈述层里放的是一台竖着的设备（242×525），不是横图。
+   kit.css 的默认宽度 min(46%, 34rem) 是给横图的，套到竖图上会顶到 1273px 高、
+   把整段撑成一屏半。按设备实际比例收窄，让它和大字的高度大致相当。 */
+.statement--device { padding-block: clamp(4rem, 7vw, 7rem); }
+.statement--device .statement__art { width: clamp(6.5rem, 11vw, 10rem); }
+/* 大字压在设备后面，字距收紧一点，像 augen 那样是一整块 */
+.statement--device .statement__type { letter-spacing: 0.02em; }
+
+/* 三张布局方案图尺寸差一档（Infinite Canvas 那张内容本来就短），
+   所以容器统一画幅、图 contain 顶对齐——同系列同规格是在容器上保证的。 */
+.plate--spec { aspect-ratio: 0.55; background: none; }
+.plate--spec > img {
+  height: 100%;
+  object-fit: contain;
+  object-position: top center;
+  transform: none;
+}
+
+/* ======================================================================
+   Oreate AI · 生成涌现
+   这里只处理原稿中已有的结构：案例图组、3C 文字结构与单条素材带。
+   文字仍然使用共用版心，色块只承担章节分隔，不承载新的叙事。 */
+.oreate-intro {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(16rem, .65fr);
+  gap: var(--gutter);
+  align-items: end;
+}
+.oreate-intro__side { display: grid; gap: var(--space-sm); }
+.oreate-section > .page + .page { margin-top: var(--space-4xl); }
+.oreate-board { display: grid; gap: var(--space-sm); }
+.oreate-board .plate { width: 100%; }
+.oreate-board--split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--gutter);
+}
+.oreate-board--split .plate { height: 100%; }
+.oreate-copy { display: grid; gap: var(--space-lg); }
+.oreate-copy > .t-lead { max-width: 34rem; }
+.oreate-steps { display: grid; gap: 0; }
+.oreate-step {
+  display: grid;
+  grid-template-columns: 3rem minmax(0, 1fr);
+  gap: var(--space-md);
+  padding-block: var(--space-lg);
+  border-top: var(--rule) solid var(--hair);
+}
+.band--ink .oreate-step { border-top-color: var(--hair-on-ink); }
+.oreate-step:last-child { border-bottom: var(--rule) solid var(--hair); }
+.band--ink .oreate-step:last-child { border-bottom-color: var(--hair-on-ink); }
+.oreate-step__body { display: grid; gap: var(--space-xs); }
+.drift {
+  overflow: clip;
+  padding-block: var(--space-3xl);
+}
+.drift__row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  width: max-content;
+  animation: oreate-drift 45s linear infinite;
+}
+.drift__row img {
+  width: 10rem;
+  height: 7.5rem;
+  object-fit: cover;
+  flex: none;
+}
+.drift__row img:nth-child(3n) { width: 15rem; height: 8.5rem; }
+.drift__row img:nth-child(4n) { width: 8rem; height: 12rem; }
+@keyframes oreate-drift { to { transform: translateX(-50%); } }
+.oreate-outcome {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, .8fr);
+  gap: var(--gutter);
+  align-items: start;
+}
+.oreate-outcome__copy { display: grid; gap: var(--space-lg); }
+@media (prefers-reduced-motion: reduce) {
+  .drift__row { animation: none; }
+}
+@media (max-width: 767px) {
+  .oreate-intro, .oreate-board--split, .oreate-outcome {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .oreate-intro__side { order: -1; }
+  .oreate-step { grid-template-columns: 2.25rem minmax(0, 1fr); }
+  .drift__row img, .drift__row img:nth-child(3n), .drift__row img:nth-child(4n) {
+    width: 8rem; height: 6rem;
+  }
+}

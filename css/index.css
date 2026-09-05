@@ -36,6 +36,10 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-md);
+  /* 首屏这一组不跟版心走，直接贴左边缘——augen 实测是 68/2000 = 3.4%。
+     版心收窄到 960 之后，如果还居中，这一组就飘到画面中间去了。 */
+  max-width: none;
+  padding-inline: clamp(1.25rem, 3.4vw, 3.5rem);
 }
 .hero__title { max-width: 24rem; }
 .hero__jump {
@@ -49,8 +53,10 @@
 
 .hero__cue {
   position: absolute;
-  left: var(--margin);
-  bottom: var(--space-lg);
+  /* 文案贴到左边缘之后，这个箭头再放左下就顶到胶囊那一行了，挪到右下角，
+     一左一右反而把首屏的底边撑开。 */
+  right: clamp(1.25rem, 3.4vw, 3.5rem);
+  bottom: clamp(3rem, 8vh, 6rem);
   z-index: 2;
   width: 2.25rem;
   height: 2.25rem;
@@ -72,23 +78,84 @@
 .work__item:target .work__row::before { opacity: 1; }
 .work__item:target .work__no { color: var(--accent); }
 
-/* ---- 过场带 ----------------------------------------------------------- */
-.interlude { padding-block: var(--space-3xl); overflow: clip; }
+/* ---- 过场带 · 铰链线框 -------------------------------------------------
+   两屏的滚动量换一屏的停留：钉住之后，滚动进度同时驱动三件事——上盖从闭合
+   转到 105°、沿途逐档留下残影、右边三句话逐句浮出来。 */
+.interlude { height: 260vh; overflow: clip; padding: 0; }
+.interlude__pin {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: grid;
+  align-content: center;
+}
 .interlude__inner {
   display: grid;
-  grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
-  column-gap: var(--space-2xl);
-  align-items: center;
+  /* 整组内容比视口中心再抬一点：钉住段里图下面留的空比上面多，
+     居中反而显得整块坠着。translateY 不动布局，钉住的计算不受影响。 */
+  transform: translateY(-4.5vh);
+  /* 线框收小、往左靠（负的左边距让它探进页面留白里），
+     省下来的宽度全给右边那三句话，行不至于被挤成三四行。 */
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.24fr);
+  column-gap: var(--space-xl);
+  /* 两栏顶对齐只是起点：真正的对齐由 js 的 interludeAlign() 把文字栏整体下移，
+     让末行的基线落在图纸最下面那条地线（y=682）的延长线上，两栏下沿齐平。
+     纯居中／纯顶对齐都不行——线框的视觉重量全在下半部。 */
+  align-items: start;
 }
-.interlude__fig { margin: 0; }
-.interlude__fig img { width: 100%; height: auto; }
-.interlude__copy { display: flex; flex-direction: column; gap: var(--space-sm); }
-.interlude__note { max-width: 22rem; }
+.interlude__fig {
+  margin: 0 0 0 calc(var(--margin) * -0.62);
+  justify-self: start;
+  width: 100%;
+}
+
+/* 线框：所有线只描边不填色；non-scaling-stroke 保证缩放后仍是 1px 发丝。
+   三档灰度就是这张图的层次——主结构、次结构、构造线。 */
+.wf { display: block; width: 100%; height: auto; overflow: visible; }
+.wf rect, .wf path, .wf line, .wf circle, .wf use {
+  fill: none;
+  vector-effect: non-scaling-stroke;
+}
+.wf__solid { stroke: rgba(242, 242, 244, 0.44); stroke-width: 1; }
+.wf__thin { stroke: rgba(242, 242, 244, 0.24); stroke-width: 1; }
+.wf__hair { stroke: rgba(242, 242, 244, 0.12); stroke-width: 1; }
+.wf__accent { stroke: var(--accent); stroke-width: 1.2; }
+.wf__dot { fill: var(--accent); stroke: none; }
+/* 残影：默认不出现，进度滚过它那一档才浮出来 */
+.wf-ghost { opacity: 0; }
+.wf-arrow { opacity: 0; }
+
+/* 三句话同字号、同颜色、同左边缘；层次只靠"逐句由淡到亮"来给 */
+.interlude__lines { display: grid; gap: var(--space-xl); }
+.interlude__line { opacity: 0; text-align: left; will-change: opacity, transform; }
+
+@media (prefers-reduced-motion: reduce) {
+  .interlude { height: auto; }
+  .interlude__pin { position: static; height: auto; padding-block: var(--band-pad); }
+  .interlude__inner { transform: none; }
+  .interlude__line { opacity: 1; }
+}
 
 @media (max-width: 767px) {
-  .interlude__inner { grid-template-columns: minmax(0, 1fr); row-gap: var(--space-xl); }
+  .interlude { height: auto; }
+  .interlude__pin { position: static; height: auto; padding-block: var(--space-4xl); }
+  .interlude__inner { grid-template-columns: minmax(0, 1fr); row-gap: var(--space-2xl); transform: none; }
+}
+
+@media (max-width: 767px) {
   .hero { height: 100svh; }
   .hero__copy { bottom: 5.5rem; }
+  /* 窄屏上 cover 会把主视觉裁到产品本体，文案正好压在最亮的旋钮上，读不清。
+     底部加一层纸色渐隐（只在窄屏），桌面端的构图不受影响。 */
+  .hero::after {
+    content: '';
+    position: absolute;
+    inset: auto 0 0 0;
+    height: 38%;
+    z-index: 1;
+    pointer-events: none;
+    background: linear-gradient(to top, rgba(237, 237, 234, 0.94), rgba(237, 237, 234, 0));
+  }
 }
 
 /* ---- 幕三 · 作品索引 -------------------------------------------------- */
@@ -169,7 +236,25 @@
 
 /* ---- 幕二 · 关于：深色带做分章 ---------------------------------------- */
 .about { padding-block: var(--space-4xl) var(--space-3xl); }
-.about__title { max-width: 38rem; margin: var(--space-sm) 0 var(--space-2xl); }
+
+/* 头像：方框（圆角只留 --radius-sm 那一档，和站里其它容器同规格），纸色底 +
+   一圈发丝，线稿的黑才立得住；里面是角色全身像（图留了透明底，底色由这里给）。
+   圆形那版只用在浏览器标签图标上。全身像比头部特写信息量大，尺寸相应放到
+   5.25rem，再小衣领和手臂的线就并成一团了。 */
+.about__avatar {
+  margin: var(--space-lg) 0 var(--space-lg);
+  width: 5.25rem;
+  height: 5.25rem;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--paper);
+  box-shadow: 0 0 0 var(--rule) var(--hair-on-ink);
+}
+.about__avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+/* 这句是招呼语，和下面那句是一体的，颜色跟正文同档（原来压暗一档，太浅了） */
+.about__hello { margin: 0 0 var(--space-2xs); color: inherit; }
+.about__title { max-width: 34rem; margin: 0 0 var(--space-2xl); }
 
 .about__bio {
   display: grid;
@@ -200,7 +285,17 @@
    实测（tools 里量的）：百度的字标基线就在图片最底部（余量 0%），
    而 Lenovo 是带红底的 lockup，字标基线在 68/96 处，下面还有 28.1% 的红底——
    所以它会整体偏高。用 --logo-drop 把这段余量按比例补回去，两张就落在同一条线上。 */
-.about__org { display: block; }
+/* 用 flex 而不是行内流：inline-block 的 logo 会把整个行框撑高 5px，
+   于是左右两栏的行高差一档、两边的发丝线越往下越对不齐（用户指出的那处）。
+   flex 容器的高度只取最高那一项，基线对齐照旧靠 align-items: baseline。 */
+.about__org {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-sm);
+  /* 高度锁成一行正文的高度：logo 比这一行略矮，多出来的两像素让它溢出，
+     不参与布局。这样有 logo 的那一栏和没有 logo 的那一栏行高完全一致。 */
+  height: calc(1em * var(--leading-cn));
+}
 .about__logo {
   display: inline-block;
   vertical-align: baseline;
@@ -208,7 +303,7 @@
   bottom: calc(var(--logo-h) * var(--logo-drop, 0) * -1);
   height: var(--logo-h);
   width: auto;
-  margin-right: var(--space-sm);
+  flex: 0 0 auto;
   --logo-h: 1.35rem;
 }
 .about__logo[data-logo='lenovo'] { --logo-drop: 0.281; }
@@ -221,18 +316,24 @@
 /* ---- 幕四 · 联系 ------------------------------------------------------ */
 .contact { padding-block: var(--space-4xl); }
 .contact__inner { display: flex; flex-direction: column; gap: var(--space-lg); }
+/* 四个联系方式一横排，谁都不许换行。用 flex + space-between 而不是等分网格：
+   等分列会把 670156618@qq.com 挤到折行，按内容宽排就不会。 */
 .contact__list {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
-  gap: var(--space-xl);
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  gap: var(--space-lg);
   margin-top: var(--space-2xl);
 }
-.contact__item { display: flex; flex-direction: column; gap: var(--space-2xs); }
-.contact__val { letter-spacing: 0; }
+.contact__item { flex: 0 0 auto; display: flex; flex-direction: column; gap: var(--space-2xs); }
+.contact__val { letter-spacing: 0; white-space: nowrap; }
 
 @media (max-width: 767px) {
   .work__row { grid-template-columns: minmax(0, 1fr); row-gap: var(--space-md); }
   .work__meta { flex-direction: row; gap: var(--space-sm); }
   .about__row { grid-template-columns: minmax(0, 1fr); row-gap: var(--space-2xs); }
+  /* 窄屏一横排放不下四个，允许折成两排 */
+  .contact__list { flex-wrap: wrap; gap: var(--space-lg) var(--space-xl); }
+  .contact__item { flex: 1 1 40%; }
 }
 

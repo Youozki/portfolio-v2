@@ -4,15 +4,17 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Companion App — 朱晨宇</title>
-<meta name="description" content="Tiko，ThinkBook Plus Gen7 中的智能协作助手。交互体验、视觉与表情动效。" />
-<link rel="stylesheet" href="css/base.css" />
-<link rel="stylesheet" href="css/case.css" />
+<link rel="icon" href="assets/graphics/favicon.png" sizes="32x32" />
+<link rel="apple-touch-icon" href="assets/graphics/favicon-180.png" />
+<link rel="stylesheet" href="css/base.css?v=1788603634" />
+<link rel="stylesheet" href="css/case.css?v=1788603634" />
+<link rel="stylesheet" href="css/case-doc.css?v=1788603634" />
 </head>
 <body class="is-case">
 
 <nav class="nav" id="nav" aria-label="章节导航">
   <span class="nav__glass" aria-hidden="true"></span>
-  <a class="nav__home" id="navHome" href="index.html" aria-label="返回作品索引">
+  <a class="nav__home" id="navHome" href="index.html#row-companion" aria-label="返回作品索引">
     <span class="nav__glyphs" aria-hidden="true">
       <span class="nav__roll">
         <svg class="mark" viewBox="0 0 24 24" width="20" height="20">
@@ -27,20 +29,20 @@
     </span>
   </a>
   <ul class="nav__list">
-    <li><a class="nav__link" href="#scene"><span class="nav__label"><span class="nav__text">现场</span></span></a></li>
-    <li><a class="nav__link" href="#problem"><span class="nav__label"><span class="nav__text">阻碍</span></span></a></li>
-    <li><a class="nav__link" href="#design"><span class="nav__label"><span class="nav__text">决策</span></span></a></li>
-    <li><a class="nav__link" href="#outcome"><span class="nav__label"><span class="nav__text">结果</span></span></a></li>
+    <li><a class="nav__link" href="#intro"><span class="nav__label"><span class="nav__text">Intro</span></span></a></li>
+    <li><a class="nav__link" href="#problem"><span class="nav__label"><span class="nav__text">Problem</span></span></a></li>
+    <li><a class="nav__link" href="#strategy"><span class="nav__label"><span class="nav__text">Strategy</span></span></a></li>
+    <li><a class="nav__link" href="#design"><span class="nav__label"><span class="nav__text">Design</span></span></a></li>
+    <li><a class="nav__link" href="#outcome"><span class="nav__label"><span class="nav__text">Outcome</span></span></a></li>
   </ul>
 </nav>
-<script src="js/nav-enter.js"></script>
+<script src="js/nav-enter.js?v=1788603634"></script>
 
-<!-- 章节进度：贴在视口底边的一条发丝，上面跑一个发光的点 -->
 <div class="progress" id="progress" aria-hidden="true"><span></span></div>
 
 <main>
-  <header class="band band--paper case-head">
-    <div class="page case-head__inner">
+  <header class="band band--accent case-head doc-head">
+    <div class="doc-page case-head__inner">
       <p class="t-num">1</p>
       <h1 class="t-h1 case-head__title">
         <span class="line-clip"><span class="line-inner">Companion</span></span>
@@ -49,376 +51,1864 @@
       <div class="case-head__meta">
         <span class="t-cap">2025</span>
         <span class="t-cap">IDG UI/UX 组</span>
-        <span class="work__tags">
-          <span class="tag">交互体验</span><span class="tag">视觉</span><span class="tag">表情动效</span>
-        </span>
+        <span class="work__tags"><span class="tag">交互体验</span><span class="tag">视觉</span><span class="tag">表情动效</span></span>
       </div>
       <div class="case-head__intro">
-        <p class="t-body" data-reveal="soft">Tiko 是 Thinkbook Plus Gen7 中的智能协作助手，能够帮助用户更快速地获取信息、完成决策并简化日常工作流程，为用户带来更顺畅的使用体验。此外，Tiko 也需要在 Ces2026 展上取得吸睛的作用。</p>
-        <p class="t-body" data-reveal="soft" data-reveal-delay="0.08">我参与了 TIKO 主要的交互体验与视觉部分，包括 TIKO 表情动效的制作与交互、Twist Center 页的视觉优化及 OOBE 页工作。</p>
+        <p class="doc-body">Tiko 是 Thinkbook Plus Gen7 中的智能协作助手，能够帮助用户更快速地获取信息、完成决策并简化日常工作流程，为用户带来更顺畅的使用体验。此外，Tiko 也需要在 Ces2026 展上取得吸睛的作用。</p>
+        <p class="doc-body">我参与了 TIKO 主要的交互体验与视觉部分，包括 TIKO 表情动效的制作与交互、Twist Center 页的视觉优化及 OOBE 页工作。</p>
       </div>
     </div>
   </header>
-  <!-- 幕一 · 现场：整屏钉住的镜片，两句设想随滚动依次浮现 -->
-  <section class="band band--ink stage" id="scene" aria-labelledby="scene-title">
-    <div class="stage__pin">
-      <img class="stage__bg" src="assets/cases/companion/hero-lens.webp" alt=""
-           width="2560" height="1542" aria-hidden="true" />
-      <div class="page stage__copy">
-        <p class="t-label">现场</p>
-        <p class="t-h2 stage__line" id="scene-title" data-line="1">我们即将看到的，不再是冷冰冰的机器，而是能够理解你、适应你、甚至预判你的智能伙伴。</p>
-        <p class="t-h2 stage__line" data-line="2">如果屏幕不再只是静静地立在那里，而是能感知你的位置、跟随你的视线自动旋转调整？如果笔记本电脑的形态可以根据场景，如编程、绘画、展示等场景，进行超乎想象的物理形变...</p>
-      </div>
-    </div>
-  </section>
-
-  <section class="band band--paper act">
-    <figure class="page fig fig--wide" data-reveal="soft">
-      <img src="assets/cases/companion/laptop-tiko.webp" alt="ThinkBook Plus Gen7 开合状态，屏幕上是 Hi,Tiko 与 Tiko 本体"
-           width="2400" height="1014" />
-      <figcaption class="t-cap">Tiko 与它所依附的机器</figcaption>
-    </figure>
-  </section>
-
-  <!-- 幕二 · 阻碍：左栏标题吸顶，右栏三个问题依次推进 -->
-  <section class="band band--paper act" id="problem" aria-labelledby="problem-title">
-    <div class="page split">
-      <div class="split__aside">
-        <p class="t-num">1.1</p>
-        <h2 class="t-h1" id="problem-title">Problem</h2>
-        <p class="t-body split__lead">针对联想已有产品与市场竞品进行调研，我们发现主要存在三种问题。</p>
-      </div>
-      <ol class="split__main steps">
-        <li class="step" data-reveal="soft">
-          <span class="step__no t-num">01</span>
-          <p class="t-lead step__claim">纯视效与纯扁平导致视觉主体不明晰。</p>
-          <p class="t-body">多个并列面板各自抢视觉重量，用户找不到该看哪里；收拢成单一面板之后，
-            主体才立得住。</p>
-        </li>
-        <li class="step" data-reveal="soft">
-          <span class="step__no t-num">02</span>
-          <p class="t-lead step__claim">作为 Preload 存在，仅仅是软件，无法利用机型的优势。</p>
-          <p class="t-body">作为智能体的形式却在物理层面无法与用户互动，无视觉交互链路，实质是进行信息交换。</p>
-          <figure class="fig step__fig">
-            <img src="assets/cases/companion/pb-desktop.webp" alt="既有助手的桌面端界面，纯软件形态"
-                 width="1347" height="823" loading="lazy" />
-          </figure>
-        </li>
-        <li class="step" data-reveal="soft">
-          <span class="step__no t-num">03</span>
-          <p class="t-lead step__claim">交互方式单一，存在于 PC 端，且依赖于用户主动触发使用，Maximum App 思路，产品亮点变弱。</p>
-          <figure class="fig step__fig step__fig--narrow">
-            <img src="assets/cases/companion/pb-panel.webp" alt="侧边面板形态的助手界面"
-                 width="589" height="821" loading="lazy" />
-          </figure>
-        </li>
-      </ol>
-    </div>
-
-    <div class="page conclusion">
-      <p class="t-lead conclusion__head" data-reveal="soft">得出初步结论。</p>
-      <ol class="conclusion__list">
-        <li class="row conclusion__row" data-reveal="soft"><span class="t-num">→</span>
-          <span class="t-body">解决软件形态定位偏差，功能模块与机器割裂问题，充分利用产品本身的硬件能力，使用户感知链路提升。</span></li>
-        <li class="row conclusion__row" data-reveal="soft"><span class="t-num">→</span>
-          <span class="t-body">结合共性产品用户使用触点分析，产出 Tiko 设计策略，进行推演。以用户视角为中心，最大化减少界面的视觉噪音。</span></li>
-        <li class="row conclusion__row" data-reveal="soft"><span class="t-num">→</span>
-          <span class="t-body">找齐场景框架、交互逻辑及视觉形式，人-机体验互补，传达简便易操作。</span></li>
-        <li class="row conclusion__row is-final" data-reveal="soft"><span class="t-num">→</span>
-          <span class="t-lead t-accent">从而确定设计一个凭借机器为身体的互动式 AI 助理。</span></li>
-      </ol>
-    </div>
-  </section>
-  <!-- 幕三 · 决策 -->
-  <section class="band band--paper act" id="design" aria-labelledby="design-title">
-    <div class="page split">
-      <div class="split__aside">
-        <p class="t-num">1.2</p>
-        <h2 class="t-h1" id="design-title">Strategy</h2>
-      </div>
-      <div class="split__main">
-        <p class="t-lead" data-reveal="soft">可视化视觉系统。</p>
-        <p class="t-body" data-reveal="soft">我们通过设计（理念、框架、风格、规则）来串联起硬件、系统和智能体的联系。形成软硬件结合的产品体验，赋予其智能的高感知力外在显性化，让用户感受只能科技的温度，展现出品牌的活力与年轻化，同时也即是构建了一套形式增强功能的可视化视觉系统。</p>
-      </div>
-    </div>
-
-    <!-- 设计策略：文字与结构全部来自设计稿（Figma 节点 4218:4925），
-         形式重做过——原稿是两张并排的静态板，这里拆成"推演线 + 体验地图"两段，
-         连线上的光点随滚动跑一遍，把"从人到机器"这条链路读出来。 -->
-    <div class="page stack" id="stack" data-reveal="soft">
-      <p class="t-label">从人到机器的推演</p>
-
-      <div class="stack__rail">
-        <span class="stack__spark" aria-hidden="true"></span>
-        <div class="stack__node">
-          <p class="stack__stage">感知</p>
-          <p class="stack__role">Human</p>
-          <p class="stack__job">人给出意图</p>
-        </div>
-        <div class="stack__node">
-          <p class="stack__stage">思考</p>
-          <p class="stack__role">Agent</p>
-          <p class="stack__job">辅助工具</p>
-        </div>
-        <div class="stack__node">
-          <p class="stack__stage">反馈</p>
-          <p class="stack__role">Machine</p>
-          <p class="stack__job">互动生命</p>
-        </div>
-      </div>
-
-      <p class="stack__ghosts" aria-label="未点亮的环节">
-        <span>记忆</span><span>规划</span><span>解决</span><span>行动</span>
-      </p>
-
-      <div class="stack__body">
-        <figure class="stack__orb">
-          <img src="assets/cases/companion/tiko-orb.webp" alt="Tiko 本体：环形光圈里的一对眼睛"
-               width="911" height="673" loading="lazy" />
-        </figure>
-        <p class="stack__note">七个环节里，感知、思考、反馈这三段落在 Tiko 身上；
-          记忆、规划、解决、行动仍由系统与人承担。它要做的不是全都接管，
-          而是把这三段做成能被看见的动作。</p>
-      </div>
-    </div>
-
-    <div class="page emap" data-reveal="soft">
-      <p class="t-label emap__head">体验地图</p>
-      <div class="emap__row">
-        <p class="t-num emap__key">Journey</p>
-        <ul class="emap__cells emap__cells--3"><li>空闲状态</li><li>交互中</li><li>任务后台</li></ul>
-      </div>
-      <div class="emap__row">
-        <p class="t-num emap__key">Action</p>
-        <ul class="emap__cells emap__cells--6"><li>打开</li><li>输入</li><li>进程</li><li>输出</li><li>任务处理</li><li>error/待机</li></ul>
-      </div>
-      <div class="emap__row">
-        <p class="t-num emap__key">Contact Point</p>
-        <ul class="emap__cells emap__cells--4"><li>Companion App</li><li>执行任务</li><li>主动唤醒</li><li>PC/手机</li></ul>
-      </div>
-      <div class="emap__row">
-        <p class="t-num emap__key">Feeling</p>
-        <ul class="emap__cells emap__cells--4 emap__cells--feel">
-          <li style="--dot:#df5191">Positive</li><li style="--dot:#d6433e">Warm</li>
-          <li style="--dot:#5abeea">Calm</li><li style="--dot:#33a254">Process</li>
-        </ul>
-      </div>
-      <div class="emap__row emap__row--last">
-        <p class="t-num emap__key">Opportunity</p>
-        <ul class="emap__cells emap__cells--3 emap__cells--notes">
-          <li>
-            <span>通过桌面快捷方式进入</span>
-            <span>休眠之后，用户说出唤醒词如："Hi Tiko"</span>
-            <span>设备无操作自动触发</span>
-            <span>语音助手唤起 Companion mode</span>
-            <span>keyboard 触发唤起 Companion mode</span>
-          </li>
-          <li>
-            <span>展示交互中状态，如打字动画、加载动画等</span>
-            <span>减少等待感知：你是想问 xxxx 吗？好的，我在思考怎么帮你解决这个问题…</span>
-            <span>动画/动作效果要易于理解</span>
-            <span>动画要有吸引力，增加用户兴趣度与使用欲</span>
-            <span>抢断发生时的动画衔接</span>
-          </li>
-          <li>
-            <span>根据表情自动生成相关 Motion</span>
-            <span>尝试在不同端设计动画及其裁切方案的可行性</span>
-            <span>待机表情可感知性的平衡</span>
-          </li>
-        </ul>
-      </div>
-    </div>
-
-    <figure class="page fig fig--mid" data-reveal="soft">
-      <img src="assets/cases/companion/moodboard.webp" alt="九种表情处理与六个本体造型的探索板"
-           width="2753" height="638" loading="lazy" />
-      <figcaption class="t-cap">视觉方案初次迭代 · 交互方案初次迭代</figcaption>
-    </figure>
-
-    <!-- 四种情绪：一共就四张，平铺成 2×2，不做横向滚动。
-         四张面板是从原来那条长图里切出来的，统一切了 26px 圆角——
-         原图里有的带圆角有的不带，切开重排才能真正统一。
-         标签和色板改成用 HTML/CSS 排，颜色取自原图。 -->
-    <div class="page emo">
-      <div class="emo__head">
-        <p class="t-label">四种情绪</p>
-        <p class="t-body emo__lead">在 Tiko 视觉方案最终设定上，我们确定了四种情绪变化，也制作了上百种不同的表情动效。</p>
-      </div>
-      <ul class="emo__grid">
-        <li class="emo__item" data-reveal="soft">
-          <img src="assets/cases/companion/emo-positive.webp" alt="Positive 情绪状态" width="676" height="422" loading="lazy" />
-          <p class="t-cap emo__name">Positive</p>
-          <span class="emo__bars"><i style="background:#df5191"></i><i style="background:#bd57b7"></i><i style="background:#d07365"></i></span>
-        </li>
-        <li class="emo__item" data-reveal="soft" data-reveal-delay="0.06">
-          <img src="assets/cases/companion/emo-warm.webp" alt="Warm 情绪状态" width="676" height="422" loading="lazy" />
-          <p class="t-cap emo__name">Warm</p>
-          <span class="emo__bars"><i style="background:#d6433e"></i><i style="background:#e87340"></i><i style="background:#e13d9d"></i></span>
-        </li>
-        <li class="emo__item" data-reveal="soft" data-reveal-delay="0.12">
-          <img src="assets/cases/companion/emo-calm.webp" alt="Calm 情绪状态" width="676" height="422" loading="lazy" />
-          <p class="t-cap emo__name">Calm</p>
-          <span class="emo__bars"><i style="background:#5abeea"></i><i style="background:#456ff9"></i><i style="background:#a335c7"></i></span>
-        </li>
-        <li class="emo__item" data-reveal="soft" data-reveal-delay="0.18">
-          <img src="assets/cases/companion/emo-process.webp" alt="Process 情绪状态" width="676" height="422" loading="lazy" />
-          <p class="t-cap emo__name">Process</p>
-          <span class="emo__bars"><i style="background:#33a254"></i><i style="background:#b4d701"></i><i style="background:#32b8ef"></i></span>
-        </li>
-      </ul>
-    </div>
-
-    <div class="page split">
-      <div class="split__aside"><p class="t-label">表情动效</p></div>
-      <div class="split__main">
-        <p class="t-body" data-reveal="soft">其视觉效果会根据情绪变化，而不同的情绪也会相应匹配多种不同的任务场景，配合产品硬件电机的扭转，带给用户丰富的互动感受。</p>
-      </div>
-    </div>
-
-    <figure class="page fig fig--mid" data-reveal="soft">
-      <img src="assets/cases/companion/expressions.webp" alt="表情动效帧：眨眼、点赞、墨镜、爱心、相机、咖啡、蛋糕、音符、睡眠等"
-           width="3200" height="931" loading="lazy" />
-      <figcaption class="t-cap">上百种表情动效里的一部分</figcaption>
-    </figure>
-
-    <div class="page grid2">
-      <figure class="fig" data-reveal="soft">
-        <img src="assets/cases/companion/emotion-model.webp" alt="情绪模型：本体外环绕四种情绪与触发场景"
-             width="1168" height="1686" loading="lazy" />
-        <figcaption class="t-cap">情绪与场景的对应关系</figcaption>
-      </figure>
-      <div class="grid2__copy">
-        <p class="t-lead" data-reveal="soft">具有人文关怀的智能体。</p>
-        <p class="t-body" data-reveal="soft">显性化后台交互工作状态，让用户等待的焦虑感弱化，交互和视觉感知上可触发更多无意识、直觉化的操作。</p>
-        <p class="t-body" data-reveal="soft">同时可以让机器具备情绪表达，与用户产生共情。实现让用户与信息与功能交互而不是与屏幕这个介质交互，达成“去屏幕介质化”，减少屏幕本身的特征感。</p>
-      </div>
-    </div>
-  </section>
-
-  <section class="band band--ink act">
-    <figure class="page fig" data-reveal="soft">
-      <img src="assets/cases/companion/voice-flow.webp" alt="语音反馈流：积极响应、理性回复、消极情绪表达三档及其状态文案"
-           width="2257" height="692" loading="lazy" />
-      <figcaption class="t-cap">语音反馈的三档语气与状态文案</figcaption>
-    </figure>
-  </section>
-  <section class="band band--paper act">
-    <div class="page split">
-      <div class="split__aside">
-        <p class="t-num">1.3</p>
-        <h2 class="t-h1">Twist Center</h2>
-      </div>
-      <div class="split__main">
-        <p class="t-body" data-reveal="soft">Twist Center 定位以会议场景为核心，摒弃繁杂的用户使用开端，将屏幕的物理能力交给系统去判断，让用户聚焦于信息本身。</p>
-      </div>
-    </div>
-
-    <!-- 六张屏依次接管同一个位置，左侧目录随之点亮 -->
-    <div class="deck" id="tcDeck">
-      <div class="deck__pin">
-        <div class="page deck__inner">
-          <ol class="deck__index" aria-hidden="true">
-            <li class="deck__idx"><span class="t-num">01</span><span class="t-cap">Plus Center</span></li>
-            <li class="deck__idx"><span class="t-num">02</span><span class="t-cap">未开启</span></li>
-            <li class="deck__idx"><span class="t-num">03</span><span class="t-cap">人脸锁定</span></li>
-            <li class="deck__idx"><span class="t-num">04</span><span class="t-cap">声纹录入</span></li>
-            <li class="deck__idx"><span class="t-num">05</span><span class="t-cap">声源跟踪</span></li>
-            <li class="deck__idx"><span class="t-num">06</span><span class="t-cap">低电量</span></li>
-          </ol>
-          <div class="deck__stack">
-            <figure class="deck__card"><img src="assets/cases/companion/tc-splash.webp" alt="Plus Center 启动页" width="1004" height="628" loading="lazy" /></figure>
-            <figure class="deck__card"><img src="assets/cases/companion/tc-empty.webp" alt="摄像头未开启、各项开关关闭的空状态" width="1004" height="628" loading="lazy" /></figure>
-            <figure class="deck__card"><img src="assets/cases/companion/tc-live.webp" alt="识别到用户 Anna 并锁定人脸，右侧为用户列表" width="1004" height="628" loading="lazy" /></figure>
-            <figure class="deck__card"><img src="assets/cases/companion/tc-voice.webp" alt="引导用户三次说出 Hi, Tiko 完成声纹录入" width="1004" height="628" loading="lazy" /></figure>
-            <figure class="deck__card"><img src="assets/cases/companion/tc-tracking.webp" alt="声源跟踪进行中的状态" width="1004" height="628" loading="lazy" /></figure>
-            <figure class="deck__card"><img src="assets/cases/companion/tc-battery.webp" alt="会议画面虚化，前置低电量提示" width="1004" height="628" loading="lazy" /></figure>
+  <div class="case-doc-wrap" data-span="8525.09">
+    <div class="case-doc">
+      <div class="case-slice" style="--y0:487.00px"><span class="doc-anchor" id="intro" style="top:487px"></span><span class="doc-anchor" id="problem" style="top:1257px"></span><span class="doc-anchor" id="strategy" style="top:2592px"></span><span class="doc-anchor" id="design" style="top:3712px"></span><span class="doc-anchor" id="outcome" style="top:8131px"></span><div style="position:absolute;top:4668.09px;left:255px;width:1475px;height:443.73px">
+    <div
+      style="width:1475px;border-radius:19.5px;background-color:rgba(241,241,241,1);min-height:443.73px;position:absolute;top:0;left:0"
+    ></div>
+    <div style="position:absolute;top:68.12px;left:83.04px;width:1305.14px;height:297.86px">
+      <div style="width:245.11px;height:153.19px;position:absolute;top:0;left:0">
+        <div style="width:245.11px;height:153.19px;overflow:hidden;position:absolute;top:0;left:0">
+          <!-- [START: Taskbar (Legacy)] 请优先使用【Taskbar (Legacy)】组件，完整替换截止到[END: Taskbar (Legacy)]的全部HTML，不要保留这部分的任何HTML结构与样式。-->
+          <div
+            style="width:245.16px;height:6.14px;backdrop-filter:blur(7.67px);-webkit-backdrop-filter:blur(7.67px);background-color:rgba(243,243,243,0.9);position:absolute;top:147.07px;left:0"
+          >
+            <div
+              style="width:23.01px;height:5.11px;display:flex;flex-direction:row;flex-wrap:nowrap;justify-content:center;align-items:center;position:absolute;top:0.51px;left:219.95px"
+            >
+              <div
+                style="width:4.09px;height:5.11px;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;align-items:flex-start"
+              >
+                <img src="assets/cases/companion/image_1.webp" style="width:1.53px;height:0.83px;margin-left:1.23px;margin-bottom:1.79px;object-fit:contain"
+                 loading="lazy" decoding="async" alt="" />
+              </div>
+              <div
+                style="width:10.23px;height:5.11px;border-radius:0.38px;display:flex;flex-direction:column;justify-content:center;align-items:flex-start"
+              >
+                <div
+                  style="width:8.69px;height:2.56px;display:flex;flex-direction:row;flex-wrap:nowrap;justify-content:flex-start;align-items:flex-start;margin-left:0.65px"
+                >
+                  <div
+                    style="width:2.56px;height:2.56px;overflow:hidden;margin-right:0.51px;display:flex;justify-content:flex-start;align-items:flex-start"
+                  >
+                    <div
+                      style="font-family:'Segoe UI Variable Static Display',sans-serif;font-size:2.05px;white-space:nowrap;text-align:center;color:rgba(0,0,0,1);line-height:normal;letter-spacing:normal;font-weight:400;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0"
+                    >
+                      <div ><span style="font-size:2.05px;letter-spacing:normal"></span></div>
+                    </div>
+                  </div>
+                  <div
+                    style="width:2.56px;height:2.56px;overflow:hidden;margin-right:0.51px;display:flex;justify-content:flex-start;align-items:flex-start"
+                  >
+                    <div
+                      style="font-family:'Segoe UI Variable Static Display',sans-serif;font-size:2.05px;white-space:nowrap;text-align:center;color:rgba(0,0,0,1);line-height:normal;letter-spacing:normal;font-weight:400;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0"
+                    >
+                      <div ><span style="font-size:2.05px;letter-spacing:normal"></span></div>
+                    </div>
+                  </div>
+                  <div
+                    style="width:2.56px;height:2.56px;overflow:hidden;display:flex;justify-content:flex-start;align-items:flex-start"
+                  >
+                    <div
+                      style="font-family:'Segoe UI Variable Static Display',sans-serif;font-size:2.05px;white-space:nowrap;text-align:center;color:rgba(0,0,0,1);line-height:normal;letter-spacing:normal;font-weight:400;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0"
+                    >
+                      <div ><span style="font-size:2.05px;letter-spacing:normal"></span></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div style="width:8.69px;height:5.11px;display:flex;justify-content:flex-start;align-items:flex-start">
+                <div
+                  style="font-family:'Segoe UI Variable Static Small',sans-serif;font-size:1.53px;white-space:nowrap;text-align:right;color:rgba(0,0,0,1);line-height:normal;letter-spacing:normal;font-weight:400;flex-shrink:0"
+                >
+                  <div ><span style="font-size:1.53px;letter-spacing:normal">11:00 AM </span></div>
+                  <div><span style="font-size:1.53px;letter-spacing:normal">10/05/2021</span></div>
+                </div>
+              </div>
+            </div>
+            <div
+              style="width:44.48px;height:5.11px;display:flex;flex-direction:row;flex-wrap:nowrap;justify-content:flex-start;align-items:flex-start;position:absolute;top:0.44px;left:100.76px"
+            >
+              <div
+                style="width:5.11px;height:5.11px;overflow:hidden;margin-right:0.51px;display:flex;justify-content:center;align-items:flex-start"
+              >
+                <div
+                  style="width:3.07px;height:3.07px;margin-top:1.02px;display:flex;flex-direction:column;justify-content:center;align-items:flex-end"
+                >
+                  <img src="assets/cases/companion/image_2.webp" style="width:3px;height:3px;margin-right:0.03px"  loading="lazy" decoding="async" alt="" />
+                </div>
+              </div>
+              <div
+                style="width:5.11px;height:5.11px;overflow:hidden;margin-right:0.51px;display:flex;justify-content:center;align-items:flex-start"
+              >
+                <img src="assets/cases/companion/image_3.webp" style="width:3.07px;height:3.07px;margin-top:1.02px"  loading="lazy" decoding="async" alt="" />
+              </div>
+              <div
+                style="width:5.11px;height:5.11px;overflow:hidden;margin-right:0.51px;display:flex;justify-content:center;align-items:flex-start"
+              >
+                <img src="assets/cases/companion/image_4.webp" style="width:3.07px;height:3.07px;overflow:hidden;margin-top:1.02px"
+                 loading="lazy" decoding="async" alt="" />
+              </div>
+              <div
+                style="width:5.11px;height:5.11px;overflow:hidden;margin-right:0.51px;display:flex;justify-content:center;align-items:flex-start"
+              >
+                <div style="width:3.07px;min-height:3.07px;margin-top:1.02px"></div>
+              </div>
+              <div
+                style="width:5.11px;height:5.11px;overflow:hidden;margin-right:0.51px;display:flex;justify-content:center;align-items:flex-start"
+              >
+                <img src="assets/cases/companion/image_5.webp" style="width:3.07px;height:3.07px;margin-top:1.02px"  loading="lazy" decoding="async" alt="" />
+              </div>
+              <!-- [START: App Icon] 请优先使用【App Icon】组件，完整替换截止到[END: App Icon]的全部HTML，不要保留这部分的任何HTML结构与样式。-->
+              <div
+                style="width:5.11px;height:5.11px;overflow:hidden;margin-right:0.51px;display:flex;justify-content:center;align-items:flex-start"
+              >
+                <div
+                  style="width:3.07px;height:3.07px;margin-top:1.02px;display:flex;justify-content:center;align-items:center"
+                >
+                  <img src="assets/cases/companion/image_6.webp" style="width:3.07px;height:3.07px"  loading="lazy" decoding="async" alt="" />
+                </div>
+              </div>
+              <!-- [END: App Icon] -->
+              <!-- [START: App Icon] 请优先使用【App Icon】组件，完整替换截止到[END: App Icon]的全部HTML，不要保留这部分的任何HTML结构与样式。-->
+              <div
+                style="width:5.11px;height:5.11px;overflow:hidden;margin-right:0.51px;display:flex;justify-content:center;align-items:flex-start"
+              >
+                <div
+                  style="width:3.07px;height:3.07px;margin-top:1.02px;display:flex;justify-content:center;align-items:center"
+                >
+                  <div undefined></div>
+                </div>
+              </div>
+              <!-- [END: App Icon] -->
+              <!-- [START: App Icon] 请优先使用【App Icon】组件，完整替换截止到[END: App Icon]的全部HTML，不要保留这部分的任何HTML结构与样式。-->
+              <div
+                style="width:5.11px;height:5.11px;overflow:hidden;display:flex;justify-content:center;align-items:flex-start"
+              >
+                <div
+                  style="width:3.07px;height:3.07px;margin-top:1.02px;display:flex;justify-content:center;align-items:center"
+                >
+                  <img src="assets/cases/companion/image_7.webp" style="width:3.07px;height:3.07px"  loading="lazy" decoding="async" alt="" />
+                </div>
+              </div>
+              <!-- [END: App Icon] -->
+            </div>
+            <img src="assets/cases/companion/image_8.webp" style="width:245px;height:0.13px;position:absolute;top:0;left:0;object-fit:cover"
+             loading="lazy" decoding="async" alt="" />
           </div>
-          <p class="t-cap deck__caption">Twist Center 页面视觉</p>
+          <!-- [END: Taskbar (Legacy)] -->
+          <div
+            style="width:5.11px;overflow:hidden;min-height:5.11px;position:absolute;top:109.28px;left:130.47px"
+          ></div>
+          <img src="assets/cases/companion/image_9.webp" style="width:3.58px;height:3.07px;position:absolute;top:110.30px;left:130.47px;object-fit:contain"
+           loading="lazy" decoding="async" alt="" />
+          <div
+            style="width:245.11px;height:153.19px;overflow:hidden;position:absolute;top:0;left:0;display:flex;flex-direction:column;justify-content:center;align-items:center"
+          >
+            <div style="width:245.11px;height:153.58px;border-radius:1.02px;position:relative">
+              <img src="assets/cases/companion/image_10.webp" style="width:245.42px;height:153.77px;border-radius:1.02px;position:absolute;top:0;left:0"
+               loading="lazy" decoding="async" alt="" /><img
+                src="assets/cases/companion/image_11.webp"
+                style="height:1.66px;position:absolute;top:2.23px;left:265.92px"
+               loading="lazy" decoding="async" alt="" /><img src="assets/cases/companion/image_12.webp" style="width:106.34px;height:66.11px;position:absolute;top:48.26px;left:69.32px;object-fit:contain"
+               loading="lazy" decoding="async" alt="" />
+            </div>
+          </div>
+        </div>
+        <img src="assets/cases/companion/image_13.webp" style="width:118.47px;height:61.28px;position:absolute;top:40.85px;left:62.05px;object-fit:contain"
+         loading="lazy" decoding="async" alt="" />
+        <div
+          style="width:245.11px;height:6.13px;background-color:rgba(0,0,0,1);display:flex;flex-direction:row;flex-wrap:nowrap;justify-content:space-between;align-items:center;position:absolute;top:0;left:0"
+        >
+          <div
+            style="width:24.59px;height:6.13px;overflow:hidden;background-color:rgba(41,41,41,0);display:flex;flex-direction:column;flex-wrap:nowrap;justify-content:flex-start;align-items:flex-start;padding-top:1.53px;box-sizing:border-box;padding-right:1.53px;padding-bottom:1.53px;padding-left:1.53px"
+          >
+            <div
+              style="width:21.53px;height:3.07px;display:flex;flex-direction:column;flex-wrap:nowrap;justify-content:flex-start;align-items:flex-start;padding-left:1.02px;box-sizing:border-box"
+            >
+              <div style="width:20.51px;height:3.07px;display:flex;flex-direction:row;flex-wrap:nowrap;justify-content:flex-start;align-items:center">
+                <!-- [START: Logos] 请优先使用【Logos】组件，完整替换截止到[END: Logos]的全部HTML，不要保留这部分的任何HTML结构与样式。-->
+                <div
+                  style="width:3.07px;height:3.07px;overflow:hidden;border-radius:9.59px;margin-right:1.02px;display:flex;justify-content:center;align-items:center"
+                >
+                  <div style="position:relative;width:3.07px;height:3.07px">
+                    <img src="assets/cases/companion/image_14.webp" style="width:3.07px;height:3.07px;position:absolute;top:0;left:0"
+                     loading="lazy" decoding="async" alt="" /><img src="assets/cases/companion/image_15.webp" style="width:1.45px;height:1.84px;position:absolute;top:0.61px;left:0.84px;object-fit:contain"
+                     loading="lazy" decoding="async" alt="" />
+                  </div>
+                </div>
+                <!-- [END: Logos] -->
+                <div
+                  style="font-family:'Segoe UI Variable',sans-serif;font-size:1.79px;white-space:nowrap;color:rgba(255,255,255,1);line-height:1.75;letter-spacing:normal;font-weight:600"
+                >
+                  <span style="font-size:1.79px;letter-spacing:0.01px">Companion Mode</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:flex-start;align-items:flex-start;width:24.02px;height:4.09px">
+            <div
+              style="width:5.87px;height:4.09px;display:flex;flex-direction:row;flex-wrap:nowrap;justify-content:flex-start;align-items:center;box-sizing:border-box;padding-right:1.28px;padding-left:1.28px"
+            >
+              <!-- [START: Icon/24px/Settings] 请优先使用【Icon/24px/Settings】组件，完整替换截止到[END: Icon/24px/Settings]的全部HTML，不要保留这部分的任何HTML结构与样式。-->
+              <div
+                style="width:3.06px;height:3.06px;overflow:hidden;display:flex;flex-direction:column;justify-content:center;align-items:flex-start"
+              >
+                <img src="assets/cases/companion/image_16.webp" style="width:2.10px;height:2.10px;margin-left:0.48px"  loading="lazy" decoding="async" alt="" />
+              </div>
+              <!-- [END: Icon/24px/Settings] -->
+            </div>
+            <img src="assets/cases/companion/image_17.webp" style="height:2.04px;margin-top:1.02px"  loading="lazy" decoding="async" alt="" />
+            <!-- [START: Parts] 请优先使用【Parts】组件，完整替换截止到[END: Parts]的全部HTML，不要保留这部分的任何HTML结构与样式。-->
+            <div style="width:18.17px;height:4.09px;margin-left:0.11px;display:flex;justify-content:center;align-items:center">
+              <!-- [START: Parts / Title Bar Caption Control Group] 请优先使用【Parts / Title Bar Caption Control Group】组件，完整替换截止到[END: Parts / Title Bar Caption Control Group]的全部HTML，不要保留这部分的任何HTML结构与样式。-->
+              <div
+                style="width:18.17px;height:4.09px;overflow:hidden;display:flex;justify-content:flex-start;align-items:flex-start"
+              >
+                <!-- [START: Title Bar / Parts / Title Bar Caption Control Button] 请优先使用【Title Bar / Parts / Title Bar Caption Control Button】组件，完整替换截止到[END: Title Bar / Parts / Title Bar Caption Control Button]的全部HTML，不要保留这部分的任何HTML结构与样式。-->
+                <div
+                  style="width:5.88px;height:calc(100% - 0px - 0.09px);display:flex;flex-direction:column;justify-content:flex-start;align-items:flex-start"
+                >
+                  <div
+                    style="width:6px;background-color:rgba(255,255,255,0);min-height:4px"
+                  ></div>
+                  <div
+                    style="font-family:'Segoe Fluent Icons',sans-serif;font-size:1.28px;white-space:nowrap;text-align:center;color:rgba(255,255,255,1);line-height:2.05px;letter-spacing:normal;font-weight:400;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0"
+                  >
+                    <div ><span style="font-size:1.28px;letter-spacing:normal"></span></div>
+                  </div>
+                </div>
+                <!-- [END: Title Bar / Parts / Title Bar Caption Control Button] -->
+                <!-- [START: Title Bar / Parts / Title Bar Caption Control Button] 请优先使用【Title Bar / Parts / Title Bar Caption Control Button】组件，完整替换截止到[END: Title Bar / Parts / Title Bar Caption Control Button]的全部HTML，不要保留这部分的任何HTML结构与样式。-->
+                <div
+                  style="width:5.88px;height:calc(100% - 0px - 0.09px);display:flex;flex-direction:column;justify-content:flex-start;align-items:flex-start"
+                >
+                  <div
+                    style="width:6px;background-color:rgba(255,255,255,0);min-height:4px"
+                  ></div>
+                  <div
+                    style="font-family:'Segoe Fluent Icons',sans-serif;font-size:1.28px;white-space:nowrap;text-align:center;color:rgba(255,255,255,1);line-height:2.05px;letter-spacing:normal;font-weight:400;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0"
+                  >
+                    <div ><span style="font-size:1.28px;letter-spacing:normal"></span></div>
+                  </div>
+                </div>
+                <!-- [END: Title Bar / Parts / Title Bar Caption Control Button] -->
+                <!-- [START: Title Bar / Parts / Title Bar Caption Control Button] 请优先使用【Title Bar / Parts / Title Bar Caption Control Button】组件，完整替换截止到[END: Title Bar / Parts / Title Bar Caption Control Button]的全部HTML，不要保留这部分的任何HTML结构与样式。-->
+                <div
+                  style="width:5.88px;height:calc(100% - 0px - 0.09px);display:flex;flex-direction:column;justify-content:flex-start;align-items:flex-start"
+                >
+                  <div
+                    style="width:6px;background-color:rgba(255,255,255,0);min-height:4px"
+                  ></div>
+                  <div
+                    style="font-family:'Segoe Fluent Icons',sans-serif;font-size:1.28px;white-space:nowrap;text-align:center;color:rgba(255,255,255,1);line-height:2.05px;letter-spacing:normal;font-weight:400;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0"
+                  >
+                    <div ><span style="font-size:1.28px;letter-spacing:normal"></span></div>
+                  </div>
+                </div>
+                <!-- [END: Title Bar / Parts / Title Bar Caption Control Button] -->
+              </div>
+              <!-- [END: Parts / Title Bar Caption Control Group] -->
+            </div>
+            <!-- [END: Parts] -->
+          </div>
         </div>
       </div>
+      <div style="width:245.11px;height:153.19px;position:absolute;top:0.29px;left:352.57px">
+        <div style="width:245.11px;height:153.19px;overflow:hidden;position:absolute;top:0;left:0">
+          <!-- [START: Taskbar (Legacy)] 请优先使用【Taskbar (Legacy)】组件，完整替换截止到[END: Taskbar (Legacy)]的全部HTML，不要保留这部分的任何HTML结构与样式。-->
+          <div
+            style="width:245.16px;height:6.14px;backdrop-filter:blur(7.67px);-webkit-backdrop-filter:blur(7.67px);background-color:rgba(243,243,243,0.9);position:absolute;top:147.07px;left:0"
+          >
+            <div
+              style="width:23.01px;height:5.11px;display:flex;flex-direction:row;flex-wrap:nowrap;justify-content:center;align-items:center;position:absolute;top:0.51px;left:219.95px"
+            >
+              <div
+                style="width:4.09px;height:5.11px;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;align-items:flex-start"
+              >
+                <img src="assets/cases/companion/image_1.webp" style="width:1.53px;height:0.83px;margin-left:1.23px;margin-bottom:1.79px;object-fit:contain"
+                 loading="lazy" decoding="async" alt="" />
+              </div>
+              <div
+                style="width:10.23px;height:5.11px;border-radius:0.38px;display:flex;flex-direction:column;justify-content:center;align-items:flex-start"
+              >
+                <div
+                  style="width:8.69px;height:2.56px;display:flex;flex-direction:row;flex-wrap:nowrap;justify-content:flex-start;align-items:flex-start;margin-left:0.65px"
+                >
+                  <div
+                    style="width:2.56px;height:2.56px;overflow:hidden;margin-right:0.51px;display:flex;justify-content:flex-start;align-items:flex-start"
+                  >
+                    <div
+                      style="font-family:'Segoe UI Variable Static Display',sans-serif;font-size:2.05px;white-space:nowrap;text-align:center;color:rgba(0,0,0,1);line-height:normal;letter-spacing:normal;font-weight:400;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0"
+                    >
+                      <div ><span style="font-size:2.05px;letter-spacing:normal"></span></div>
+                    </div>
+                  </div>
+                  <div
+                    style="width:2.56px;height:2.56px;overflow:hidden;margin-right:0.51px;display:flex;justify-content:flex-start;align-items:flex-start"
+                  >
+                    <div
+                      style="font-family:'Segoe UI Variable Static Display',sans-serif;font-size:2.05px;white-space:nowrap;text-align:center;color:rgba(0,0,0,1);line-height:normal;letter-spacing:normal;font-weight:400;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0"
+                    >
+                      <div ><span style="font-size:2.05px;letter-spacing:normal"></span></div>
+                    </div>
+                  </div>
+                  <div
+                    style="width:2.56px;height:2.56px;overflow:hidden;display:flex;justify-content:flex-start;align-items:flex-start"
+                  >
+                    <div
+                      style="font-family:'Segoe UI Variable Static Display',sans-serif;font-size:2.05px;white-space:nowrap;text-align:center;color:rgba(0,0,0,1);line-height:normal;letter-spacing:normal;font-weight:400;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0"
+                    >
+                      <div ><span style="font-size:2.05px;letter-spacing:normal"></span></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div style="width:8.69px;height:5.11px;display:flex;justify-content:flex-start;align-items:flex-start">
+                <div
+                  style="font-family:'Segoe UI Variable Static Small',sans-serif;font-size:1.53px;white-space:nowrap;text-align:right;color:rgba(0,0,0,1);line-height:normal;letter-spacing:normal;font-weight:400;flex-shrink:0"
+                >
+                  <div ><span style="font-size:1.53px;letter-spacing:normal">11:00 AM </span></div>
+                  <div><span style="font-size:1.53px;letter-spacing:normal">10/05/2021</span></div>
+                </div>
+              </div>
+            </div>
+            <div
+              style="width:44.48px;height:5.11px;display:flex;flex-direction:row;flex-wrap:nowrap;justify-content:flex-start;align-items:flex-start;position:absolute;top:0.44px;left:100.76px"
+            >
+              <div
+                style="width:5.11px;height:5.11px;overflow:hidden;margin-right:0.51px;display:flex;justify-content:center;align-items:flex-start"
+              >
+                <div
+                  style="width:3.07px;height:3.07px;margin-top:1.02px;display:flex;flex-direction:column;justify-content:center;align-items:flex-end"
+                >
+                  <img src="assets/cases/companion/image_2.webp" style="width:3px;height:3px;margin-right:0.03px"  loading="lazy" decoding="async" alt="" />
+                </div>
+              </div>
+              <div
+                style="width:5.11px;height:5.11px;overflow:hidden;margin-right:0.51px;display:flex;justify-content:center;align-items:flex-start"
+              >
+                <img src="assets/cases/companion/image_3.webp" style="width:3.07px;height:3.07px;margin-top:1.02px"  loading="lazy" decoding="async" alt="" />
+              </div>
+              <div
+                style="width:5.11px;height:5.11px;overflow:hidden;margin-right:0.51px;display:flex;justify-content:center;align-items:flex-start"
+              >
+                <img src="assets/cases/companion/image_4.webp" style="width:3.07px;height:3.07px;overflow:hidden;margin-top:1.02px"
+                 loading="lazy" decoding="async" alt="" />
+              </div>
+              <div
+                style="width:5.11px;height:5.11px;overflow:hidden;margin-right:0.51px;display:flex;justify-content:center;align-items:flex-start"
+              >
+                <div style="width:3.07px;min-height:3.07px;margin-top:1.02px"></div>
+              </div>
+              <div
+                style="width:5.11px;height:5.11px;overflow:hidden;margin-right:0.51px;display:flex;justify-content:center;align-items:flex-start"
+              >
+                <img src="assets/cases/companion/image_5.webp" style="width:3.07px;height:3.07px;margin-top:1.02px"  loading="lazy" decoding="async" alt="" />
+              </div>
+              <!-- [START: App Icon] 请优先使用【App Icon】组件，完整替换截止到[END: App Icon]的全部HTML，不要保留这部分的任何HTML结构与样式。-->
+              <div
+                style="width:5.11px;height:5.11px;overflow:hidden;margin-right:0.51px;display:flex;justify-content:center;align-items:flex-start"
+              >
+                <div
+                  style="width:3.07px;height:3.07px;margin-top:1.02px;display:flex;justify-content:center;align-items:center"
+                >
+                  <img src="assets/cases/companion/image_6.webp" style="width:3.07px;height:3.07px"  loading="lazy" decoding="async" alt="" />
+                </div>
+              </div>
+              <!-- [END: App Icon] -->
+              <!-- [START: App Icon] 请优先使用【App Icon】组件，完整替换截止到[END: App Icon]的全部HTML，不要保留这部分的任何HTML结构与样式。-->
+              <div
+                style="width:5.11px;height:5.11px;overflow:hidden;margin-right:0.51px;display:flex;justify-content:center;align-items:flex-start"
+              >
+                <div
+                  style="width:3.07px;height:3.07px;margin-top:1.02px;display:flex;justify-content:center;align-items:center"
+                >
+                  <div undefined></div>
+                </div>
+              </div>
+              <!-- [END: App Icon] -->
+              <!-- [START: App Icon] 请优先使用【App Icon】组件，完整替换截止到[END: App Icon]的全部HTML，不要保留这部分的任何HTML结构与样式。-->
+              <div
+                style="width:5.11px;height:5.11px;overflow:hidden;display:flex;justify-content:center;align-items:flex-start"
+              >
+                <div
+                  style="width:3.07px;height:3.07px;margin-top:1.02px;display:flex;justify-content:center;align-items:center"
+                >
+                  <img src="assets/cases/companion/image_7.webp" style="width:3.07px;height:3.07px"  loading="lazy" decoding="async" alt="" />
+                </div>
+              </div>
+              <!-- [END: App Icon] -->
+            </div>
+            <img src="assets/cases/companion/image_8.webp" style="width:245px;height:0.13px;position:absolute;top:0;left:0;object-fit:cover"
+             loading="lazy" decoding="async" alt="" />
+          </div>
+          <!-- [END: Taskbar (Legacy)] -->
+          <div
+            style="width:5.11px;overflow:hidden;min-height:5.11px;position:absolute;top:109.28px;left:130.47px"
+          ></div>
+          <img src="assets/cases/companion/image_18.webp" style="width:3.58px;height:3.07px;position:absolute;top:110.30px;left:130.47px;object-fit:contain"
+           loading="lazy" decoding="async" alt="" />
+          <div
+            style="width:245.11px;height:153.19px;overflow:hidden;position:absolute;top:0;left:0;display:flex;flex-direction:column;justify-content:center;align-items:flex-start"
+          >
+            <div style="width:245.11px;height:153.58px;border-radius:1.02px;position:relative">
+              <img src="assets/cases/companion/image_19.webp" style="width:245.42px;height:153.77px;border-radius:1.02px;position:absolute;top:0;left:0"
+               loading="lazy" decoding="async" alt="" /><img
+                src="assets/cases/companion/image_11.webp"
+                style="height:1.66px;position:absolute;top:2.23px;left:265.92px"
+               loading="lazy" decoding="async" alt="" /><img src="assets/cases/companion/image_20.webp" style="width:107.59px;height:68.97px;position:absolute;top:48.89px;left:72.90px;object-fit:contain"
+               loading="lazy" decoding="async" alt="" />
+            </div>
+          </div>
+          <div
+            style="width:245.11px;height:6.13px;background-color:rgba(0,0,0,1);display:flex;flex-direction:row;flex-wrap:nowrap;justify-content:space-between;align-items:center;position:absolute;top:0;left:0"
+          >
+            <div
+              style="width:24.59px;height:6.13px;overflow:hidden;background-color:rgba(41,41,41,0);display:flex;flex-direction:column;flex-wrap:nowrap;justify-content:flex-start;align-items:flex-start;padding-top:1.53px;box-sizing:border-box;padding-right:1.53px;padding-bottom:1.53px;padding-left:1.53px"
+            >
+              <div
+                style="width:21.53px;height:3.07px;display:flex;flex-direction:column;flex-wrap:nowrap;justify-content:flex-start;align-items:flex-start;padding-left:1.02px;box-sizing:border-box"
+              >
+                <div style="width:20.51px;height:3.07px;display:flex;flex-direction:row;flex-wrap:nowrap;justify-content:flex-start;align-items:center">
+                  <!-- [START: Logos] 请优先使用【Logos】组件，完整替换截止到[END: Logos]的全部HTML，不要保留这部分的任何HTML结构与样式。-->
+                  <div
+                    style="width:3.07px;height:3.07px;overflow:hidden;border-radius:9.59px;margin-right:1.02px;display:flex;justify-content:center;align-items:center"
+                  >
+                    <div style="position:relative;width:3.07px;height:3.07px">
+                      <img src="assets/cases/companion/image_14.webp" style="width:3.07px;height:3.07px;position:absolute;top:0;left:0"
+                       loading="lazy" decoding="async" alt="" /><img src="assets/cases/companion/image_15.webp" style="width:1.45px;height:1.84px;position:absolute;top:0.61px;left:0.84px;object-fit:contain"
+                       loading="lazy" decoding="async" alt="" />
+                    </div>
+                  </div>
+                  <!-- [END: Logos] -->
+                  <div
+                    style="font-family:'Segoe UI Variable',sans-serif;font-size:1.79px;white-space:nowrap;color:rgba(255,255,255,1);line-height:1.75;letter-spacing:normal;font-weight:600"
+                  >
+                    <span style="font-size:1.79px;letter-spacing:0.01px">Companion Mode</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div style="display:flex;justify-content:flex-start;align-items:flex-start;width:24.02px;height:4.09px">
+              <div
+                style="width:5.87px;height:4.09px;display:flex;flex-direction:row;flex-wrap:nowrap;justify-content:flex-start;align-items:center;box-sizing:border-box;padding-right:1.28px;padding-left:1.28px"
+              >
+                <!-- [START: Icon/24px/Settings] 请优先使用【Icon/24px/Settings】组件，完整替换截止到[END: Icon/24px/Settings]的全部HTML，不要保留这部分的任何HTML结构与样式。-->
+                <div
+                  style="width:3.06px;height:3.06px;overflow:hidden;display:flex;flex-direction:column;justify-content:center;align-items:flex-start"
+                >
+                  <img src="assets/cases/companion/image_16.webp" style="width:2.10px;height:2.10px;margin-left:0.48px"
+                   loading="lazy" decoding="async" alt="" />
+                </div>
+                <!-- [END: Icon/24px/Settings] -->
+              </div>
+              <img src="assets/cases/companion/image_17.webp" style="height:2.04px;margin-top:1.02px"  loading="lazy" decoding="async" alt="" />
+              <!-- [START: Parts] 请优先使用【Parts】组件，完整替换截止到[END: Parts]的全部HTML，不要保留这部分的任何HTML结构与样式。-->
+              <div style="width:18.17px;height:4.09px;margin-left:0.11px;display:flex;justify-content:center;align-items:center">
+                <!-- [START: Parts / Title Bar Caption Control Group] 请优先使用【Parts / Title Bar Caption Control Group】组件，完整替换截止到[END: Parts / Title Bar Caption Control Group]的全部HTML，不要保留这部分的任何HTML结构与样式。-->
+                <div
+                  style="width:18.17px;height:4.09px;overflow:hidden;display:flex;justify-content:flex-start;align-items:flex-start"
+                >
+                  <!-- [START: Title Bar / Parts / Title Bar Caption Control Button] 请优先使用【Title Bar / Parts / Title Bar Caption Control Button】组件，完整替换截止到[END: Title Bar / Parts / Title Bar Caption Control Button]的全部HTML，不要保留这部分的任何HTML结构与样式。-->
+                  <div
+                    style="width:5.88px;height:calc(100% - 0px - 0.09px);display:flex;flex-direction:column;justify-content:flex-start;align-items:flex-start"
+                  >
+                    <div
+                      style="width:6px;background-color:rgba(255,255,255,0);min-height:4px"
+                    ></div>
+                    <div
+                      style="font-family:'Segoe Fluent Icons',sans-serif;font-size:1.28px;white-space:nowrap;text-align:center;color:rgba(255,255,255,1);line-height:2.05px;letter-spacing:normal;font-weight:400;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0"
+                    >
+                      <div ><span style="font-size:1.28px;letter-spacing:normal"></span></div>
+                    </div>
+                  </div>
+                  <!-- [END: Title Bar / Parts / Title Bar Caption Control Button] -->
+                  <!-- [START: Title Bar / Parts / Title Bar Caption Control Button] 请优先使用【Title Bar / Parts / Title Bar Caption Control Button】组件，完整替换截止到[END: Title Bar / Parts / Title Bar Caption Control Button]的全部HTML，不要保留这部分的任何HTML结构与样式。-->
+                  <div
+                    style="width:5.88px;height:calc(100% - 0px - 0.09px);display:flex;flex-direction:column;justify-content:flex-start;align-items:flex-start"
+                  >
+                    <div
+                      style="width:6px;background-color:rgba(255,255,255,0);min-height:4px"
+                    ></div>
+                    <div
+                      style="font-family:'Segoe Fluent Icons',sans-serif;font-size:1.28px;white-space:nowrap;text-align:center;color:rgba(255,255,255,1);line-height:2.05px;letter-spacing:normal;font-weight:400;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0"
+                    >
+                      <div ><span style="font-size:1.28px;letter-spacing:normal"></span></div>
+                    </div>
+                  </div>
+                  <!-- [END: Title Bar / Parts / Title Bar Caption Control Button] -->
+                  <!-- [START: Title Bar / Parts / Title Bar Caption Control Button] 请优先使用【Title Bar / Parts / Title Bar Caption Control Button】组件，完整替换截止到[END: Title Bar / Parts / Title Bar Caption Control Button]的全部HTML，不要保留这部分的任何HTML结构与样式。-->
+                  <div
+                    style="width:5.88px;height:calc(100% - 0px - 0.09px);display:flex;flex-direction:column;justify-content:flex-start;align-items:flex-start"
+                  >
+                    <div
+                      style="width:6px;background-color:rgba(255,255,255,0);min-height:4px"
+                    ></div>
+                    <div
+                      style="font-family:'Segoe Fluent Icons',sans-serif;font-size:1.28px;white-space:nowrap;text-align:center;color:rgba(255,255,255,1);line-height:2.05px;letter-spacing:normal;font-weight:400;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0"
+                    >
+                      <div ><span style="font-size:1.28px;letter-spacing:normal"></span></div>
+                    </div>
+                  </div>
+                  <!-- [END: Title Bar / Parts / Title Bar Caption Control Button] -->
+                </div>
+                <!-- [END: Parts / Title Bar Caption Control Group] -->
+              </div>
+              <!-- [END: Parts] -->
+            </div>
+          </div>
+        </div>
+        <img src="assets/cases/companion/image_21.webp" style="width:118.47px;height:61.28px;position:absolute;top:40.85px;left:62.04px;object-fit:contain"
+         loading="lazy" decoding="async" alt="" />
+      </div>
+      <div style="width:245.11px;height:153.19px;position:absolute;top:0.71px;left:1060.03px">
+        <div style="width:245.11px;height:153.19px;overflow:hidden;position:absolute;top:0;left:0">
+          <!-- [START: Taskbar (Legacy)] 请优先使用【Taskbar (Legacy)】组件，完整替换截止到[END: Taskbar (Legacy)]的全部HTML，不要保留这部分的任何HTML结构与样式。-->
+          <div
+            style="width:245.16px;height:6.14px;backdrop-filter:blur(7.67px);-webkit-backdrop-filter:blur(7.67px);background-color:rgba(243,243,243,0.9);position:absolute;top:147.06px;left:0"
+          >
+            <div
+              style="width:23.01px;height:5.11px;display:flex;flex-direction:row;flex-wrap:nowrap;justify-content:center;align-items:center;position:absolute;top:0.51px;left:219.95px"
+            >
+              <div
+                style="width:4.09px;height:5.11px;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;align-items:flex-start"
+              >
+                <img src="assets/cases/companion/image_1.webp" style="width:1.53px;height:0.83px;margin-left:1.23px;margin-bottom:1.79px;object-fit:contain"
+                 loading="lazy" decoding="async" alt="" />
+              </div>
+              <div
+                style="width:10.23px;height:5.11px;border-radius:0.38px;display:flex;flex-direction:column;justify-content:center;align-items:flex-start"
+              >
+                <div
+                  style="width:8.69px;height:2.56px;display:flex;flex-direction:row;flex-wrap:nowrap;justify-content:flex-start;align-items:flex-start;margin-left:0.65px"
+                >
+                  <div
+                    style="width:2.56px;height:2.56px;overflow:hidden;margin-right:0.51px;display:flex;justify-content:flex-start;align-items:flex-start"
+                  >
+                    <div
+                      style="font-family:'Segoe UI Variable Static Display',sans-serif;font-size:2.05px;white-space:nowrap;text-align:center;color:rgba(0,0,0,1);line-height:normal;letter-spacing:normal;font-weight:400;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0"
+                    >
+                      <div ><span style="font-size:2.05px;letter-spacing:normal"></span></div>
+                    </div>
+                  </div>
+                  <div
+                    style="width:2.56px;height:2.56px;overflow:hidden;margin-right:0.51px;display:flex;justify-content:flex-start;align-items:flex-start"
+                  >
+                    <div
+                      style="font-family:'Segoe UI Variable Static Display',sans-serif;font-size:2.05px;white-space:nowrap;text-align:center;color:rgba(0,0,0,1);line-height:normal;letter-spacing:normal;font-weight:400;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0"
+                    >
+                      <div ><span style="font-size:2.05px;letter-spacing:normal"></span></div>
+                    </div>
+                  </div>
+                  <div
+                    style="width:2.56px;height:2.56px;overflow:hidden;display:flex;justify-content:flex-start;align-items:flex-start"
+                  >
+                    <div
+                      style="font-family:'Segoe UI Variable Static Display',sans-serif;font-size:2.05px;white-space:nowrap;text-align:center;color:rgba(0,0,0,1);line-height:normal;letter-spacing:normal;font-weight:400;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0"
+                    >
+                      <div ><span style="font-size:2.05px;letter-spacing:normal"></span></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div style="width:8.69px;height:5.11px;display:flex;justify-content:flex-start;align-items:flex-start">
+                <div
+                  style="font-family:'Segoe UI Variable Static Small',sans-serif;font-size:1.53px;white-space:nowrap;text-align:right;color:rgba(0,0,0,1);line-height:normal;letter-spacing:normal;font-weight:400;flex-shrink:0"
+                >
+                  <div ><span style="font-size:1.53px;letter-spacing:normal">11:00 AM </span></div>
+                  <div><span style="font-size:1.53px;letter-spacing:normal">10/05/2021</span></div>
+                </div>
+              </div>
+            </div>
+            <div
+              style="width:44.48px;height:5.11px;display:flex;flex-direction:row;flex-wrap:nowrap;justify-content:flex-start;align-items:flex-start;position:absolute;top:0.44px;left:100.76px"
+            >
+              <div
+                style="width:5.11px;height:5.11px;overflow:hidden;margin-right:0.51px;display:flex;justify-content:center;align-items:flex-start"
+              >
+                <div
+                  style="width:3.07px;height:3.07px;margin-top:1.02px;display:flex;flex-direction:column;justify-content:center;align-items:flex-start"
+                >
+                  <img src="assets/cases/companion/image_2.webp" style="width:3px;height:3px;margin-left:0.03px"  loading="lazy" decoding="async" alt="" />
+                </div>
+              </div>
+              <div
+                style="width:5.11px;height:5.11px;overflow:hidden;margin-right:0.51px;display:flex;justify-content:center;align-items:flex-start"
+              >
+                <img src="assets/cases/companion/image_22.webp" style="width:3.07px;height:3.07px;margin-top:1.02px"  loading="lazy" decoding="async" alt="" />
+              </div>
+              <div
+                style="width:5.11px;height:5.11px;overflow:hidden;margin-right:0.51px;display:flex;justify-content:center;align-items:flex-start"
+              >
+                <img src="assets/cases/companion/image_4.webp" style="width:3.07px;height:3.07px;overflow:hidden;margin-top:1.02px"
+                 loading="lazy" decoding="async" alt="" />
+              </div>
+              <div
+                style="width:5.11px;height:5.11px;overflow:hidden;margin-right:0.51px;display:flex;justify-content:center;align-items:flex-start"
+              >
+                <div style="width:3.07px;min-height:3.07px;margin-top:1.02px"></div>
+              </div>
+              <div
+                style="width:5.11px;height:5.11px;overflow:hidden;margin-right:0.51px;display:flex;justify-content:center;align-items:flex-start"
+              >
+                <img src="assets/cases/companion/image_5.webp" style="width:3.07px;height:3.07px;margin-top:1.02px"  loading="lazy" decoding="async" alt="" />
+              </div>
+              <!-- [START: App Icon] 请优先使用【App Icon】组件，完整替换截止到[END: App Icon]的全部HTML，不要保留这部分的任何HTML结构与样式。-->
+              <div
+                style="width:5.11px;height:5.11px;overflow:hidden;margin-right:0.51px;display:flex;justify-content:center;align-items:flex-start"
+              >
+                <div
+                  style="width:3.07px;height:3.07px;margin-top:1.02px;display:flex;justify-content:center;align-items:center"
+                >
+                  <img src="assets/cases/companion/image_6.webp" style="width:3.07px;height:3.07px"  loading="lazy" decoding="async" alt="" />
+                </div>
+              </div>
+              <!-- [END: App Icon] -->
+              <!-- [START: App Icon] 请优先使用【App Icon】组件，完整替换截止到[END: App Icon]的全部HTML，不要保留这部分的任何HTML结构与样式。-->
+              <div
+                style="width:5.11px;height:5.11px;overflow:hidden;margin-right:0.51px;display:flex;justify-content:center;align-items:flex-start"
+              >
+                <div
+                  style="width:3.07px;height:3.07px;margin-top:1.02px;display:flex;justify-content:center;align-items:center"
+                >
+                  <div undefined></div>
+                </div>
+              </div>
+              <!-- [END: App Icon] -->
+              <!-- [START: App Icon] 请优先使用【App Icon】组件，完整替换截止到[END: App Icon]的全部HTML，不要保留这部分的任何HTML结构与样式。-->
+              <div
+                style="width:5.11px;height:5.11px;overflow:hidden;display:flex;justify-content:center;align-items:flex-start"
+              >
+                <div
+                  style="width:3.07px;height:3.07px;margin-top:1.02px;display:flex;justify-content:center;align-items:center"
+                >
+                  <img src="assets/cases/companion/image_7.webp" style="width:3.07px;height:3.07px"  loading="lazy" decoding="async" alt="" />
+                </div>
+              </div>
+              <!-- [END: App Icon] -->
+            </div>
+            <img src="assets/cases/companion/image_8.webp" style="width:245px;height:0.13px;position:absolute;top:0;left:0;object-fit:cover"
+             loading="lazy" decoding="async" alt="" />
+          </div>
+          <!-- [END: Taskbar (Legacy)] -->
+          <div
+            style="width:5.11px;overflow:hidden;min-height:5.11px;position:absolute;top:109.28px;left:130.47px"
+          ></div>
+          <img src="assets/cases/companion/image_23.webp" style="width:3.58px;height:3.07px;position:absolute;top:110.30px;left:130.47px;object-fit:contain"
+           loading="lazy" decoding="async" alt="" />
+          <div
+            style="width:245.11px;height:153.19px;overflow:hidden;position:absolute;top:0;left:0;display:flex;flex-direction:column;justify-content:center;align-items:flex-end"
+          >
+            <div style="width:245.11px;height:153.58px;border-radius:1.02px;position:relative">
+              <img src="assets/cases/companion/image_24.webp" style="width:245.42px;height:153.77px;border-radius:1.02px;position:absolute;top:0;left:0"
+               loading="lazy" decoding="async" alt="" /><img
+                src="assets/cases/companion/image_11.webp"
+                style="height:1.66px;position:absolute;top:2.23px;left:265.92px"
+               loading="lazy" decoding="async" alt="" /><img src="assets/cases/companion/image_25.webp" style="width:97.26px;height:66.10px;position:absolute;top:51.07px;left:73.92px;object-fit:contain"
+               loading="lazy" decoding="async" alt="" />
+            </div>
+          </div>
+        </div>
+        <img src="assets/cases/companion/image_26.webp" style="width:118.47px;height:61.28px;position:absolute;top:40.85px;left:62.04px;object-fit:contain"
+         loading="lazy" decoding="async" alt="" />
+        <div
+          style="width:245.11px;height:6.13px;background-color:rgba(0,0,0,1);display:flex;flex-direction:row;flex-wrap:nowrap;justify-content:space-between;align-items:center;position:absolute;top:0;left:0"
+        >
+          <div
+            style="width:24.59px;height:6.13px;overflow:hidden;background-color:rgba(41,41,41,0);display:flex;flex-direction:column;flex-wrap:nowrap;justify-content:flex-start;align-items:flex-start;padding-top:1.53px;box-sizing:border-box;padding-right:1.53px;padding-bottom:1.53px;padding-left:1.53px"
+          >
+            <div
+              style="width:21.53px;height:3.07px;display:flex;flex-direction:column;flex-wrap:nowrap;justify-content:flex-start;align-items:flex-start;padding-left:1.02px;box-sizing:border-box"
+            >
+              <div style="width:20.51px;height:3.07px;display:flex;flex-direction:row;flex-wrap:nowrap;justify-content:flex-start;align-items:center">
+                <!-- [START: Logos] 请优先使用【Logos】组件，完整替换截止到[END: Logos]的全部HTML，不要保留这部分的任何HTML结构与样式。-->
+                <div
+                  style="width:3.07px;height:3.07px;overflow:hidden;border-radius:9.59px;margin-right:1.02px;display:flex;justify-content:center;align-items:center"
+                >
+                  <div style="position:relative;width:3.07px;height:3.07px">
+                    <img src="assets/cases/companion/image_14.webp" style="width:3.07px;height:3.07px;position:absolute;top:0;left:0"
+                     loading="lazy" decoding="async" alt="" /><img src="assets/cases/companion/image_15.webp" style="width:1.45px;height:1.84px;position:absolute;top:0.61px;left:0.84px;object-fit:contain"
+                     loading="lazy" decoding="async" alt="" />
+                  </div>
+                </div>
+                <!-- [END: Logos] -->
+                <div
+                  style="font-family:'Segoe UI Variable',sans-serif;font-size:1.79px;white-space:nowrap;color:rgba(255,255,255,1);line-height:1.75;letter-spacing:normal;font-weight:600"
+                >
+                  <span style="font-size:1.79px;letter-spacing:0.01px">Companion Mode</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:flex-start;align-items:flex-start;width:24.02px;height:4.09px">
+            <div
+              style="width:5.87px;height:4.09px;display:flex;flex-direction:row;flex-wrap:nowrap;justify-content:flex-start;align-items:center;box-sizing:border-box;padding-right:1.28px;padding-left:1.28px"
+            >
+              <!-- [START: Icon/24px/Settings] 请优先使用【Icon/24px/Settings】组件，完整替换截止到[END: Icon/24px/Settings]的全部HTML，不要保留这部分的任何HTML结构与样式。-->
+              <div style="width:3.06px;height:3.06px;overflow:hidden;display:flex;flex-direction:column;justify-content:center;align-items:flex-end">
+                <img src="assets/cases/companion/image_16.webp" style="width:2.10px;height:2.10px;margin-right:0.48px"  loading="lazy" decoding="async" alt="" />
+              </div>
+              <!-- [END: Icon/24px/Settings] -->
+            </div>
+            <img src="assets/cases/companion/image_17.webp" style="height:2.04px;margin-top:1.02px"  loading="lazy" decoding="async" alt="" />
+            <!-- [START: Parts] 请优先使用【Parts】组件，完整替换截止到[END: Parts]的全部HTML，不要保留这部分的任何HTML结构与样式。-->
+            <div style="width:18.17px;height:4.09px;margin-left:0.11px;display:flex;justify-content:center;align-items:center">
+              <!-- [START: Parts / Title Bar Caption Control Group] 请优先使用【Parts / Title Bar Caption Control Group】组件，完整替换截止到[END: Parts / Title Bar Caption Control Group]的全部HTML，不要保留这部分的任何HTML结构与样式。-->
+              <div
+                style="width:18.17px;height:4.09px;overflow:hidden;display:flex;justify-content:flex-start;align-items:flex-start"
+              >
+                <!-- [START: Title Bar / Parts / Title Bar Caption Control Button] 请优先使用【Title Bar / Parts / Title Bar Caption Control Button】组件，完整替换截止到[END: Title Bar / Parts / Title Bar Caption Control Button]的全部HTML，不要保留这部分的任何HTML结构与样式。-->
+                <div
+                  style="width:5.88px;height:calc(100% - 0px - 0.09px);display:flex;flex-direction:column;justify-content:flex-start;align-items:flex-start"
+                >
+                  <div
+                    style="width:6px;background-color:rgba(255,255,255,0);min-height:4px"
+                  ></div>
+                  <div
+                    style="font-family:'Segoe Fluent Icons',sans-serif;font-size:1.28px;white-space:nowrap;text-align:center;color:rgba(255,255,255,1);line-height:2.05px;letter-spacing:normal;font-weight:400;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0"
+                  >
+                    <div ><span style="font-size:1.28px;letter-spacing:normal"></span></div>
+                  </div>
+                </div>
+                <!-- [END: Title Bar / Parts / Title Bar Caption Control Button] -->
+                <!-- [START: Title Bar / Parts / Title Bar Caption Control Button] 请优先使用【Title Bar / Parts / Title Bar Caption Control Button】组件，完整替换截止到[END: Title Bar / Parts / Title Bar Caption Control Button]的全部HTML，不要保留这部分的任何HTML结构与样式。-->
+                <div
+                  style="width:5.88px;height:calc(100% - 0px - 0.09px);display:flex;flex-direction:column;justify-content:flex-start;align-items:flex-start"
+                >
+                  <div
+                    style="width:6px;background-color:rgba(255,255,255,0);min-height:4px"
+                  ></div>
+                  <div
+                    style="font-family:'Segoe Fluent Icons',sans-serif;font-size:1.28px;white-space:nowrap;text-align:center;color:rgba(255,255,255,1);line-height:2.05px;letter-spacing:normal;font-weight:400;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0"
+                  >
+                    <div ><span style="font-size:1.28px;letter-spacing:normal"></span></div>
+                  </div>
+                </div>
+                <!-- [END: Title Bar / Parts / Title Bar Caption Control Button] -->
+                <!-- [START: Title Bar / Parts / Title Bar Caption Control Button] 请优先使用【Title Bar / Parts / Title Bar Caption Control Button】组件，完整替换截止到[END: Title Bar / Parts / Title Bar Caption Control Button]的全部HTML，不要保留这部分的任何HTML结构与样式。-->
+                <div
+                  style="width:5.88px;height:calc(100% - 0px - 0.09px);display:flex;flex-direction:column;justify-content:flex-start;align-items:flex-start"
+                >
+                  <div
+                    style="width:6px;background-color:rgba(255,255,255,0);min-height:4px"
+                  ></div>
+                  <div
+                    style="font-family:'Segoe Fluent Icons',sans-serif;font-size:1.28px;white-space:nowrap;text-align:center;color:rgba(255,255,255,1);line-height:2.05px;letter-spacing:normal;font-weight:400;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0"
+                  >
+                    <div ><span style="font-size:1.28px;letter-spacing:normal"></span></div>
+                  </div>
+                </div>
+                <!-- [END: Title Bar / Parts / Title Bar Caption Control Button] -->
+              </div>
+              <!-- [END: Parts / Title Bar Caption Control Group] -->
+            </div>
+            <!-- [END: Parts] -->
+          </div>
+        </div>
+      </div>
+      <div
+        style="position:absolute;top:165.07px;left:92.45px;font-family:'PingFang HK','PingFang SC',sans-serif;font-size:12.96px;white-space:nowrap;color:rgba(0,0,0,1);line-height:normal;letter-spacing:normal;font-weight:500"
+      >
+        <span style="font-size:12.96px;letter-spacing:normal">Positive</span>
+      </div>
+      <div
+        style="position:absolute;top:165.07px;left:455.49px;font-family:'PingFang HK','PingFang SC',sans-serif;font-size:12.96px;white-space:nowrap;color:rgba(0,0,0,1);line-height:normal;letter-spacing:normal;font-weight:500"
+      >
+        <span style="font-size:12.96px;letter-spacing:normal">Warm</span>
+      </div>
+      <div
+        style="position:absolute;top:164.92px;left:816.55px;font-family:'PingFang HK','PingFang SC',sans-serif;font-size:12.96px;white-space:nowrap;color:rgba(0,0,0,1);line-height:normal;letter-spacing:normal;font-weight:500"
+      >
+        <span style="font-size:12.96px;letter-spacing:normal">Calm</span>
+      </div>
+      <div
+        style="position:absolute;top:164.92px;left:1162.02px;font-family:'PingFang HK','PingFang SC',sans-serif;font-size:12.96px;white-space:nowrap;color:rgba(0,0,0,1);line-height:normal;letter-spacing:normal;font-weight:500"
+      >
+        <span style="font-size:12.96px;letter-spacing:normal">Process</span>
+      </div>
+      <div style="width:245.11px;height:153.19px;overflow:hidden;position:absolute;top:0.71px;left:705.09px">
+        <!-- [START: Taskbar (Legacy)] 请优先使用【Taskbar (Legacy)】组件，完整替换截止到[END: Taskbar (Legacy)]的全部HTML，不要保留这部分的任何HTML结构与样式。-->
+        <div
+          style="width:245.16px;height:6.14px;backdrop-filter:blur(7.67px);-webkit-backdrop-filter:blur(7.67px);background-color:rgba(243,243,243,0.9);position:absolute;top:147.06px;left:0"
+        >
+          <div
+            style="width:23.01px;height:5.11px;display:flex;flex-direction:row;flex-wrap:nowrap;justify-content:center;align-items:center;position:absolute;top:0.51px;left:219.95px"
+          >
+            <div
+              style="width:4.09px;height:5.11px;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;align-items:flex-start"
+            >
+              <img src="assets/cases/companion/image_1.webp" style="width:1.53px;height:0.83px;margin-left:1.23px;margin-bottom:1.79px;object-fit:contain"
+               loading="lazy" decoding="async" alt="" />
+            </div>
+            <div
+              style="width:10.23px;height:5.11px;border-radius:0.38px;display:flex;flex-direction:column;justify-content:center;align-items:flex-start"
+            >
+              <div
+                style="width:8.69px;height:2.56px;display:flex;flex-direction:row;flex-wrap:nowrap;justify-content:flex-start;align-items:flex-start;margin-left:0.65px"
+              >
+                <div
+                  style="width:2.56px;height:2.56px;overflow:hidden;margin-right:0.51px;display:flex;justify-content:flex-start;align-items:flex-start"
+                >
+                  <div
+                    style="font-family:'Segoe UI Variable Static Display',sans-serif;font-size:2.05px;white-space:nowrap;text-align:center;color:rgba(0,0,0,1);line-height:normal;letter-spacing:normal;font-weight:400;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0"
+                  >
+                    <div ><span style="font-size:2.05px;letter-spacing:normal"></span></div>
+                  </div>
+                </div>
+                <div
+                  style="width:2.56px;height:2.56px;overflow:hidden;margin-right:0.51px;display:flex;justify-content:flex-start;align-items:flex-start"
+                >
+                  <div
+                    style="font-family:'Segoe UI Variable Static Display',sans-serif;font-size:2.05px;white-space:nowrap;text-align:center;color:rgba(0,0,0,1);line-height:normal;letter-spacing:normal;font-weight:400;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0"
+                  >
+                    <div ><span style="font-size:2.05px;letter-spacing:normal"></span></div>
+                  </div>
+                </div>
+                <div
+                  style="width:2.56px;height:2.56px;overflow:hidden;display:flex;justify-content:flex-start;align-items:flex-start"
+                >
+                  <div
+                    style="font-family:'Segoe UI Variable Static Display',sans-serif;font-size:2.05px;white-space:nowrap;text-align:center;color:rgba(0,0,0,1);line-height:normal;letter-spacing:normal;font-weight:400;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0"
+                  >
+                    <div ><span style="font-size:2.05px;letter-spacing:normal"></span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div style="width:8.69px;height:5.11px;display:flex;justify-content:flex-start;align-items:flex-start">
+              <div
+                style="font-family:'Segoe UI Variable Static Small',sans-serif;font-size:1.53px;white-space:nowrap;text-align:right;color:rgba(0,0,0,1);line-height:normal;letter-spacing:normal;font-weight:400;flex-shrink:0"
+              >
+                <div ><span style="font-size:1.53px;letter-spacing:normal">11:00 AM </span></div>
+                <div><span style="font-size:1.53px;letter-spacing:normal">10/05/2021</span></div>
+              </div>
+            </div>
+          </div>
+          <div
+            style="width:44.48px;height:5.11px;display:flex;flex-direction:row;flex-wrap:nowrap;justify-content:flex-start;align-items:flex-start;position:absolute;top:0.44px;left:100.76px"
+          >
+            <div
+              style="width:5.11px;height:5.11px;overflow:hidden;margin-right:0.51px;display:flex;justify-content:center;align-items:flex-start"
+            >
+              <div
+                style="width:3.07px;height:3.07px;margin-top:1.02px;display:flex;flex-direction:column;justify-content:center;align-items:flex-start"
+              >
+                <img src="assets/cases/companion/image_2.webp" style="width:3px;height:3px;margin-left:0.03px"  loading="lazy" decoding="async" alt="" />
+              </div>
+            </div>
+            <div
+              style="width:5.11px;height:5.11px;overflow:hidden;margin-right:0.51px;display:flex;justify-content:center;align-items:flex-start"
+            >
+              <img src="assets/cases/companion/image_22.webp" style="width:3.07px;height:3.07px;margin-top:1.02px"  loading="lazy" decoding="async" alt="" />
+            </div>
+            <div
+              style="width:5.11px;height:5.11px;overflow:hidden;margin-right:0.51px;display:flex;justify-content:center;align-items:flex-start"
+            >
+              <img src="assets/cases/companion/image_4.webp" style="width:3.07px;height:3.07px;overflow:hidden;margin-top:1.02px"
+               loading="lazy" decoding="async" alt="" />
+            </div>
+            <div
+              style="width:5.11px;height:5.11px;overflow:hidden;margin-right:0.51px;display:flex;justify-content:center;align-items:flex-start"
+            >
+              <div style="width:3.07px;min-height:3.07px;margin-top:1.02px"></div>
+            </div>
+            <div
+              style="width:5.11px;height:5.11px;overflow:hidden;margin-right:0.51px;display:flex;justify-content:center;align-items:flex-start"
+            >
+              <img src="assets/cases/companion/image_5.webp" style="width:3.07px;height:3.07px;margin-top:1.02px"  loading="lazy" decoding="async" alt="" />
+            </div>
+            <!-- [START: App Icon] 请优先使用【App Icon】组件，完整替换截止到[END: App Icon]的全部HTML，不要保留这部分的任何HTML结构与样式。-->
+            <div
+              style="width:5.11px;height:5.11px;overflow:hidden;margin-right:0.51px;display:flex;justify-content:center;align-items:flex-start"
+            >
+              <div
+                style="width:3.07px;height:3.07px;margin-top:1.02px;display:flex;justify-content:center;align-items:center"
+              >
+                <img src="assets/cases/companion/image_6.webp" style="width:3.07px;height:3.07px"  loading="lazy" decoding="async" alt="" />
+              </div>
+            </div>
+            <!-- [END: App Icon] -->
+            <!-- [START: App Icon] 请优先使用【App Icon】组件，完整替换截止到[END: App Icon]的全部HTML，不要保留这部分的任何HTML结构与样式。-->
+            <div
+              style="width:5.11px;height:5.11px;overflow:hidden;margin-right:0.51px;display:flex;justify-content:center;align-items:flex-start"
+            >
+              <div
+                style="width:3.07px;height:3.07px;margin-top:1.02px;display:flex;justify-content:center;align-items:center"
+              >
+                <div undefined></div>
+              </div>
+            </div>
+            <!-- [END: App Icon] -->
+            <!-- [START: App Icon] 请优先使用【App Icon】组件，完整替换截止到[END: App Icon]的全部HTML，不要保留这部分的任何HTML结构与样式。-->
+            <div
+              style="width:5.11px;height:5.11px;overflow:hidden;display:flex;justify-content:center;align-items:flex-start"
+            >
+              <div
+                style="width:3.07px;height:3.07px;margin-top:1.02px;display:flex;justify-content:center;align-items:center"
+              >
+                <img src="assets/cases/companion/image_7.webp" style="width:3.07px;height:3.07px"  loading="lazy" decoding="async" alt="" />
+              </div>
+            </div>
+            <!-- [END: App Icon] -->
+          </div>
+          <img src="assets/cases/companion/image_8.webp" style="width:245px;height:0.13px;position:absolute;top:0;left:0;object-fit:cover"
+           loading="lazy" decoding="async" alt="" />
+        </div>
+        <!-- [END: Taskbar (Legacy)] -->
+        <div
+          style="width:5.11px;overflow:hidden;min-height:5.11px;position:absolute;top:109.28px;left:130.47px"
+        ></div>
+        <img src="assets/cases/companion/image_23.webp" style="width:3.58px;height:3.07px;position:absolute;top:110.30px;left:130.47px;object-fit:contain"
+         loading="lazy" decoding="async" alt="" />
+        <div
+          style="width:245.11px;height:153.19px;overflow:hidden;position:absolute;top:0;left:0;display:flex;flex-direction:column;justify-content:center;align-items:flex-start"
+        >
+          <div style="width:245.11px;height:153.58px;border-radius:1.02px;position:relative">
+            <img src="assets/cases/companion/image_27.webp" style="width:245.42px;height:153.77px;border-radius:1.02px;position:absolute;top:0;left:0"
+             loading="lazy" decoding="async" alt="" />
+            <div style="position:absolute;top:40.47px;left:59.23px;width:108.42px;height:70.11px">
+              <img src="assets/cases/companion/image_28.webp" style="width:108.42px;height:70.11px;position:absolute;top:0;left:0;object-fit:contain"
+               loading="lazy" decoding="async" alt="" /><img src="assets/cases/companion/image_29.webp" style="width:86.48px;height:53.40px;position:absolute;top:16.71px;left:21.94px;object-fit:contain"
+               loading="lazy" decoding="async" alt="" />
+            </div>
+            <img
+              src="assets/cases/companion/image_11.webp"
+              style="height:1.66px;position:absolute;top:2.23px;left:265.92px"
+             loading="lazy" decoding="async" alt="" /><img src="assets/cases/companion/image_30.webp" style="width:118.47px;height:61.28px;position:absolute;top:41.11px;left:63.32px;object-fit:contain"
+             loading="lazy" decoding="async" alt="" />
+          </div>
+        </div>
+        <div
+          style="width:245.11px;height:6.13px;background-color:rgba(0,0,0,1);display:flex;flex-direction:row;flex-wrap:nowrap;justify-content:space-between;align-items:center;position:absolute;top:0;left:0"
+        >
+          <div
+            style="width:24.59px;height:6.13px;overflow:hidden;background-color:rgba(41,41,41,0);display:flex;flex-direction:column;flex-wrap:nowrap;justify-content:flex-start;align-items:flex-start;padding-top:1.53px;box-sizing:border-box;padding-right:1.53px;padding-bottom:1.53px;padding-left:1.53px"
+          >
+            <div
+              style="width:21.53px;height:3.07px;display:flex;flex-direction:column;flex-wrap:nowrap;justify-content:flex-start;align-items:flex-start;padding-left:1.02px;box-sizing:border-box"
+            >
+              <div style="width:20.51px;height:3.07px;display:flex;flex-direction:row;flex-wrap:nowrap;justify-content:flex-start;align-items:center">
+                <!-- [START: Logos] 请优先使用【Logos】组件，完整替换截止到[END: Logos]的全部HTML，不要保留这部分的任何HTML结构与样式。-->
+                <div
+                  style="width:3.07px;height:3.07px;overflow:hidden;border-radius:9.59px;margin-right:1.02px;display:flex;justify-content:center;align-items:center"
+                >
+                  <div style="position:relative;width:3.07px;height:3.07px">
+                    <img src="assets/cases/companion/image_14.webp" style="width:3.07px;height:3.07px;position:absolute;top:0;left:0"
+                     loading="lazy" decoding="async" alt="" /><img src="assets/cases/companion/image_15.webp" style="width:1.45px;height:1.84px;position:absolute;top:0.61px;left:0.84px;object-fit:contain"
+                     loading="lazy" decoding="async" alt="" />
+                  </div>
+                </div>
+                <!-- [END: Logos] -->
+                <div
+                  style="font-family:'Segoe UI Variable',sans-serif;font-size:1.79px;white-space:nowrap;color:rgba(255,255,255,1);line-height:1.75;letter-spacing:normal;font-weight:600"
+                >
+                  <span style="font-size:1.79px;letter-spacing:0.01px">Companion Mode</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:flex-start;align-items:flex-start;width:24.02px;height:4.09px">
+            <div
+              style="width:5.87px;height:4.09px;display:flex;flex-direction:row;flex-wrap:nowrap;justify-content:flex-start;align-items:center;box-sizing:border-box;padding-right:1.28px;padding-left:1.28px"
+            >
+              <!-- [START: Icon/24px/Settings] 请优先使用【Icon/24px/Settings】组件，完整替换截止到[END: Icon/24px/Settings]的全部HTML，不要保留这部分的任何HTML结构与样式。-->
+              <div style="width:3.06px;height:3.06px;overflow:hidden;display:flex;flex-direction:column;justify-content:center;align-items:flex-end">
+                <img src="assets/cases/companion/image_16.webp" style="width:2.10px;height:2.10px;margin-right:0.48px"  loading="lazy" decoding="async" alt="" />
+              </div>
+              <!-- [END: Icon/24px/Settings] -->
+            </div>
+            <img src="assets/cases/companion/image_17.webp" style="height:2.04px;margin-top:1.02px"  loading="lazy" decoding="async" alt="" />
+            <!-- [START: Parts] 请优先使用【Parts】组件，完整替换截止到[END: Parts]的全部HTML，不要保留这部分的任何HTML结构与样式。-->
+            <div style="width:18.17px;height:4.09px;margin-left:0.11px;display:flex;justify-content:center;align-items:center">
+              <!-- [START: Parts / Title Bar Caption Control Group] 请优先使用【Parts / Title Bar Caption Control Group】组件，完整替换截止到[END: Parts / Title Bar Caption Control Group]的全部HTML，不要保留这部分的任何HTML结构与样式。-->
+              <div
+                style="width:18.17px;height:4.09px;overflow:hidden;display:flex;justify-content:flex-start;align-items:flex-start"
+              >
+                <!-- [START: Title Bar / Parts / Title Bar Caption Control Button] 请优先使用【Title Bar / Parts / Title Bar Caption Control Button】组件，完整替换截止到[END: Title Bar / Parts / Title Bar Caption Control Button]的全部HTML，不要保留这部分的任何HTML结构与样式。-->
+                <div
+                  style="width:5.88px;height:calc(100% - 0px - 0.09px);display:flex;flex-direction:column;justify-content:flex-start;align-items:flex-start"
+                >
+                  <div
+                    style="width:6px;background-color:rgba(255,255,255,0);min-height:4px"
+                  ></div>
+                  <div
+                    style="font-family:'Segoe Fluent Icons',sans-serif;font-size:1.28px;white-space:nowrap;text-align:center;color:rgba(255,255,255,1);line-height:2.05px;letter-spacing:normal;font-weight:400;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0"
+                  >
+                    <div ><span style="font-size:1.28px;letter-spacing:normal"></span></div>
+                  </div>
+                </div>
+                <!-- [END: Title Bar / Parts / Title Bar Caption Control Button] -->
+                <!-- [START: Title Bar / Parts / Title Bar Caption Control Button] 请优先使用【Title Bar / Parts / Title Bar Caption Control Button】组件，完整替换截止到[END: Title Bar / Parts / Title Bar Caption Control Button]的全部HTML，不要保留这部分的任何HTML结构与样式。-->
+                <div
+                  style="width:5.88px;height:calc(100% - 0px - 0.09px);display:flex;flex-direction:column;justify-content:flex-start;align-items:flex-start"
+                >
+                  <div
+                    style="width:6px;background-color:rgba(255,255,255,0);min-height:4px"
+                  ></div>
+                  <div
+                    style="font-family:'Segoe Fluent Icons',sans-serif;font-size:1.28px;white-space:nowrap;text-align:center;color:rgba(255,255,255,1);line-height:2.05px;letter-spacing:normal;font-weight:400;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0"
+                  >
+                    <div ><span style="font-size:1.28px;letter-spacing:normal"></span></div>
+                  </div>
+                </div>
+                <!-- [END: Title Bar / Parts / Title Bar Caption Control Button] -->
+                <!-- [START: Title Bar / Parts / Title Bar Caption Control Button] 请优先使用【Title Bar / Parts / Title Bar Caption Control Button】组件，完整替换截止到[END: Title Bar / Parts / Title Bar Caption Control Button]的全部HTML，不要保留这部分的任何HTML结构与样式。-->
+                <div
+                  style="width:5.88px;height:calc(100% - 0px - 0.09px);display:flex;flex-direction:column;justify-content:flex-start;align-items:flex-start"
+                >
+                  <div
+                    style="width:6px;background-color:rgba(255,255,255,0);min-height:4px"
+                  ></div>
+                  <div
+                    style="font-family:'Segoe Fluent Icons',sans-serif;font-size:1.28px;white-space:nowrap;text-align:center;color:rgba(255,255,255,1);line-height:2.05px;letter-spacing:normal;font-weight:400;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0"
+                  >
+                    <div ><span style="font-size:1.28px;letter-spacing:normal"></span></div>
+                  </div>
+                </div>
+                <!-- [END: Title Bar / Parts / Title Bar Caption Control Button] -->
+              </div>
+              <!-- [END: Parts / Title Bar Caption Control Group] -->
+            </div>
+            <!-- [END: Parts] -->
+          </div>
+        </div>
+      </div>
+      <div
+        style="width:86.68px;background-color:rgba(223,81,144,1);min-height:20.94px;position:absolute;top:210.54px;left:0"
+      ></div>
+      <div
+        style="width:86.68px;background-color:rgba(189,87,183,1);min-height:20.94px;position:absolute;top:243.74px;left:0"
+      ></div>
+      <div
+        style="width:86.68px;background-color:rgba(208,115,102,1);min-height:20.94px;position:absolute;top:276.93px;left:0"
+      ></div>
+      <div
+        style="width:86.68px;background-color:rgba(214,67,61,1);min-height:20.94px;position:absolute;top:210.54px;left:352.57px"
+      ></div>
+      <div
+        style="width:86.68px;background-color:rgba(233,115,63,1);min-height:20.94px;position:absolute;top:243.74px;left:352.57px"
+      ></div>
+      <div
+        style="width:86.68px;background-color:rgba(224,61,158,1);min-height:20.94px;position:absolute;top:276.93px;left:352.57px"
+      ></div>
+      <div
+        style="width:86.68px;background-color:rgba(91,190,235,1);min-height:20.94px;position:absolute;top:210.39px;left:704.92px"
+      ></div>
+      <div
+        style="width:86.68px;background-color:rgba(70,110,250,1);min-height:20.94px;position:absolute;top:243.58px;left:704.92px"
+      ></div>
+      <div
+        style="width:86.68px;background-color:rgba(163,53,199,1);min-height:20.94px;position:absolute;top:276.78px;left:704.92px"
+      ></div>
+      <div
+        style="width:86.68px;background-color:rgba(52,161,83,1);min-height:20.94px;position:absolute;top:210.39px;left:1060.3px"
+      ></div>
+      <div
+        style="width:86.68px;background-color:rgba(180,215,0,1);min-height:20.94px;position:absolute;top:243.58px;left:1060.3px"
+      ></div>
+      <div
+        style="width:86.68px;background-color:rgba(49,184,238,1);min-height:20.94px;position:absolute;top:276.78px;left:1060.3px"
+      ></div>
     </div>
-  </section>
-
-  <section class="band band--paper act">
-    <div class="page split">
-      <div class="split__aside">
-        <p class="t-num">1.4</p>
-        <h2 class="t-h1">Pet Tracking</h2>
-      </div>
-      <div class="split__main">
-        <p class="t-body" data-reveal="soft">此外还有 Twist Center 交互与 Pet Tracking 功能中的一些小功能点。该场景是关于电脑追踪控制权限的移动端与 PC 端归还交互功能设计。主要为宠物追踪模式，自动巡逻区域以检测宠物。</p>
-        <p class="t-body" data-reveal="soft" data-reveal-delay="0.08">检测到猫狗立刻开启跟踪，页面中出现预览画面与标签，并且停止巡航，如果追踪过程中目标丢失，设备将回到巡航与扫描状态继续搜索。</p>
+  </div><div
+    style="position:absolute;top:4443.09px;left:256px;width:1122px;opacity:0.8;font-family:'PingFang SC','PingFang HK',sans-serif;font-size:20px;color:rgba(50,48,46,1);line-height:1.7;letter-spacing:normal;font-weight:400"
+  >
+    <div >
+      <span style="letter-spacing:normal"
+        >显性化后台交互工作状态，让用户等待的焦虑感弱化，交互和视觉感知上可触发更多无意识、直觉化的操作。
+      </span>
+    </div>
+    <div ><span style="letter-spacing:normal"> </span></div>
+    <div>
+      <span style="letter-spacing:normal"
+        >同时可以让机器具备情绪表达，与用户产生共情。 实现让用户与信息与功能交互而不是与屏幕这个介质交互，达成“去屏幕介质化”，减少屏幕本身的特征感。</span
+      >
+    </div>
+  </div><div
+    style="width:1125.88px;border-radius:18.92px;background-color:rgba(241,241,241,1);min-height:460.76px;position:absolute;top:5135.47px;left:255px"
+  ></div><div
+    style="position:absolute;top:5940.09px;left:255px;display:flex;flex-direction:column;justify-content:flex-start;align-items:flex-start;width:970px;height:775px"
+  >
+    <div style="width:970px;border-radius:18.92px;background-color:rgba(241,241,241,1);min-height:744px"></div>
+    <div
+      style="margin-top:10px;margin-left:417px;opacity:0.8;font-family:'PingFang SC','PingFang HK',sans-serif;font-size:15px;white-space:nowrap;color:rgba(50,48,46,1);line-height:21px;letter-spacing:normal;font-weight:400;flex-shrink:0"
+    >
+      <span style="letter-spacing:normal">Twist Center页面视觉</span>
+    </div>
+  </div><div
+    style="width:1475px;border-radius:18.92px;background-color:rgba(241,241,241,1);min-height:744px;position:absolute;top:6922.09px;left:255px"
+  ></div><div
+    style="position:absolute;top:5940.09px;left:1245px;display:flex;flex-direction:column;justify-content:flex-start;align-items:flex-start;width:484.88px;height:775px"
+  >
+    <div style="width:484.88px;border-radius:18.92px;background-color:rgba(241,241,241,1);min-height:744px"></div>
+    <div
+      style="margin-top:10px;margin-left:193px;opacity:0.8;font-family:'PingFang SC','PingFang HK',sans-serif;font-size:15px;white-space:nowrap;color:rgba(50,48,46,1);line-height:21px;letter-spacing:normal;font-weight:400;flex-shrink:0"
+    >
+      <span style="letter-spacing:normal">用户信息录入流程图</span>
+    </div>
+  </div><div
+    style="width:325.47px;border-radius:18.92px;background-color:rgba(241,241,241,1);min-height:460.76px;position:absolute;top:5135.47px;left:1404.54px"
+  ></div><div
+    style="width:831px;border-radius:20px;background-color:rgba(241,241,241,1);min-height:487px;position:absolute;top:497px;left:256px"
+  ></div><div
+    style="width:1474px;border-radius:20px;background-color:rgba(241,241,241,1);min-height:276px;position:absolute;top:1597.00px;left:256px"
+  ></div><div
+    style="width:662px;border-radius:20px;background-color:rgba(241,241,241,1);min-height:484px;position:absolute;top:2932.00px;left:256px"
+  ></div><div
+    style="width:732px;border-radius:13.62px;background-color:rgba(241,241,241,1);min-height:282.09px;position:absolute;top:4052.00px;left:256px"
+  ></div><div
+    style="width:722px;border-radius:13.62px;background-color:rgba(241,241,241,1);min-height:282.09px;position:absolute;top:4052.00px;left:1008px"
+  ></div><div
+    style="width:792px;border-radius:20px;background-color:rgba(241,241,241,1);min-height:484px;position:absolute;top:2932.00px;left:938px"
+  ></div><div
+    style="width:630px;border-radius:20px;background-color:rgba(241,241,241,1);min-height:487px;position:absolute;top:497px;left:1100px"
+  ></div><img src="assets/cases/companion/image_32.webp" style="width:1071.95px;height:311.96px;position:absolute;top:5210.22px;left:260.68px"
+   loading="lazy" decoding="async" alt="" /><div
+    style="position:absolute;top:1070px;left:256px;display:flex;flex-direction:column;justify-content:flex-start;align-items:center;width:1098px;height:125px"
+  >
+    <div
+      style="width:1098px;opacity:0.8;font-family:'PingFang SC','PingFang HK',sans-serif;font-size:20px;white-space:nowrap;color:rgba(50,48,46,1);line-height:1.7;letter-spacing:normal;font-weight:400;flex-shrink:0"
+    >
+      <span style="letter-spacing:normal"
+        >我们即将看到的，不再是冷冰冰的机器，而是能够理解你、适应你、甚至预判你的智能伙伴。</span
+      >
+    </div>
+    <div
+      style="margin-top:30px;width:1098px;height:61px;opacity:0.8;font-family:'PingFang SC','PingFang HK',sans-serif;font-size:20px;color:rgba(50,48,46,1);line-height:1.7;letter-spacing:normal;font-weight:400;display:inline-flex;align-items:center;flex-shrink:0"
+    >
+      <div >
+        <span style="letter-spacing:normal"
+          >如果屏幕不再只是静静地立在那里，而是能感知你的位置、跟随你的视线自动旋转调整？如果笔记本电脑的形态可以根据场景，如编程、绘画、展示等场景，进行超乎想象的物理形变...</span
+        >
       </div>
     </div>
-
-    <ol class="page seq" id="petSeq">
-      <li class="seq__item" data-reveal="soft">
-        <span class="seq__no t-num">01</span>
-        <img src="assets/cases/companion/pet-cruise.webp" alt="巡航与扫描中的移动端界面" width="979" height="2120" loading="lazy" />
-        <p class="t-cap">巡航扫描</p>
-      </li>
-      <li class="seq__item" data-reveal="soft" data-reveal-delay="0.07">
-        <span class="seq__no t-num">02</span>
-        <img src="assets/cases/companion/pet-locked.webp" alt="识别到一只狗并锁定目标" width="1209" height="1145" loading="lazy" />
-        <p class="t-cap">目标锁定</p>
-      </li>
-      <li class="seq__item" data-reveal="soft" data-reveal-delay="0.14">
-        <span class="seq__no t-num">03</span>
-        <img src="assets/cases/companion/pet-live.webp" alt="实时画面与云台方向控制" width="1082" height="2162" loading="lazy" />
-        <p class="t-cap">实时跟踪</p>
-      </li>
-      <li class="seq__item" data-reveal="soft" data-reveal-delay="0.21">
-        <span class="seq__no t-num">04</span>
-        <img src="assets/cases/companion/pet-offline.webp" alt="设备未连接的离线状态" width="747" height="747" loading="lazy" />
-        <p class="t-cap">目标丢失</p>
-      </li>
-    </ol>
-    <p class="page t-cap seq__caption" data-reveal="soft">Pet Tracking 功能设定</p>
-  </section>
-  <!-- 幕四 · 结果 -->
-  <section class="band band--ink act outcome" id="outcome" aria-labelledby="outcome-title">
-    <div class="page split">
-      <div class="split__aside">
-        <p class="t-num">1.5</p>
-        <h2 class="t-h1" id="outcome-title">Outcome</h2>
-      </div>
-      <div class="split__main">
-        <p class="t-lead" data-reveal="soft">产品在 Ces 展上取得了不错的成绩，也拿到了 11 项 Best of CES 2026 媒体奖项。</p>
-        <p class="t-body" data-reveal="soft">在这个项目里我更清楚地意识到，设计不是悬在空中的闭门思考。</p>
-      </div>
-    </div>
-
-    <figure class="page fig fig--mid ces" data-reveal="soft">
-      <img src="assets/cases/companion/ces.webp" alt="CES 2026 展台现场，展板上是 11 项 Best of CES 媒体奖项"
-           width="2560" height="1484" loading="lazy" />
-      <figcaption class="t-cap">CES 2026 展台现场</figcaption>
-    </figure>
-
-    <div class="page awards" data-reveal="soft">
-      <p class="t-label awards__head">媒体奖项</p>
-      <div class="awards__row">
-        <img src="assets/cases/companion/awards/crn.webp" alt="CRN" width="133" height="100" loading="lazy" />
-        <img src="assets/cases/companion/awards/pcworld.webp" alt="PCWorld" width="225" height="100" loading="lazy" />
-        <img src="assets/cases/companion/awards/pcwelt.webp" alt="PC-WELT" width="198" height="100" loading="lazy" />
-        <img src="assets/cases/companion/awards/tomsguide.webp" alt="tom's guide" width="266" height="100" loading="lazy" />
-        <img src="assets/cases/companion/awards/gadgeteer.webp" alt="the gadgeteer" width="234" height="100" loading="lazy" />
-        <img src="assets/cases/companion/awards/zdnet.webp" alt="ZDNET" width="132" height="100" loading="lazy" />
-        <img src="assets/cases/companion/awards/ubergizmo.webp" alt="übergizmo" width="423" height="100" loading="lazy" />
-        <img src="assets/cases/companion/awards/netzwelt.webp" alt="NETZWELT" width="228" height="100" loading="lazy" />
-        <img src="assets/cases/companion/awards/mashable.webp" alt="Mashable" width="102" height="100" loading="lazy" />
-        <img src="assets/cases/companion/awards/findarticles.webp" alt="FindArticles" width="282" height="100" loading="lazy" />
+  </div><img src="assets/cases/companion/image_33.webp" style="width:744px;height:496.91px;position:absolute;top:487px;left:196px"  loading="lazy" decoding="async" alt="" /><img src="assets/cases/companion/intro_illus.webp" style="width:469px;height:318.03px;position:absolute;top:581.49px;left:1180.5px" loading="lazy" decoding="async" alt="" /><div class="doc-ch" data-no="02"
+    style="position:absolute;top:1347.00px;left:256px;width:129px;font-family:'PingFang HK','PingFang SC',sans-serif;font-size:30px;white-space:nowrap;color:rgba(50,48,46,1);line-height:32px;letter-spacing:normal;font-weight:600"
+  >
+    <span style="letter-spacing:0.07px">Problem</span>
+  </div><div class="doc-ch" data-no="03"
+    style="position:absolute;top:2682.00px;left:256px;width:129px;font-family:'PingFang HK','PingFang SC',sans-serif;font-size:30px;white-space:nowrap;color:rgba(50,48,46,1);line-height:32px;letter-spacing:normal;font-weight:600"
+  >
+    <span style="letter-spacing:0.07px">Strategy</span>
+  </div><div class="doc-ch" data-no="04"
+    style="position:absolute;top:3802.00px;left:256px;width:129px;font-family:'PingFang HK','PingFang SC',sans-serif;font-size:30px;white-space:nowrap;color:rgba(50,48,46,1);line-height:32px;letter-spacing:normal;font-weight:600"
+  >
+    <span style="letter-spacing:0.07px">Design</span>
+  </div><img src="assets/cases/companion/image_40.webp" style="width:147.09px;height:205.12px;position:absolute;top:1632.84px;left:667.36px"
+   loading="lazy" decoding="async" alt="" /><img src="assets/cases/companion/image_41.webp" style="width:336.67px;height:205.52px;position:absolute;top:1632.00px;left:317px"
+   loading="lazy" decoding="async" alt="" /><img src="assets/cases/companion/image_42.webp" style="width:86px;height:86px;position:absolute;top:1693.00px;left:911px"  loading="lazy" decoding="async" alt="" /><img src="assets/cases/companion/mascot.webp" style="width:121px;height:79.88px;position:absolute;top:1696.00px;left:1142px" loading="lazy" decoding="async" alt="" /><img src="assets/cases/companion/image_49.webp" style="width:338px;height:122px;position:absolute;top:1680.00px;left:1346px"  loading="lazy" decoding="async" alt="" /><div
+    style="position:absolute;top:2007.00px;left:256px;width:397px;height:33px;opacity:0.8;font-family:'PingFang SC','PingFang HK',sans-serif;font-size:20px;white-space:nowrap;color:rgba(50,48,46,1);line-height:1.7;letter-spacing:normal;font-weight:400"
+  >
+    <span style="letter-spacing:normal">纯视效与纯扁平导致视觉主体不明晰。</span>
+  </div><div
+    style="position:absolute;top:2064.00px;left:256px;width:1098px;height:67px;opacity:0.8;font-family:'PingFang SC','PingFang HK',sans-serif;font-size:20px;color:rgba(50,48,46,1);line-height:1.7;letter-spacing:normal;font-weight:400"
+  >
+    <span style="letter-spacing:normal"
+      >作为Preload存在，仅仅是软件，无法利用机型的优势。作为智能体的形式却在物理层面无法与用户互动，无视觉交互链路，实质是进行信息交换。</span
+    >
+  </div><div
+    style="position:absolute;top:2155.00px;left:256px;width:1064px;height:33px;opacity:0.8;font-family:'PingFang SC','PingFang HK',sans-serif;font-size:20px;white-space:nowrap;color:rgba(50,48,46,1);line-height:1.7;letter-spacing:normal;font-weight:400"
+  >
+    <span style="letter-spacing:normal"
+      >交互方式单一，存在于PC端，且依赖于用户主动触发使用，Maximum App思路，产品亮点变弱。</span
+    >
+  </div><div
+    style="position:absolute;top:1958.00px;left:256px;font-family:'PingFang SC','PingFang HK',sans-serif;font-size:20px;white-space:nowrap;color:rgba(50,48,46,1);line-height:1.7;letter-spacing:normal;font-weight:600"
+  >
+    <span style="letter-spacing:normal">针对联想已有产品与市场竞品进行调研，我们发现主要存在三种问题。</span>
+  </div><div
+    style="position:absolute;top:2251.00px;left:256px;font-family:'PingFang SC','PingFang HK',sans-serif;font-size:20px;white-space:nowrap;color:rgba(50,48,46,1);line-height:1.7;letter-spacing:normal;font-weight:600"
+  >
+    <span style="letter-spacing:normal">得出初步结论。</span>
+  </div><img src="assets/cases/companion/image_50.webp" style="width:86px;height:86px;position:absolute;top:1693.00px;left:1034px"  loading="lazy" decoding="async" alt="" /><div style="position:absolute;top:5157.09px;left:1428px;width:276px;height:411.46px">
+    <div
+      style="width:71.94px;height:71.94px;overflow:hidden;border-radius:62.95px;border-width:1.80px;border-style:solid;background-color:rgba(0,0,0,1);position:absolute;top:173.02px;left:107.34px"
+    >
+      <img src="assets/cases/companion/image_51.webp" style="width:43.16px;height:35px;position:absolute;top:17.98px;left:13.49px"
+       loading="lazy" decoding="async" alt="" />
+      <div style="width:89.91px;min-height:59.35px;position:absolute;top:6.29px;left:-16.19px"></div>
+      <div
+        style="position:absolute;top:15.29px;left:14.39px;display:flex;justify-content:flex-start;align-items:center;width:44.06px;height:5.40px"
+      >
+        <div
+          style="width:15.29px;border-radius:6.29px;border-color:rgba(255,255,255,1);border-style:solid;border-width:1.8px;min-height:5.4px"
+        ></div>
+        <div
+          style="width:15.29px;border-radius:6.29px;border-color:rgba(255,255,255,1);border-style:solid;border-width:1.8px;min-height:5.4px;margin-left:13.49px"
+        ></div>
       </div>
     </div>
-  </section>
-
+    <img src="assets/cases/companion/image_52.webp" style="width:154.67px;height:154.67px;position:absolute;top:131.65px;left:66.87px"
+     loading="lazy" decoding="async" alt="" /><img src="assets/cases/companion/image_53.webp" style="width:53.33px;height:53.33px;position:absolute;top:134.79px;left:177.02px;max-width:none"
+     loading="lazy" decoding="async" alt="" /><img src="assets/cases/companion/image_53.webp" style="width:53.33px;height:53.33px;position:absolute;top:232.81px;left:177.02px;max-width:none"
+     loading="lazy" decoding="async" alt="" /><img src="assets/cases/companion/image_53.webp" style="width:53.33px;height:53.33px;position:absolute;top:134.79px;left:56.52px;max-width:none"
+     loading="lazy" decoding="async" alt="" /><img src="assets/cases/companion/image_53.webp" style="width:53.33px;height:53.33px;position:absolute;top:232.81px;left:56.52px;max-width:none"
+     loading="lazy" decoding="async" alt="" />
+    <div
+      style="position:absolute;top:155.93px;left:69.57px;font-family:'PingFang HK','PingFang SC',sans-serif;font-size:7.19px;white-space:nowrap;color:rgba(50,48,46,1);line-height:normal;letter-spacing:normal;font-weight:500"
+    >
+      <span style="font-size:7.19px;letter-spacing:normal">Positive</span>
+    </div>
+    <div
+      style="position:absolute;top:91px;left:0;opacity:0.6;font-family:'PingFang HK','PingFang SC',sans-serif;font-size:8.99px;white-space:nowrap;color:rgba(50,48,46,1);line-height:normal;letter-spacing:normal;font-weight:500"
+    >
+      <span style="font-size:8.99px;letter-spacing:normal">Welcome</span>
+    </div>
+    <div
+      style="position:absolute;top:0;left:90px;opacity:0.6;font-family:'PingFang HK','PingFang SC',sans-serif;font-size:8.99px;white-space:nowrap;color:rgba(50,48,46,1);line-height:normal;letter-spacing:normal;font-weight:500"
+    >
+      <span style="font-size:8.99px;letter-spacing:normal">Processing</span>
+    </div>
+    <div
+      style="position:absolute;top:97px;left:232px;opacity:0.6;font-family:'PingFang HK','PingFang SC',sans-serif;font-size:8.99px;white-space:nowrap;color:rgba(50,48,46,1);line-height:normal;letter-spacing:normal;font-weight:500"
+    >
+      <span style="font-size:8.99px;letter-spacing:normal">User Input</span>
+    </div>
+    <div
+      style="position:absolute;top:345px;left:15px;opacity:0.6;font-family:'PingFang HK','PingFang SC',sans-serif;font-size:8.99px;white-space:nowrap;color:rgba(50,48,46,1);line-height:normal;letter-spacing:normal;font-weight:500"
+    >
+      <span style="font-size:8.99px;letter-spacing:normal">Ai assistant</span>
+    </div>
+    <div
+      style="position:absolute;top:398.46px;left:154.41px;opacity:0.6;font-family:'PingFang HK','PingFang SC',sans-serif;font-size:8.99px;white-space:nowrap;color:rgba(50,48,46,1);line-height:normal;letter-spacing:normal;font-weight:500"
+    >
+      <span style="font-size:8.99px;letter-spacing:normal">Plan</span>
+    </div>
+    <div
+      style="position:absolute;top:311px;left:143px;opacity:0.6;font-family:'PingFang HK','PingFang SC',sans-serif;font-size:8.99px;white-space:nowrap;color:rgba(50,48,46,1);line-height:normal;letter-spacing:normal;font-weight:500"
+    >
+      <span style="font-size:8.99px;letter-spacing:normal">Realtime translation</span>
+    </div>
+    <div
+      style="position:absolute;top:372.91px;left:231.99px;opacity:0.6;font-family:'PingFang HK','PingFang SC',sans-serif;font-size:8.99px;white-space:nowrap;color:rgba(50,48,46,1);line-height:normal;letter-spacing:normal;font-weight:500"
+    >
+      <span style="font-size:8.99px;letter-spacing:normal">Service</span>
+    </div>
+    <div
+      style="position:absolute;top:46px;left:127px;opacity:0.6;font-family:'PingFang HK','PingFang SC',sans-serif;font-size:8.99px;white-space:nowrap;color:rgba(50,48,46,1);line-height:normal;letter-spacing:normal;font-weight:500"
+    >
+      <span style="font-size:8.99px;letter-spacing:normal">Launch App</span>
+    </div>
+    <div
+      style="position:absolute;top:155.93px;left:194.56px;font-family:'PingFang HK','PingFang SC',sans-serif;font-size:7.19px;white-space:nowrap;color:rgba(50,48,46,1);line-height:normal;letter-spacing:normal;font-weight:500"
+    >
+      <span style="font-size:7.19px;letter-spacing:normal">Warm</span>
+    </div>
+    <div
+      style="position:absolute;top:253.95px;left:190.96px;font-family:'PingFang HK','PingFang SC',sans-serif;font-size:7.19px;white-space:nowrap;color:rgba(50,48,46,1);line-height:normal;letter-spacing:normal;font-weight:500"
+    >
+      <span style="font-size:7.19px;letter-spacing:normal">Process</span>
+    </div>
+    <div
+      style="position:absolute;top:253.95px;left:74.06px;font-family:'PingFang HK','PingFang SC',sans-serif;font-size:7.19px;white-space:nowrap;color:rgba(50,48,46,1);line-height:normal;letter-spacing:normal;font-weight:500"
+    >
+      <span style="font-size:7.19px;letter-spacing:normal">Calm</span>
+    </div>
+    <img src="assets/cases/companion/image_54.webp" style="width:20.68px;height:18.91px;position:absolute;top:160px;left:160.39px"
+     loading="lazy" decoding="async" alt="" />
+    <div
+      style="position:absolute;top:160px;left:165.78px;font-family:'PingFang SC','PingFang HK',sans-serif;font-size:7.19px;white-space:nowrap;text-align:center;color:rgba(255,255,255,1);line-height:10.10px;letter-spacing:normal;font-weight:600"
+    >
+      <span style="font-size:7.19px;letter-spacing:normal">. . .</span>
+    </div>
+  </div><div
+    style="position:absolute;top:2358.00px;left:256px;width:1109px;opacity:0.8;font-family:'PingFang SC','PingFang HK',sans-serif;font-size:20px;white-space:nowrap;color:rgba(50,48,46,1);line-height:1.7;letter-spacing:normal;font-weight:400"
+  >
+    <span style="letter-spacing:0.07px"
+      >结合共性产品用户使用触点分析，产出Tiko设计策略，进行推演。以用户视角为中心，最大化减少界面的视觉噪音。</span
+    >
+  </div><div
+    style="position:absolute;top:2300.00px;left:256px;width:1023px;opacity:0.8;font-family:'PingFang SC','PingFang HK',sans-serif;font-size:20px;white-space:nowrap;color:rgba(50,48,46,1);line-height:1.7;letter-spacing:normal;font-weight:400"
+  >
+    <span style="letter-spacing:0.07px"
+      >解决软件形态定位偏差，功能模块与机器割裂问题，充分利用产品本身的硬件能力，使用户感知链路提升。</span
+    >
+  </div><div
+    style="position:absolute;top:2416.00px;left:256px;width:1093px;opacity:0.8;font-family:'PingFang SC','PingFang HK',sans-serif;font-size:20px;white-space:nowrap;color:rgba(50,48,46,1);line-height:1.7;letter-spacing:normal;font-weight:400"
+  >
+    <span style="letter-spacing:0.07px">找齐场景框架、交互逻辑及视觉形式，人-机体验互补，传达简便易操作。</span>
+  </div><div
+    style="position:absolute;top:2474.00px;left:256px;width:1093px;opacity:0.8;font-family:'PingFang SC','PingFang HK',sans-serif;font-size:20px;white-space:nowrap;color:rgba(50,48,46,1);line-height:1.7;letter-spacing:normal;font-weight:400"
+  >
+    <span style="letter-spacing:0.07px">从而确定设计一个凭借机器为身体的互动式AI助理。</span>
+  </div><div style="position:absolute;top:3025.00px;left:295px;width:593.46px;height:303px">
+    <div
+      style="position:absolute;top:0;left:5.53px;opacity:0.5;font-family:'PingFang SC','PingFang HK',sans-serif;font-size:12.51px;white-space:nowrap;color:rgba(50,48,46,1);line-height:1.43;letter-spacing:normal;font-weight:400"
+    >
+      <span style="font-size:12.51px;letter-spacing:0.13px">记忆</span>
+    </div>
+    <div
+      style="position:absolute;top:0;left:192.34px;opacity:0.5;font-family:'PingFang SC','PingFang HK',sans-serif;font-size:12.51px;white-space:nowrap;color:rgba(50,48,46,1);line-height:1.43;letter-spacing:normal;font-weight:400"
+    >
+      <span style="font-size:12.51px;letter-spacing:0.13px">规划</span>
+    </div>
+    <div
+      style="position:absolute;top:0;left:379.09px;opacity:0.5;font-family:'PingFang SC','PingFang HK',sans-serif;font-size:12.51px;white-space:nowrap;color:rgba(47,47,47,1);line-height:1.43;letter-spacing:normal;font-weight:400"
+    >
+      <span style="font-size:12.51px;letter-spacing:0.13px">解决</span>
+    </div>
+    <div
+      style="position:absolute;top:0;left:567.46px;opacity:0.5;font-family:'PingFang SC','PingFang HK',sans-serif;font-size:12.51px;white-space:nowrap;color:rgba(47,47,47,1);line-height:1.43;letter-spacing:normal;font-weight:400"
+    >
+      <span style="font-size:12.51px;letter-spacing:0.13px">行动</span>
+    </div>
+    <div
+      style="width:75.82px;border-radius:4.6px;background-color:rgba(217,217,217,1);min-height:27.36px;position:absolute;top:176.83px;left:274.39px"
+    ></div>
+    <div
+      style="width:56.18px;border-radius:4.6px;background-color:rgba(217,217,217,1);min-height:27.63px;position:absolute;top:26.71px;left:270.71px"
+    ></div>
+    <div
+      style="width:56.18px;border-radius:4.6px;background-color:rgba(217,217,217,1);min-height:27.63px;position:absolute;top:26.71px;left:83.81px"
+    ></div>
+    <div
+      style="width:68.15px;border-radius:4.6px;background-color:rgba(217,217,217,1);min-height:27.63px;position:absolute;top:26.71px;left:460.43px"
+    ></div>
+    <div
+      style="width:75.82px;border-radius:4.6px;background-color:rgba(217,217,217,1);min-height:27.36px;position:absolute;top:176.83px;left:460.42px"
+    ></div>
+    <div
+      style="position:absolute;top:0;left:98.54px;font-family:'PingFang SC','PingFang HK',sans-serif;font-size:12.51px;white-space:nowrap;color:rgba(50,48,46,1);line-height:1.43;letter-spacing:normal;font-weight:400"
+    >
+      <span style="font-size:12.51px;letter-spacing:0.13px">感知</span>
+    </div>
+    <div
+      style="position:absolute;top:181.52px;left:286.90px;font-family:'PingFang HK','PingFang SC',sans-serif;font-size:12.51px;white-space:nowrap;color:rgba(50,48,46,1);line-height:1.43;letter-spacing:normal;font-weight:400"
+    >
+      <span style="font-size:12.51px;letter-spacing:0.13px">辅助工具</span>
+    </div>
+    <div
+      style="position:absolute;top:181.52px;left:473.71px;font-family:'PingFang HK','PingFang SC',sans-serif;font-size:12.51px;white-space:nowrap;color:rgba(50,48,46,1);line-height:1.43;letter-spacing:normal;font-weight:400"
+    >
+      <span style="font-size:12.51px;letter-spacing:0.13px">互动生命</span>
+    </div>
+    <div
+      style="position:absolute;top:30.39px;left:91.18px;font-family:'PingFang HK','PingFang SC',sans-serif;font-size:12.51px;white-space:nowrap;color:rgba(50,48,46,1);line-height:1.43;letter-spacing:normal;font-weight:400"
+    >
+      <span style="font-size:12.51px;letter-spacing:0.13px">Human</span>
+    </div>
+    <div
+      style="position:absolute;top:30.39px;left:281.06px;font-family:'PingFang HK','PingFang SC',sans-serif;font-size:12.51px;white-space:nowrap;color:rgba(50,48,46,1);line-height:1.43;letter-spacing:normal;font-weight:400"
+    >
+      <span style="font-size:12.51px;letter-spacing:0.13px">Agent</span>
+    </div>
+    <div
+      style="position:absolute;top:30.39px;left:469.43px;font-family:'PingFang HK','PingFang SC',sans-serif;font-size:12.51px;white-space:nowrap;color:rgba(50,48,46,1);line-height:1.43;letter-spacing:normal;font-weight:400"
+    >
+      <span style="font-size:12.51px;letter-spacing:0.13px">Machine</span>
+    </div>
+    <div
+      style="position:absolute;top:0;left:287.64px;font-family:'PingFang SC','PingFang HK',sans-serif;font-size:12.51px;white-space:nowrap;color:rgba(50,48,46,1);line-height:1.43;letter-spacing:normal;font-weight:400"
+    >
+      <span style="font-size:12.51px;letter-spacing:0.13px">思考</span>
+    </div>
+    <div
+      style="position:absolute;top:0;left:478.36px;font-family:'PingFang SC','PingFang HK',sans-serif;font-size:12.51px;white-space:nowrap;color:rgba(50,48,46,1);line-height:1.43;letter-spacing:normal;font-weight:400"
+    >
+      <span style="font-size:12.51px;letter-spacing:0.13px">反馈</span>
+    </div>
+    <img src="assets/cases/companion/image_55.webp" style="width:488.12px;position:absolute;top:69.07px;left:77.36px"  loading="lazy" decoding="async" alt="" /><img
+      src="assets/cases/companion/image_56.webp"
+      style="width:258.79px;position:absolute;top:225.64px;left:208.14px"
+     loading="lazy" decoding="async" alt="" /><img src="assets/cases/companion/image_57.webp" style="width:10.13px;height:10.13px;position:absolute;top:63.55px;left:79.20px"
+     loading="lazy" decoding="async" alt="" /><img src="assets/cases/companion/image_58.webp" style="width:10.13px;height:10.13px;position:absolute;top:63.55px;left:265.18px"
+     loading="lazy" decoding="async" alt="" /><img src="assets/cases/companion/image_59.webp" style="width:10.13px;height:10.13px;position:absolute;top:220.11px;left:265.18px"
+     loading="lazy" decoding="async" alt="" /><img src="assets/cases/companion/image_57.webp" style="width:10.13px;height:10.13px;position:absolute;top:63.55px;left:461.35px"
+     loading="lazy" decoding="async" alt="" /><img src="assets/cases/companion/image_60.webp" style="width:10.13px;height:10.13px;position:absolute;top:220.11px;left:461.35px"
+     loading="lazy" decoding="async" alt="" /><img src="assets/cases/companion/image_61.webp" style="width:227.63px;height:155.64px;position:absolute;top:147.36px;left:0;object-fit:contain"
+     loading="lazy" decoding="async" alt="" />
+  </div><div style="position:absolute;top:2968.00px;left:964.55px;width:750.28px;height:437.01px">
+    <div
+      style="position:absolute;top:4.43px;left:1.81px;width:49.78px;height:18.10px;font-family:'PingFang HK','PingFang SC',sans-serif;font-size:11.25px;white-space:nowrap;color:rgba(0,116,222,1);line-height:1.43;letter-spacing:normal;font-weight:500"
+    >
+      <span style="font-size:11.25px;letter-spacing:0.10px">Journey</span>
+    </div>
+    <div
+      style="position:absolute;top:83.17px;left:1.81px;width:40.73px;height:17.20px;font-family:'PingFang HK','PingFang SC',sans-serif;font-size:11.25px;white-space:nowrap;color:rgba(0,116,222,1);line-height:1.43;letter-spacing:normal;font-weight:500"
+    >
+      <span style="font-size:11.25px;letter-spacing:0.10px">Action</span>
+    </div>
+    <div
+      style="position:absolute;top:161.01px;left:1.81px;width:83.27px;height:18.10px;font-family:'PingFang HK','PingFang SC',sans-serif;font-size:11.25px;white-space:nowrap;color:rgba(0,116,222,1);line-height:1.43;letter-spacing:normal;font-weight:500"
+    >
+      <span style="font-size:11.25px;letter-spacing:0.10px">Contact Point</span>
+    </div>
+    <div
+      style="position:absolute;top:239.76px;left:1.81px;width:46.16px;height:18.10px;opacity:0.9;font-family:'PingFang HK','PingFang SC',sans-serif;font-size:11.25px;white-space:nowrap;color:rgba(0,116,222,1);line-height:1.43;letter-spacing:normal;font-weight:500"
+    >
+      <span style="font-size:11.25px;letter-spacing:0.10px">Feeling</span>
+    </div>
+    <div
+      style="position:absolute;top:318.50px;left:0;width:76.94px;height:17.20px;font-family:'PingFang HK','PingFang SC',sans-serif;font-size:11.25px;white-space:nowrap;color:rgba(0,116,222,1);line-height:1.43;letter-spacing:normal;font-weight:500"
+    >
+      <span style="font-size:11.25px;letter-spacing:0.10px">Opportunity</span>
+    </div>
+    <div
+      style="position:absolute;top:79.86px;left:140.85px;width:29.04px;height:22.51px;font-family:'PingFang HK','PingFang SC',sans-serif;font-size:10.74px;white-space:nowrap;color:rgba(50,48,46,1);line-height:21.48px;letter-spacing:normal;font-weight:500"
+    >
+      <span style="font-size:10.74px;letter-spacing:0.05px">打开</span>
+    </div>
+    <div
+      style="position:absolute;top:0;left:140.85px;width:49.37px;height:22.51px;font-family:'PingFang HK','PingFang SC',sans-serif;font-size:10.74px;white-space:nowrap;color:rgba(50,48,46,1);line-height:21.48px;letter-spacing:normal;font-weight:500"
+    >
+      <span style="font-size:10.74px;letter-spacing:0.05px">空闲状态</span>
+    </div>
+    <div
+      style="position:absolute;top:0;left:412.38px;width:38.48px;height:22.51px;font-family:'PingFang HK','PingFang SC',sans-serif;font-size:10.74px;white-space:nowrap;color:rgba(50,48,46,1);line-height:21.48px;letter-spacing:normal;font-weight:500"
+    >
+      <span style="font-size:10.74px;letter-spacing:0.05px">交互中</span>
+    </div>
+    <div
+      style="position:absolute;top:0;left:675.20px;width:47.92px;height:22.51px;font-family:'PingFang HK','PingFang SC',sans-serif;font-size:10.74px;white-space:nowrap;color:rgba(50,48,46,1);line-height:21.48px;letter-spacing:normal;font-weight:500"
+    >
+      <span style="font-size:10.74px;letter-spacing:0.05px">任务后台</span>
+    </div>
+    <div
+      style="position:absolute;top:158.44px;left:140.94px;width:93.96px;height:22.51px;font-family:'PingFang HK','PingFang SC',sans-serif;font-size:10.74px;white-space:nowrap;color:rgba(50,48,46,1);line-height:21.48px;letter-spacing:normal;font-weight:500"
+    >
+      <span style="font-size:10.74px;letter-spacing:0.05px">Companion App</span>
+    </div>
+    <div
+      style="position:absolute;top:158.27px;left:328.89px;width:47.92px;height:22.51px;font-family:'PingFang HK','PingFang SC',sans-serif;font-size:10.74px;white-space:nowrap;color:rgba(50,48,46,1);line-height:21.48px;letter-spacing:normal;font-weight:500"
+    >
+      <span style="font-size:10.74px;letter-spacing:0.05px">执行任务</span>
+    </div>
+    <div
+      style="position:absolute;top:158.27px;left:499.50px;width:47.92px;height:22.51px;font-family:'PingFang HK','PingFang SC',sans-serif;font-size:10.74px;white-space:nowrap;color:rgba(50,48,46,1);line-height:21.48px;letter-spacing:normal;font-weight:500"
+    >
+      <span style="font-size:10.74px;letter-spacing:0.05px">主动唤醒</span>
+    </div>
+    <div
+      style="position:absolute;top:158.27px;left:679.55px;width:47.92px;height:22.51px;font-family:'PingFang HK','PingFang SC',sans-serif;font-size:10.74px;white-space:nowrap;color:rgba(50,48,46,1);line-height:21.48px;letter-spacing:normal;font-weight:500"
+    >
+      <span style="font-size:10.74px;letter-spacing:0.05px">PC/手机</span>
+    </div>
+    <div
+      style="position:absolute;top:79.86px;left:246.85px;width:29.04px;height:22.51px;font-family:'PingFang HK','PingFang SC',sans-serif;font-size:10.74px;white-space:nowrap;color:rgba(50,48,46,1);line-height:21.48px;letter-spacing:normal;font-weight:500"
+    >
+      <span style="font-size:10.74px;letter-spacing:0.05px">输入</span>
+    </div>
+    <div
+      style="position:absolute;top:79.86px;left:352.12px;width:29.04px;height:22.51px;font-family:'PingFang HK','PingFang SC',sans-serif;font-size:10.74px;white-space:nowrap;color:rgba(50,48,46,1);line-height:21.48px;letter-spacing:normal;font-weight:500"
+    >
+      <span style="font-size:10.74px;letter-spacing:0.05px">进程</span>
+    </div>
+    <div
+      style="position:absolute;top:79.86px;left:457.39px;width:29.04px;height:22.51px;font-family:'PingFang HK','PingFang SC',sans-serif;font-size:10.74px;white-space:nowrap;color:rgba(50,48,46,1);line-height:21.48px;letter-spacing:normal;font-weight:500"
+    >
+      <span style="font-size:10.74px;letter-spacing:0.05px">输出</span>
+    </div>
+    <div
+      style="position:absolute;top:79.86px;left:562.66px;width:47.92px;height:22.51px;font-family:'PingFang HK','PingFang SC',sans-serif;font-size:10.74px;white-space:nowrap;color:rgba(50,48,46,1);line-height:21.48px;letter-spacing:normal;font-weight:500"
+    >
+      <span style="font-size:10.74px;letter-spacing:0.05px">任务处理</span>
+    </div>
+    <div
+      style="position:absolute;top:79.86px;left:675.20px;width:57.36px;height:22.51px;font-family:'PingFang HK','PingFang SC',sans-serif;font-size:10.74px;white-space:nowrap;color:rgba(50,48,46,1);line-height:21.48px;letter-spacing:normal;font-weight:500"
+    >
+      <span style="font-size:10.74px;letter-spacing:0.05px">error/待机</span>
+    </div>
+    <img src="assets/cases/companion/image_62.webp" style="width:649.90px;position:absolute;top:31.89px;left:100.39px"  loading="lazy" decoding="async" alt="" /><img
+      src="assets/cases/companion/image_62.webp"
+      style="width:649.90px;position:absolute;top:119px;left:100.39px"
+     loading="lazy" decoding="async" alt="" /><img
+      src="assets/cases/companion/image_62.webp"
+      style="width:649.90px;position:absolute;top:209.04px;left:100.39px"
+     loading="lazy" decoding="async" alt="" /><img src="assets/cases/companion/image_62.webp" style="width:649.90px;position:absolute;top:286.36px;left:100.39px"  loading="lazy" decoding="async" alt="" />
+    <div
+      style="position:absolute;top:302.92px;left:119.79px;width:246.85px;height:84.17px;opacity:0.8;font-family:'PingFang SC','PingFang HK',sans-serif;font-size:9.96px;color:rgba(50,48,46,1);line-height:20.86px;letter-spacing:normal;font-weight:400"
+    >
+      <div ><span style="font-size:9.96px;letter-spacing:normal">·通过桌面快捷方式进入 </span></div>
+      <div ><span style="font-size:9.96px;letter-spacing:normal">·休眠之后，用户说出唤醒词如：“Hi Tiko” </span></div>
+      <div ><span style="font-size:9.96px;letter-spacing:normal">·设备无操作自动触发 </span></div>
+      <div ><span style="font-size:9.96px;letter-spacing:normal">·语音助手唤起Companion mode </span></div>
+      <div><span style="font-size:9.96px;letter-spacing:normal">·keyboard 触发唤起Companion mode</span></div>
+    </div>
+    <div
+      style="position:absolute;top:302.92px;left:349.94px;width:196.75px;height:134.09px;opacity:0.8;font-family:'PingFang SC','PingFang HK',sans-serif;font-size:9.96px;color:rgba(50,48,46,1);line-height:20.86px;letter-spacing:normal;font-weight:400"
+    >
+      <div ><span style="font-size:9.96px;letter-spacing:normal">·展示交互中状态，如打字动画、加载动画等 </span></div>
+      <div >
+        <span style="font-size:9.96px;letter-spacing:normal"
+          >·减少等待感知：你是想问xxxx吗？好的，我在思考怎么帮你解决这个问题...
+        </span>
+      </div>
+      <div ><span style="font-size:9.96px;letter-spacing:normal">·动画/动作效果要易于理解 </span></div>
+      <div ><span style="font-size:9.96px;letter-spacing:normal">·动画要有吸引力，增加用户兴趣度与使用欲 </span></div>
+      <div ><span style="font-size:9.96px;letter-spacing:normal">·抢断发生时的动画衔接 </span></div>
+      <div><span style="font-size:9.96px;letter-spacing:normal"> </span></div>
+    </div>
+    <div
+      style="position:absolute;top:302.92px;left:592.86px;width:150.25px;height:84.18px;opacity:0.8;font-family:'PingFang SC','PingFang HK',sans-serif;font-size:9.96px;color:rgba(50,48,46,1);line-height:20.86px;letter-spacing:normal;font-weight:400"
+    >
+      <div ><span style="font-size:9.96px;letter-spacing:normal">·根据表情自动生成相关Motion </span></div>
+      <div ><span style="font-size:9.96px;letter-spacing:normal">·尝试在不同端设计动画及其裁切方案的可行性 </span></div>
+      <div><span style="font-size:9.96px;letter-spacing:normal">·待机表情可感知性的平衡 </span></div>
+    </div>
+    <div
+      style="position:absolute;top:241px;left:146.45px;width:44px;height:14px;font-family:'PingFang HK','PingFang SC',sans-serif;font-size:9.61px;white-space:nowrap;color:rgba(50,48,46,1);line-height:normal;letter-spacing:normal;font-weight:500;display:inline-flex;align-items:center"
+    >
+      <div ><span style="font-size:9.61px;letter-spacing:normal">Positive</span></div>
+    </div>
+    <div
+      style="position:absolute;top:241.04px;left:340.47px;width:29.36px;height:13.70px;font-family:'PingFang HK','PingFang SC',sans-serif;font-size:9.61px;white-space:nowrap;color:rgba(50,48,46,1);line-height:normal;letter-spacing:normal;font-weight:500;display:inline-flex;align-items:center"
+    >
+      <div ><span style="font-size:9.61px;letter-spacing:normal">Warm</span></div>
+    </div>
+    <div
+      style="position:absolute;top:241.04px;left:516.20px;width:24.47px;height:13.70px;font-family:'PingFang HK','PingFang SC',sans-serif;font-size:9.61px;white-space:nowrap;color:rgba(50,48,46,1);line-height:normal;letter-spacing:normal;font-weight:500;display:inline-flex;align-items:center"
+    >
+      <div ><span style="font-size:9.61px;letter-spacing:normal">Calm</span></div>
+    </div>
+    <div
+      style="position:absolute;top:240.92px;left:687.31px;width:44.85px;height:13.56px;font-family:'PingFang HK','PingFang SC',sans-serif;font-size:9.61px;white-space:nowrap;color:rgba(50,48,46,1);line-height:normal;letter-spacing:normal;font-weight:500;display:inline-flex;align-items:center"
+    >
+      <div ><span style="font-size:9.61px;letter-spacing:normal">Process</span></div>
+    </div>
+  </div><div
+    style="position:absolute;top:3532.00px;left:258px;width:1098px;opacity:0.8;font-family:'PingFang SC','PingFang HK',sans-serif;font-size:20px;color:rgba(50,48,46,1);line-height:1.7;letter-spacing:normal;font-weight:400"
+  >
+    <span style="letter-spacing:0.17px"
+      >我们通过设计（理念、框架、风格、规则）来串联起硬件、系统和智能体的联系。形成软硬件结合的产品体验，赋予其智能的高感知力外在显性化，让用户感受只能科技的温度，展现出品牌的活力与年轻化，同时也即是构建了一套形式增强功能的可视化视觉系统。</span
+    >
+  </div><img src="assets/cases/companion/itergrid.webp" style="width:687.09px;height:159.37px;position:absolute;top:4105.09px;left:278.47px" loading="lazy" decoding="async" alt="" /><img src="assets/cases/companion/image_95.webp" style="height:88px;position:absolute;top:1696.50px;left:866px"  loading="lazy" decoding="async" alt="" /><img
+    src="assets/cases/companion/image_95.webp"
+    style="height:88px;position:absolute;top:1696.50px;left:1298px"
+   loading="lazy" decoding="async" alt="" /><div
+    style="position:absolute;top:4344.09px;left:560px;width:124px;height:31px;opacity:0.8;font-family:'PingFang SC','PingFang HK',sans-serif;font-size:15px;white-space:nowrap;color:rgba(50,48,46,1);line-height:32px;letter-spacing:normal;font-weight:400"
+  >
+    <span style="letter-spacing:0.07px">视觉方案初次迭代</span>
+  </div><div
+    style="position:absolute;top:4344.09px;left:1307px;width:124px;height:31px;opacity:0.8;font-family:'PingFang SC','PingFang HK',sans-serif;font-size:15px;white-space:nowrap;color:rgba(50,48,46,1);line-height:32px;letter-spacing:normal;font-weight:400"
+  >
+    <span style="letter-spacing:0.07px">交互方案初次迭代</span>
+  </div><div
+    style="position:absolute;top:5683.09px;left:255px;width:1135px;height:58px;opacity:0.8;font-family:'PingFang SC','PingFang HK',sans-serif;font-size:20px;color:rgba(50,48,46,1);line-height:32px;letter-spacing:normal;font-weight:400"
+  >
+    <span style="letter-spacing:0.07px"
+      >在Tiko视觉方案最终设定上，我们确定了四种情绪变化，也制作了上百种不同的表情动效，其视觉效果会根据情绪变化，而不同的情绪也会相应匹配多种不同的任务场景，配合产品硬件电机的扭转，带给用户丰富的互动感受。</span
+    >
+  </div><img src="assets/cases/companion/image_96.webp" style="width:393.37px;height:258.99px;position:absolute;top:6019.09px;left:344px"
+   loading="lazy" decoding="async" alt="" /><img src="assets/cases/companion/image_97.webp" style="width:385.88px;height:258.06px;position:absolute;top:6019.09px;left:748.38px"
+   loading="lazy" decoding="async" alt="" /><div style="position:absolute;top:6068.60px;left:1285px;width:415.43px;height:468.94px">
+    <div
+      style="position:absolute;top:0;left:253.11px;font-family:Futura,'Trebuchet MS','PingFang SC',sans-serif;font-size:11.23px;white-space:nowrap;color:rgba(50,48,46,1);line-height:normal;letter-spacing:normal;font-weight:500"
+    >
+      <span style="font-size:11.23px;letter-spacing:normal">Start</span>
+    </div>
+    <div
+      style="position:absolute;top:48.60px;left:236.60px;font-family:Futura,'Trebuchet MS','PingFang SC',sans-serif;font-size:11.23px;white-space:nowrap;color:rgba(50,48,46,1);line-height:normal;letter-spacing:normal;font-weight:500"
+    >
+      <span style="font-size:11.23px;letter-spacing:normal">Input Voice</span>
+    </div>
+    <div
+      style="position:absolute;top:204.50px;left:365.91px;font-family:Futura,'Trebuchet MS','PingFang SC',sans-serif;font-size:11.23px;white-space:nowrap;color:rgba(50,48,46,1);line-height:normal;letter-spacing:normal;font-weight:500"
+    >
+      <span style="font-size:11.23px;letter-spacing:normal">Failed</span>
+    </div>
+    <div
+      style="position:absolute;top:348.48px;left:365.91px;font-family:Futura,'Trebuchet MS','PingFang SC',sans-serif;font-size:11.23px;white-space:nowrap;color:rgba(50,48,46,1);line-height:normal;letter-spacing:normal;font-weight:500"
+    >
+      <span style="font-size:11.23px;letter-spacing:normal">Failed</span>
+    </div>
+    <div
+      style="position:absolute;top:276.95px;left:275.12px;font-family:Futura,'Trebuchet MS','PingFang SC',sans-serif;font-size:11.23px;white-space:nowrap;color:rgba(43,164,89,1);line-height:normal;letter-spacing:normal;font-weight:500"
+    >
+      <span style="font-size:11.23px;letter-spacing:normal">Yes</span>
+    </div>
+    <div
+      style="position:absolute;top:420.93px;left:275.12px;font-family:Futura,'Trebuchet MS','PingFang SC',sans-serif;font-size:11.23px;white-space:nowrap;color:rgba(43,164,89,1);line-height:normal;letter-spacing:normal;font-weight:500"
+    >
+      <span style="font-size:11.23px;letter-spacing:normal">Yes</span>
+    </div>
+    <div
+      style="position:absolute;top:167.82px;left:236.60px;font-family:Futura,'Trebuchet MS','PingFang SC',sans-serif;font-size:11.23px;white-space:nowrap;color:rgba(50,48,46,1);line-height:normal;letter-spacing:normal;font-weight:500"
+    >
+      <span style="font-size:11.23px;letter-spacing:normal">Input Voice 2</span>
+    </div>
+    <div
+      style="position:absolute;top:240.27px;left:221.01px;font-family:Futura,'Trebuchet MS','PingFang SC',sans-serif;font-size:11.23px;white-space:nowrap;color:rgba(50,48,46,1);line-height:normal;letter-spacing:normal;font-weight:500"
+    >
+      <span style="font-size:11.23px;letter-spacing:normal">If Voice Qualified</span>
+    </div>
+    <div
+      style="position:absolute;top:380.58px;left:221.01px;font-family:Futura,'Trebuchet MS','PingFang SC',sans-serif;font-size:11.23px;white-space:nowrap;color:rgba(50,48,46,1);line-height:normal;letter-spacing:normal;font-weight:500"
+    >
+      <span style="font-size:11.23px;letter-spacing:normal">If Voice Qualified</span>
+    </div>
+    <div
+      style="position:absolute;top:453.94px;left:253.11px;font-family:Futura,'Trebuchet MS','PingFang SC',sans-serif;font-size:11.23px;white-space:nowrap;color:rgba(50,48,46,1);line-height:normal;letter-spacing:normal;font-weight:500"
+    >
+      <span style="font-size:11.23px;letter-spacing:normal">Save</span>
+    </div>
+    <div
+      style="position:absolute;top:316.38px;left:231.10px;font-family:Futura,'Trebuchet MS','PingFang SC',sans-serif;font-size:11.23px;white-space:nowrap;color:rgba(50,48,46,1);line-height:normal;letter-spacing:normal;font-weight:500"
+    >
+      <span style="font-size:11.23px;letter-spacing:normal">Input Voice 3</span>
+    </div>
+    <div
+      style="position:absolute;top:167.82px;left:0;font-family:Futura,'Trebuchet MS','PingFang SC',sans-serif;font-size:11.23px;white-space:nowrap;color:rgba(50,48,46,1);line-height:normal;letter-spacing:normal;font-weight:500"
+    >
+      <span style="font-size:11.23px;letter-spacing:normal">Compare Voice 1&amp;2</span>
+    </div>
+    <div
+      style="position:absolute;top:316.38px;left:0.92px;font-family:Futura,'Trebuchet MS','PingFang SC',sans-serif;font-size:11.23px;white-space:nowrap;color:rgba(50,48,46,1);line-height:normal;letter-spacing:normal;font-weight:500"
+    >
+      <span style="font-size:11.23px;letter-spacing:normal">Compare Voice 1-3</span>
+    </div>
+    <div
+      style="position:absolute;top:48.60px;left:22.93px;font-family:Futura,'Trebuchet MS','PingFang SC',sans-serif;font-size:11.23px;white-space:nowrap;color:rgba(50,48,46,1);line-height:normal;letter-spacing:normal;font-weight:500"
+    >
+      <span style="font-size:11.23px;letter-spacing:normal">Save Voice</span>
+    </div>
+    <img src="assets/cases/companion/image_98.webp" style="height:22.01px;position:absolute;top:16.05px;left:267.32px"  loading="lazy" decoding="async" alt="" /><img
+      src="assets/cases/companion/image_99.webp"
+      style="height:38.52px;position:absolute;top:193.50px;left:266.86px"
+     loading="lazy" decoding="async" alt="" /><img src="assets/cases/companion/image_99.webp" style="height:38.52px;position:absolute;top:265.95px;left:266.86px"  loading="lazy" decoding="async" alt="" /><img
+      src="assets/cases/companion/image_99.webp"
+      style="height:38.52px;position:absolute;top:337.48px;left:266.86px"
+     loading="lazy" decoding="async" alt="" /><img src="assets/cases/companion/image_99.webp" style="height:38.52px;position:absolute;top:411.76px;left:266.86px"  loading="lazy" decoding="async" alt="" /><img
+      src="assets/cases/companion/image_100.webp"
+      style="height:103.63px;position:absolute;top:63.28px;left:266.86px"
+     loading="lazy" decoding="async" alt="" /><img src="assets/cases/companion/image_100.webp" style="height:103.63px;position:absolute;top:63.28px;left:52.27px"  loading="lazy" decoding="async" alt="" /><img
+      src="assets/cases/companion/image_100.webp"
+      style="height:103.63px;position:absolute;top:196.25px;left:52.27px"
+     loading="lazy" decoding="async" alt="" /><img src="assets/cases/companion/image_101.webp" style="width:162.32px;height:39.43px;position:absolute;top:349.40px;left:52.27px;object-fit:contain"
+     loading="lazy" decoding="async" alt="" /><img src="assets/cases/companion/image_102.webp" style="width:162.32px;height:65.11px;position:absolute;top:183.41px;left:52.27px;object-fit:contain"
+     loading="lazy" decoding="async" alt="" /><img src="assets/cases/companion/image_103.webp" style="width:93.54px;height:64.65px;position:absolute;top:324.18px;left:321.89px;object-fit:contain"
+     loading="lazy" decoding="async" alt="" /><img src="assets/cases/companion/image_104.webp" style="width:93.54px;height:72.45px;position:absolute;top:176.07px;left:321.89px;object-fit:contain"
+     loading="lazy" decoding="async" alt="" /><img
+      src="assets/cases/companion/image_105.webp"
+      style="width:103.63px;position:absolute;top:56.86px;left:110.51px"
+     loading="lazy" decoding="async" alt="" /><img
+      src="assets/cases/companion/image_105.webp"
+      style="width:103.63px;position:absolute;top:176.07px;left:110.51px"
+     loading="lazy" decoding="async" alt="" /><img src="assets/cases/companion/image_105.webp" style="width:103.63px;position:absolute;top:324.64px;left:110.51px"  loading="lazy" decoding="async" alt="" />
+  </div><img src="assets/cases/companion/image_106.webp" style="width:788.02px;height:298px;position:absolute;top:6294.09px;left:344px"  loading="lazy" decoding="async" alt="" /><div
+    style="position:absolute;top:6775.09px;left:255px;width:1137px;opacity:0.8;font-family:'PingFang SC','PingFang HK',sans-serif;font-size:20px;color:rgba(50,48,46,1);line-height:1.7;letter-spacing:normal;font-weight:400"
+  >
+    <span style="letter-spacing:normal"
+      >Twist Center定位以会议场景为核心，摒弃繁杂的用户使用开端，以打开App的时刻就将任何行动纳入使用流程，最大化软件的效率程度，无冗余主页结构与说明引导，从使用中完善用户对产品的熟知能力，聚焦于信息本身。</span
+    >
+  </div><div
+    style="position:absolute;top:5879.09px;left:255px;width:603px;opacity:0.54;font-family:'PingFang SC','PingFang HK',sans-serif;font-size:20px;white-space:nowrap;color:rgba(50,48,46,1);line-height:1.7;letter-spacing:normal;font-weight:400"
+  >
+    <span style="letter-spacing:normal">此外还有Twist Center交互与Pet Tracking功能中的一些小功能点</span>
+  </div><img src="assets/cases/companion/petrow.webp" style="width:1354.22px;height:531px;position:absolute;top:7028.09px;left:316px" loading="lazy" decoding="async" alt="" /><div
+    style="position:absolute;top:7752.09px;left:255px;width:1137px;opacity:0.8;font-family:'PingFang HK','PingFang SC',sans-serif;font-size:20px;color:rgba(50,48,46,1);line-height:1.7;letter-spacing:normal;font-weight:400"
+  >
+    <div >
+      <span style="letter-spacing:normal"
+        >该场景是关于电脑追踪控制权限的移动端与PC端归还交互功能设计。主要为宠物追踪模式，自动巡逻区域以检测宠物。
+      </span>
+    </div>
+    <div ><span style="letter-spacing:normal">&nbsp;</span></div>
+    <div>
+      <span style="letter-spacing:normal"
+        >检测到猫狗立刻开启跟踪，页面中出现预览画面与标签，并且停止巡航，如果追踪过程中目标丢失，设备将回到巡航与扫描状态继续搜索。</span
+      >
+    </div>
+  </div><div
+    style="position:absolute;top:8775.09px;left:255px;width:1152px;opacity:0.8;font-family:'PingFang HK','PingFang SC',sans-serif;font-size:20px;color:rgba(50,48,46,1);line-height:1.7;letter-spacing:normal;font-weight:400"
+  >
+    <span style="letter-spacing:normal"
+      >产品在Ces展上取得了不错的成绩，这取决于团队中每个成员的努力。这是我接触的第一个项目，与其说参与了设计Tiko，更不如说Tiko带我完善了整个工作流程，从梳理项目需求与实际机器运作情况，到视觉交互，再到研发测试，不断去对其每个环节，找到设计在团队中的落脚点，找到设计在图纸与硬件的结合处，这才有了产品的诞生，设计不是悬在空中的闭门思考。</span
+    >
+  </div><div
+    style="width:470.62px;box-shadow:0px 0px 10.24px 0px rgba(0,0,0,0.05);background-color:rgba(255,255,255,1);min-height:38.86px;position:absolute;top:8471.09px;left:255.86px"
+  ></div><div
+    style="position:absolute;top:8485.09px;left:266.26px;width:352.79px;font-family:Futura,'Trebuchet MS','PingFang SC',sans-serif;font-size:9.93px;white-space:nowrap;color:rgba(50,48,46,1);line-height:normal;letter-spacing:normal;font-weight:500"
+  >
+    <span style="font-size:9.93px;letter-spacing:normal"
+      >The Best of CES 2026: The Most Important</span
+    >
+  </div><div
+    style="width:470.62px;box-shadow:0px 0px 10.24px 0px rgba(0,0,0,0.05);background-color:rgba(255,255,255,1);min-height:38.86px;position:absolute;top:8522.90px;left:255.86px"
+  ></div><div
+    style="position:absolute;top:8536.91px;left:266.26px;width:352.79px;font-family:Futura,'Trebuchet MS','PingFang SC',sans-serif;font-size:9.93px;white-space:nowrap;color:rgba(50,48,46,1);line-height:normal;letter-spacing:normal;font-weight:500"
+  >
+    <span style="font-size:9.93px;letter-spacing:normal">Best of CES 2026</span>
+  </div><div
+    style="width:471.48px;box-shadow:0px 0px 10.24px 0px rgba(0,0,0,0.05);background-color:rgba(255,255,255,1);min-height:38.86px;position:absolute;top:8574.71px;left:255px"
+  ></div><div
+    style="position:absolute;top:8588.72px;left:266.26px;width:352.79px;font-family:Futura,'Trebuchet MS','PingFang SC',sans-serif;font-size:9.93px;white-space:nowrap;color:rgba(50,48,46,1);line-height:normal;letter-spacing:normal;font-weight:500"
+  >
+    <span style="font-size:9.93px;letter-spacing:normal">The Best Laptops of CES 2026</span>
+  </div><div
+    style="width:470.62px;box-shadow:0px 0px 10.24px 0px rgba(0,0,0,0.05);background-color:rgba(255,255,255,1);min-height:38.86px;position:absolute;top:8626.52px;left:255.86px"
+  ></div><div
+    style="position:absolute;top:8640.53px;left:266.26px;width:352.79px;font-family:Futura,'Trebuchet MS','PingFang SC',sans-serif;font-size:9.93px;white-space:nowrap;color:rgba(50,48,46,1);line-height:normal;letter-spacing:normal;font-weight:500"
+  >
+    <span style="font-size:9.93px;letter-spacing:normal">Best of CES 2026</span>
+  </div><div
+    style="width:470.62px;box-shadow:0px 0px 10.24px 0px rgba(0,0,0,0.05);background-color:rgba(255,255,255,1);min-height:38.86px;position:absolute;top:8626.71px;left:757.7px"
+  ></div><div
+    style="position:absolute;top:8640.88px;left:768.10px;width:352.79px;font-family:Futura,'Trebuchet MS','PingFang SC',sans-serif;font-size:9.93px;white-space:nowrap;color:rgba(50,48,46,1);line-height:normal;letter-spacing:normal;font-weight:500"
+  >
+    <span style="font-size:9.93px;letter-spacing:normal">Best Laptops of CES 2026</span>
+  </div><div
+    style="width:470.62px;box-shadow:0px 0px 10.24px 0px rgba(0,0,0,0.05);background-color:rgba(255,255,255,1);min-height:38.86px;position:absolute;top:8471.09px;left:1259.38px"
+  ></div><div
+    style="position:absolute;top:8485.01px;left:1269.78px;width:352.79px;font-family:Futura,'Trebuchet MS','PingFang SC',sans-serif;font-size:9.93px;white-space:nowrap;color:rgba(50,48,46,1);line-height:normal;letter-spacing:normal;font-weight:500"
+  >
+    <span style="font-size:9.93px;letter-spacing:normal"
+      >The 5 Most Innovative Lenovo laptops at CES 2026</span
+    >
+  </div><img src="assets/cases/companion/image_163.webp" style="width:60.72px;height:22.04px;position:absolute;top:8478.86px;left:650.49px"
+   loading="lazy" decoding="async" alt="" /><img src="assets/cases/companion/image_164.webp" style="width:61.24px;height:19.02px;position:absolute;top:8532.40px;left:649.63px"
+   loading="lazy" decoding="async" alt="" /><img src="assets/cases/companion/image_165.webp" style="width:69.08px;height:17.27px;position:absolute;top:8585.07px;left:646.17px"
+   loading="lazy" decoding="async" alt="" /><img src="assets/cases/companion/image_166.webp" style="width:84.17px;height:16.50px;position:absolute;top:8636.88px;left:638.40px;object-fit:contain"
+   loading="lazy" decoding="async" alt="" /><img src="assets/cases/companion/image_167.webp" style="width:26.35px;height:16.14px;position:absolute;top:8637.94px;left:1169.60px"
+   loading="lazy" decoding="async" alt="" /><img src="assets/cases/companion/image_167.webp" style="width:26.35px;height:16.14px;position:absolute;top:8481.45px;left:1671.28px"
+   loading="lazy" decoding="async" alt="" /><div
+    style="width:470.62px;box-shadow:0px 0px 10.24px 0px rgba(0,0,0,0.05);background-color:rgba(255,255,255,1);min-height:38.86px;position:absolute;top:8471.09px;left:757.7px"
+  ></div><div
+    style="position:absolute;top:8485.09px;left:768.97px;width:352.79px;font-family:Futura,'Trebuchet MS','PingFang SC',sans-serif;font-size:9.93px;white-space:nowrap;color:rgba(50,48,46,1);line-height:normal;letter-spacing:normal;font-weight:500"
+  >
+    <span style="font-size:9.93px;letter-spacing:normal"
+      >CES 2026: New Laptops Deliver Cutting-Edge Al, Innovative Form Factors</span
+    >
+  </div><div
+    style="width:470.62px;box-shadow:0px 0px 10.24px 0px rgba(0,0,0,0.05);background-color:rgba(255,255,255,1);min-height:38.86px;position:absolute;top:8522.90px;left:757.7px"
+  ></div><div
+    style="position:absolute;top:8536.91px;left:768.97px;width:352.79px;font-family:Futura,'Trebuchet MS','PingFang SC',sans-serif;font-size:9.93px;white-space:nowrap;color:rgba(50,48,46,1);line-height:normal;letter-spacing:normal;font-weight:500"
+  >
+    <span style="font-size:9.93px;letter-spacing:normal">Best Business 2-in-1 Laptop</span>
+  </div><div
+    style="width:470.62px;box-shadow:0px 0px 10.24px 0px rgba(0,0,0,0.05);background-color:rgba(255,255,255,1);min-height:38.86px;position:absolute;top:8574.71px;left:757.7px"
+  ></div><div
+    style="width:470.62px;box-shadow:0px 0px 10.24px 0px rgba(0,0,0,0.05);background-color:rgba(255,255,255,1);min-height:38.86px;position:absolute;top:8522.28px;left:1259.38px"
+  ></div><div
+    style="position:absolute;top:8536.29px;left:1270.65px;width:352.79px;font-family:Futura,'Trebuchet MS','PingFang SC',sans-serif;font-size:9.93px;white-space:nowrap;color:rgba(50,48,46,1);line-height:normal;letter-spacing:normal;font-weight:500"
+  >
+    <span style="font-size:9.93px;letter-spacing:normal"
+      >Best Laptops of CES 2026: Best Gimmick</span
+    >
+  </div><div
+    style="width:470.62px;box-shadow:0px 0px 10.24px 0px rgba(0,0,0,0.05);background-color:rgba(255,255,255,1);min-height:38.86px;position:absolute;top:8574.09px;left:1259.38px"
+  ></div><div
+    style="position:absolute;top:8588.10px;left:1270.65px;width:352.79px;font-family:Futura,'Trebuchet MS','PingFang SC',sans-serif;font-size:9.93px;white-space:nowrap;color:rgba(50,48,46,1);line-height:normal;letter-spacing:normal;font-weight:500"
+  >
+    <span style="font-size:9.93px;letter-spacing:normal">Notebook Highlights of CES 2026</span>
+  </div><img src="assets/cases/companion/image_168.webp" style="width:45.46px;height:28.69px;position:absolute;top:8474.54px;left:1159.24px"
+   loading="lazy" decoding="async" alt="" /><img src="assets/cases/companion/image_169.webp" style="width:67.53px;height:15.70px;position:absolute;top:8530.67px;left:1148.01px"
+   loading="lazy" decoding="async" alt="" /><img src="assets/cases/companion/image_170.webp" style="width:76.29px;height:22.36px;position:absolute;top:8580.76px;left:1144.56px"
+   loading="lazy" decoding="async" alt="" /><img src="assets/cases/companion/image_171.webp" style="width:26.36px;height:25.44px;position:absolute;top:8527.46px;left:1670.42px"
+   loading="lazy" decoding="async" alt="" /><img src="assets/cases/companion/image_172.webp" style="width:76.44px;height:23.18px;position:absolute;top:8581.86px;left:1646.24px"
+   loading="lazy" decoding="async" alt="" /><div
+    style="position:absolute;top:8588.69px;left:768.97px;width:352.79px;font-family:Futura,'Trebuchet MS','PingFang SC',sans-serif;font-size:9.93px;white-space:nowrap;color:rgba(50,48,46,1);line-height:normal;letter-spacing:normal;font-weight:500"
+  >
+    <span style="font-size:9.93px;letter-spacing:normal">Best of CES 2026</span>
+  </div><div style="position:absolute;top:4100.09px;left:1074px;width:564.05px;height:172.99px;opacity:0.9">
+    <img src="assets/cases/companion/image_177.webp" style="width:406.89px;height:90.76px;position:absolute;top:46.29px;left:84.06px"
+     loading="lazy" decoding="async" alt="" />
+    <div
+      style="position:absolute;top:71.88px;left:7.31px;width:70.09px;height:11.18px;font-family:'PingFang SC','PingFang HK',sans-serif;font-size:8.47px;white-space:nowrap;text-align:center;color:rgba(50,48,46,1);line-height:9.53px;letter-spacing:normal;font-weight:400;display:inline-flex;align-items:center;justify-content:center"
+    >
+      <div ><span style="font-size:8.47px;letter-spacing:0px">Voice feedback</span></div>
+    </div>
+    <div
+      style="position:absolute;top:18.27px;left:124.26px;width:38.77px;height:11.18px;font-family:'PingFang SC','PingFang HK',sans-serif;font-size:8.47px;white-space:nowrap;text-align:center;color:rgba(50,48,46,1);line-height:9.53px;letter-spacing:normal;font-weight:400;display:inline-flex;align-items:center;justify-content:center"
+    >
+      <div ><span style="font-size:8.47px;letter-spacing:0px">积极响应</span></div>
+    </div>
+    <div
+      style="position:absolute;top:98.68px;left:124.26px;width:38.77px;height:11.18px;font-family:'PingFang SC','PingFang HK',sans-serif;font-size:8.47px;white-space:nowrap;text-align:center;color:rgba(50,48,46,1);line-height:9.53px;letter-spacing:normal;font-weight:400;display:inline-flex;align-items:center;justify-content:center"
+    >
+      <div ><span style="font-size:8.47px;letter-spacing:0px">理性回复</span></div>
+    </div>
+    <div
+      style="position:absolute;top:147.41px;left:114.52px;width:58.16px;height:11.18px;font-family:'PingFang SC','PingFang HK',sans-serif;font-size:8.47px;white-space:nowrap;text-align:center;color:rgba(50,48,46,1);line-height:9.53px;letter-spacing:normal;font-weight:400;display:inline-flex;align-items:center;justify-content:center"
+    >
+      <div ><span style="font-size:8.47px;letter-spacing:0px">消极情绪表达</span></div>
+    </div>
+    <div
+      style="width:87.71px;border-radius:10.67px;border-color:rgba(73,68,61,1);border-style:solid;border-width:1.07px;min-height:21.93px;position:absolute;top:65.79px;left:0"
+    ></div>
+    <div
+      style="position:absolute;top:18.27px;left:204.67px;width:17.15px;height:11.18px;font-family:'PingFang SC','PingFang HK',sans-serif;font-size:7.47px;white-space:nowrap;text-align:center;color:rgba(50,48,46,1);line-height:9.53px;letter-spacing:normal;font-weight:400;display:inline-flex;align-items:center;justify-content:center"
+    >
+      <div ><span style="font-size:7.47px;letter-spacing:0px">唤醒</span></div>
+    </div>
+    <div
+      style="position:absolute;top:18.27px;left:265.58px;width:17.15px;height:11.18px;font-family:'PingFang SC','PingFang HK',sans-serif;font-size:7.47px;white-space:nowrap;text-align:center;color:rgba(50,48,46,1);line-height:9.53px;letter-spacing:normal;font-weight:400;display:inline-flex;align-items:center;justify-content:center"
+    >
+      <div ><span style="font-size:7.47px;letter-spacing:0px">收到</span></div>
+    </div>
+    <div
+      style="position:absolute;top:18.27px;left:326.49px;width:34.30px;height:11.18px;font-family:'PingFang SC','PingFang HK',sans-serif;font-size:7.47px;white-space:nowrap;text-align:center;color:rgba(50,48,46,1);line-height:9.53px;letter-spacing:normal;font-weight:400;display:inline-flex;align-items:center;justify-content:center"
+    >
+      <div ><span style="font-size:7.47px;letter-spacing:0px">正在执行</span></div>
+    </div>
+    <div
+      style="position:absolute;top:18.27px;left:404.46px;width:34.30px;height:11.18px;font-family:'PingFang SC','PingFang HK',sans-serif;font-size:7.47px;white-space:nowrap;text-align:center;color:rgba(50,48,46,1);line-height:9.53px;letter-spacing:normal;font-weight:400;display:inline-flex;align-items:center;justify-content:center"
+    >
+      <div ><span style="font-size:7.47px;letter-spacing:0px">执行成功</span></div>
+    </div>
+    <div
+      style="position:absolute;top:18.27px;left:481.21px;width:73.07px;height:11.18px;font-family:'PingFang SC','PingFang HK',sans-serif;font-size:7.47px;white-space:nowrap;text-align:center;color:rgba(50,48,46,1);line-height:9.53px;letter-spacing:normal;font-weight:400;display:inline-flex;align-items:center;justify-content:center"
+    >
+      <div ><span style="font-size:7.47px;letter-spacing:0px">左右移动/上下移动</span></div>
+    </div>
+    <div
+      style="position:absolute;top:98.68px;left:204.67px;width:43.25px;height:11.18px;font-family:'PingFang SC','PingFang HK',sans-serif;font-size:7.47px;white-space:nowrap;text-align:center;color:rgba(50,48,46,1);line-height:9.53px;letter-spacing:normal;font-weight:400;display:inline-flex;align-items:center;justify-content:center"
+    >
+      <div ><span style="font-size:7.47px;letter-spacing:0px">正在连接中</span></div>
+    </div>
+    <div
+      style="position:absolute;top:98.68px;left:294.82px;width:34.30px;height:11.18px;font-family:'PingFang SC','PingFang HK',sans-serif;font-size:7.47px;white-space:nowrap;text-align:center;color:rgba(50,48,46,1);line-height:9.53px;letter-spacing:normal;font-weight:400;display:inline-flex;align-items:center;justify-content:center"
+    >
+      <div ><span style="font-size:7.47px;letter-spacing:0px">待机闲置</span></div>
+    </div>
+    <div
+      style="position:absolute;top:98.68px;left:376.44px;width:43.25px;height:11.18px;font-family:'PingFang SC','PingFang HK',sans-serif;font-size:7.47px;white-space:nowrap;text-align:center;color:rgba(50,48,46,1);line-height:9.53px;letter-spacing:normal;font-weight:400;display:inline-flex;align-items:center;justify-content:center"
+    >
+      <div ><span style="font-size:7.47px;letter-spacing:0px">我准备好了</span></div>
+    </div>
+    <div
+      style="position:absolute;top:147.41px;left:204.67px;width:90.22px;height:11.18px;font-family:'PingFang SC','PingFang HK',sans-serif;font-size:7.47px;white-space:nowrap;text-align:center;color:rgba(50,48,46,1);line-height:9.53px;letter-spacing:normal;font-weight:400;display:inline-flex;align-items:center;justify-content:center"
+    >
+      <div ><span style="font-size:7.47px;letter-spacing:0px">设备断开/没有打开连接</span></div>
+    </div>
+    <div
+      style="position:absolute;top:147.41px;left:342.33px;width:73.07px;height:11.18px;font-family:'PingFang SC','PingFang HK',sans-serif;font-size:7.47px;white-space:nowrap;text-align:center;color:rgba(50,48,46,1);line-height:9.53px;letter-spacing:normal;font-weight:400;display:inline-flex;align-items:center;justify-content:center"
+    >
+      <div ><span style="font-size:7.47px;letter-spacing:0px">操作失败/连接失败</span></div>
+    </div>
+    <div
+      style="position:absolute;top:147.41px;left:462.93px;width:55.92px;height:11.18px;font-family:'PingFang SC','PingFang HK',sans-serif;font-size:7.47px;white-space:nowrap;text-align:center;color:rgba(50,48,46,1);line-height:9.53px;letter-spacing:normal;font-weight:400;display:inline-flex;align-items:center;justify-content:center"
+    >
+      <div ><span style="font-size:7.47px;letter-spacing:0px">不理解/请重试</span></div>
+    </div>
+    <div
+      style="width:84.06px;border-radius:10.67px;border-color:rgba(73,68,61,1);border-style:solid;border-width:1.07px;min-height:172.99px;position:absolute;top:0;left:101.11px"
+    ></div>
+    <div
+      style="width:369.13px;border-radius:10.67px;border-color:rgba(73,68,61,1);border-style:solid;border-width:1.07px;min-height:172.99px;position:absolute;top:0;left:194.92px"
+    ></div>
+  </div><div
+    style="position:absolute;top:7675.09px;left:886px;opacity:0.8;font-family:'PingFang SC','PingFang HK',sans-serif;font-size:15px;white-space:nowrap;color:rgba(50,48,46,1);line-height:1.7;letter-spacing:normal;font-weight:400"
+  >
+    <span style="letter-spacing:normal">Pet Tracking功能设定</span>
+  </div><div
+    style="position:absolute;top:3495.00px;left:258px;font-family:'PingFang SC','PingFang HK',sans-serif;font-size:20px;white-space:nowrap;color:rgba(50,48,46,1);line-height:1.7;letter-spacing:normal;font-weight:500"
+  >
+    <span style="letter-spacing:0.17px">可视化视觉系统。</span>
+  </div><div
+    style="position:absolute;top:4409.09px;left:255px;font-family:'PingFang SC','PingFang HK',sans-serif;font-size:20px;white-space:nowrap;color:rgba(50,48,46,1);line-height:1.7;letter-spacing:normal;font-weight:500"
+  >
+    <span style="letter-spacing:0.17px">具有人文关怀的智能体。</span>
+  </div><div class="doc-ch" data-no="05" style="position:absolute;top:8221.09px;left:255px;font-family:'PingFang HK','PingFang SC',sans-serif;font-size:30px;white-space:nowrap;color:rgba(50,48,46,1);line-height:32px;font-weight:600">Outcome</div></div>
+    </div>
+  </div>
   <section class="band band--accent act coda">
     <div class="page">
-      <p class="t-h2 coda__line" data-reveal="soft">当然，一个完整的项目肯定不止这些，这仅是我所参与的部分，感兴趣的话找我聊聊。</p>
+      <p class="t-body coda__line">当然，一个完整的项目肯定不止这些，这仅是我所参与的部分，感兴趣的话找我聊聊。</p>
     </div>
   </section>
 
   <section class="band band--paper act next">
-    <a class="page next__link" href="index.html#work">
+    <a class="page next__link" href="case-justpaper.html">
       <span class="t-label">看看下个项目</span>
       <span class="next__row">
         <span class="t-num">2</span>
@@ -434,9 +1924,8 @@
 
 <script src="vendor/gsap.min.js"></script>
 <script src="vendor/ScrollTrigger.min.js"></script>
-<script src="vendor/CustomEase.min.js"></script>
 <script src="vendor/lenis.min.js"></script>
-<script src="js/site.js"></script>
-<script src="js/case-companion.js"></script>
+<script src="js/site.js?v=1788603634"></script>
+<script src="js/case-doc.js?v=1788603634"></script>
 </body>
 </html>

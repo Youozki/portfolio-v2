@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Practices — 朱晨宇</title>
+<meta name="description" content="个人技能练习作品，包括 UI 页面、MG 动效／三维动效（静帧展示）、建模视觉等。" />
+<link rel="icon" href="assets/graphics/favicon.png" sizes="32x32" />
+<link rel="apple-touch-icon" href="assets/graphics/favicon-180.png" />
+<link rel="stylesheet" href="css/base.css" />
+<link rel="stylesheet" href="css/case.css" />
+<link rel="stylesheet" href="css/practices.css" />
+</head>
+<body class="is-case is-wall">
+
+<!-- 这页顶栏只留最左边那个图标，没有章节 -->
+<nav class="nav is-inverted" id="nav" aria-label="返回">
+  <span class="nav__glass" aria-hidden="true"></span>
+  <a class="nav__home" id="navHome" href="index.html#row-practices" aria-label="返回作品索引">
+    <span class="nav__glyphs" aria-hidden="true">
+      <span class="nav__roll">
+        <svg class="mark" viewBox="0 0 24 24" width="20" height="20">
+          <rect class="mark__a" x="3.2" y="3.2" width="12.6" height="12.6" rx="3.6" />
+          <rect class="mark__b" x="8.2" y="8.2" width="12.6" height="12.6" rx="3.6" />
+        </svg>
+        <svg class="mark mark--back" viewBox="0 0 24 24" width="20" height="20">
+          <path d="M14.5 5.5 8 12l6.5 6.5" fill="none" stroke="currentColor"
+                stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </span>
+    </span>
+  </a>
+</nav>
+<script src="js/nav-enter.js"></script>
+
+<main>
+  <div class="wall" id="wall">
+    <div class="wall__cols" id="wallCols"></div>
+  </div>
+
+  <p class="wall__foot">
+    <span>动画作品都会上传到我的小红书账号</span>
+    <img src="assets/cases/practices/xhs.webp" alt="" width="36" height="36" />
+  </p>
+
+  <div class="pdetail" id="pdetail" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="pdetail__card">
+      <!-- 占位是 1px 透明图：不写 src 的 <img> 会被当成坏图报出来。
+           真正的图在点开时由 js/case-practices.js 写进来。 -->
+      <img class="pdetail__shot" alt=""
+        src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+        width="1750" height="1476" />
+    </div>
+  </div>
+</main>
+
+<script src="js/case-practices.js"></script>
+</body>
+</html>

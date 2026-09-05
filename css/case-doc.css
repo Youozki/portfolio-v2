@@ -1,0 +1,232 @@
+/* 第一版内页正文的承载层。
+   第一版的项目内页是一张 1920px 宽的坐标定位画布（元素全部 position:absolute，
+   数值直接来自设计稿导出），整体按视口宽度等比缩放。这套排版是用户认可的版本，
+   所以原封不动搬过来：不重排、不改数值、不套 v2 的版心。
+
+   外层负责三件事：
+   1. 把 1920 的画布缩到当前视口宽（--cs），高度按缩放后取值以保留正确的滚动长度；
+   2. 复位 v2 base.css 里会干扰画布的全局样式（img 的 max-width、行高、字族）；
+   3. 画布之外的段落（结尾色带、下一项目）仍走 v2 的版心与色带。 */
+
+.case-doc-wrap {
+  position: relative;
+  overflow: hidden;
+  /* 缩放后的实际高度，由 js/case-doc.js 按 data-span × 缩放系数写入 */
+  height: var(--doc-h, 0);
+  /* 画布第一张图不能贴着 intro 的蓝底。留白必须加在这里（画布自己的浅底上），
+     加在头的 padding-bottom 上只会让蓝色变高，看着还是没有空隙。
+     绝对定位的 .case-slice 以 padding 盒为参照，所以这里必须 content-box，
+     否则 padding 会从 --doc-h 里扣，画布底部被 overflow 裁掉。 */
+  box-sizing: content-box;
+  padding-top: clamp(3.5rem, 6vw, 6.5rem);
+}
+
+/* 切段：整张 1920 画布被按章节坐标切成若干段，每段单独套一个色块。
+   段内元素的坐标一个都没改，靠这一层整体上移 --y0 把该段挪到视口里。 */
+.case-slice {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1920px;
+  height: 0;
+  transform: translateY(calc(-1 * var(--y0, 0px)));
+}
+
+.case-doc {
+  width: 1920px;
+  transform: scale(var(--cs, 1));
+  transform-origin: 0 0;
+  /* 对齐设计稿导出时依赖的默认值：行高 1.5、系统无衬线、边框默认灰。
+     不要让 v2 的 --leading-cn / Geist 继承进来，否则每一行文字都会错位。 */
+  font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto,
+    'Helvetica Neue', Arial, 'PingFang SC', sans-serif;
+  line-height: 1.5;
+  letter-spacing: normal;
+}
+
+.case-doc, .case-doc * { border-color: #e5e7eb; }
+
+/* 画布里的图按设计稿写死的宽高显示。v2 的 base.css 给了 img{max-width:100%}，
+   在 1920 画布里会把图夹小，框里的照片就填不满——必须复位。 */
+.case-doc img { display: block; max-width: none; height: auto; }
+
+/* 画布里不参与 v2 的入场与视差：那两套是按 v2 版心调的，加在坐标画布上
+   会把绝对定位的元素挪出位。 */
+.case-doc [data-reveal] { opacity: 1 !important; transform: none !important; filter: none !important; }
+
+/* 横向滚动图：藏掉原生滚动条，用设计稿里那根蓝条当可视滚动条 */
+.case-doc .hscroll__view {
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.case-doc .hscroll__view::-webkit-scrollbar { display: none; }
+.case-doc .hscroll__bar { border-radius: 2.75px; background-color: #dddddd; }
+.case-doc .hscroll__thumb {
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  border-radius: 2.75px;
+  background-color: #2084e9;
+  cursor: grab;
+  touch-action: none;
+}
+.case-doc .hscroll__thumb.is-drag { cursor: grabbing; }
+
+/* 素材图墙：整条复制一份首尾相接，位移由 js/case-doc.js 驱动 */
+.case-doc .marquee { overflow: hidden; }
+.case-doc .marquee__track {
+  display: flex;
+  align-items: center;
+  width: max-content;
+  height: 100%;
+  will-change: transform;
+}
+
+/* ---- 章节色块 ---------------------------------------------------------
+   augen 的 updates 页就是这么分章的：文字始终整整齐齐排下来，靠整屏换底色
+   把环节切开。这里的白／纸／墨三档只换底，不动画布里任何一处坐标。 */
+/* ---- 章节锚点 ---------------------------------------------------------
+   顶栏的章节链接跳到这些零尺寸的空元素上。画布整体被 scale 过，
+   锚点写在画布坐标系里，缩放后位置自动跟着对。 */
+.doc-anchor {
+  position: absolute;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  pointer-events: none;
+}
+
+/* ---- 章节头 -----------------------------------------------------------
+   第一版画布里本来就有章节名（Problem / Strategy…，30px 半粗，左边缘 255）。
+   区分章节不靠拉大空隙——空隙一大中间就是一片空，反而更散。照 augen 的做法
+   给这个已有的标题加层次：上面一根贯穿版心的发丝线、线下一个小号序号、
+   再是放大的章节名。字号是唯一被改的数值，坐标一个都没动。
+   画布里的字号写在内联样式上，只能用 !important 压过去。 */
+.case-doc .doc-ch {
+  font-size: 48px !important;
+  font-weight: 300 !important;
+  line-height: 1.1 !important;
+  letter-spacing: -0.01em !important;
+}
+/* 发丝线：从章节名左边缘一直画到版心右边缘（1920 - 255 × 2 = 1410） */
+.case-doc .doc-ch::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: -58px;
+  width: 1410px;
+  height: 1px;
+  background: rgba(50, 48, 46, 0.16);
+}
+/* 序号：小号、宽字距，压在线与章节名之间 */
+.case-doc .doc-ch::after {
+  content: attr(data-no);
+  position: absolute;
+  left: 0;
+  top: -38px;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: 0.16em;
+  color: rgba(50, 48, 46, 0.42);
+}
+
+/* 画布底色沿用第一版设计稿的 #f7f7f7。色块分章试过一轮，
+   会把章节之间的元素连带丢掉，所以退回整幅一个底色。 */
+.case-doc-wrap { background: #f7f7f7; }
+
+/* ---- 内页头 -----------------------------------------------------------
+   底色用结语那一段的蓝（--accent），和页尾呼应，把 intro 从正文里切出来。
+   版式沿用 v2 的内页头，但两件事跟着画布走：
+   1. 左边缘对齐画布的内容左边（255 / 1920 = 13.28%），否则头与正文不在一条线上；
+   2. 正文字号用 vw 表达画布里的 20px（20 / 1920 = 1/96），
+      画布缩放多少它就缩放多少，两边字号永远一致。 */
+.doc-page {
+  --doc-fs: calc(100vw / 96);
+  width: 100%;
+  padding-inline: 13.28125%;
+}
+
+/* 画布页里 .page 也走画布的版心。首页把 --page-max 收到 1040 之后，
+   结语与"下一项目"如果还按 --page-max 居中，左边缘会比上面的正文缩进
+   一百多像素，两条边对不上。画布是定宽等比缩放的，只能让这边跟它对齐。 */
+.is-case main .page {
+  max-width: none;
+  padding-inline: 13.28125%;
+}
+.doc-head .case-head__inner { max-width: none; }
+/* 头与下面第一张图之间要留出距离，原来贴得太紧。
+   蓝底这边只留一档，剩下的空隙加在画布顶上（见 .case-doc-wrap 的 padding-top）。 */
+.doc-head { padding-bottom: clamp(3rem, 5vw, 5rem); }
+
+/* 标题一律不许折行：case.css 把 .line-clip 设成了 block，两个词就各占一行。
+   在内页头里改回 inline，整个标题排成一行。 */
+.doc-head .case-head__title,
+.doc-head .line-clip,
+.doc-head .line-inner { white-space: nowrap; }
+.doc-head .case-head__title .line-clip { display: inline; }
+.doc-head .case-head__title .line-clip + .line-clip { margin-left: 0.28em; }
+
+/* 蓝底上的字与描边全部提亮 */
+.doc-head .case-head__title { color: #fff; }
+.doc-head .case-head__dim { color: rgba(255, 255, 255, 0.62); }
+.doc-head .case-head__meta { border-top-color: rgba(255, 255, 255, 0.28); }
+.doc-head .tag { border-color: rgba(255, 255, 255, 0.42); color: rgba(255, 255, 255, 0.86); }
+.doc-body {
+  font-size: var(--doc-fs);
+  line-height: 1.7;
+  letter-spacing: normal;
+  color: rgba(255, 255, 255, 0.92);
+}
+.doc-body + .doc-body { margin-top: 1.7em; }
+
+/* 段落分层次：第一段是项目是什么，抬到导语字号、满亮度；第二段是我做了什么，
+   回到画布正文的字号并压暗一档。文案一个字没改，只是把主次分出来。 */
+.case-head__intro .doc-body:first-child {
+  font-size: calc(var(--doc-fs) * 1.38);
+  line-height: 1.5;
+  color: #fff;
+}
+.case-head__intro .doc-body:first-child + .doc-body { color: rgba(255, 255, 255, 0.72); }
+
+@media (max-width: 767px) {
+  /* 窄屏画布整体缩得很小，头这一段跟着缩就没法读了，回到 v2 的正文字号 */
+  .doc-page { --doc-fs: var(--text-base); padding-inline: var(--margin); }
+  .is-case main .page { padding-inline: var(--margin); }
+  .doc-body { line-height: var(--leading-cn); }
+  .doc-head .case-head__title,
+  .doc-head .line-clip,
+  .doc-head .line-inner { white-space: normal; }
+}
+
+/* ---- 画布里的入场与视差 -----------------------------------------------
+   和首页同一套语言：opacity + blur + 轻微上移，缓动也是同一条。
+   只动 transform 与 opacity，绝对定位的坐标一个都不改，所以排版不变。
+   幅度按实测那一档给（视差 10px），要的是「有存在感但不抢内容」。 */
+.case-doc [data-doc-reveal] {
+  opacity: 0;
+  transform: translate3d(0, 18px, 0);
+  filter: blur(4px);
+  transition: opacity 0.62s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.62s cubic-bezier(0.22, 1, 0.36, 1),
+    filter 0.62s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.case-doc [data-doc-reveal].is-in {
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+/* 大图再叠一层很浅的视差，位移写在 --pz 上 */
+.case-doc [data-doc-px] {
+  transform: translate3d(0, var(--pz, 0px), 0);
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .case-doc [data-doc-reveal] { opacity: 1; transform: none; filter: none; transition: none; }
+  .case-doc [data-doc-px] { transform: none; }
+}

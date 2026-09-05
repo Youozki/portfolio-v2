@@ -1,0 +1,155 @@
+/* Practices · 无限瀑布流
+   一整屏的图墙，不走页面滚动：滚轮改的是一个虚拟位移，每列各自按自己那一套
+   的高度取模，所以首尾天然衔接、可以一直滚下去。
+
+   列宽故意不等（--w 四档）。素材全是 1:1 的方图，等宽列排下来每行都会对齐，
+   看着是网格不是瀑布；列宽一错开，方图的高度就跟着错开，纵向节奏自然就散了，
+   而且一个像素都不用裁。 */
+
+.is-wall {
+  background: var(--ink);
+  color: var(--on-ink);
+  /* 详情层的开合专用缓动。全站的 --ease-out (0.16,1,0.3,1) 前段极陡，
+     0.4s 时已经走到 98%——时长加长了也还是"一下就出来"。
+     这条中段更平，才读得出渐显与渐隐的过程。 */
+  --ease-veil: cubic-bezier(0.4, 0, 0.25, 1);
+}
+
+.wall {
+  position: relative;
+  /* 点开详情时整片图墙后退：模糊 + 压暗 + 轻微缩小。
+     时长比原来长一档——0.6s 出现得太急，看不出"后退"这个动作。 */
+  transition: filter 0.6s var(--ease-veil), transform 0.6s var(--ease-veil);
+}
+.wall.is-detail {
+  filter: blur(18px) brightness(0.5);
+  transform: scale(1.03);
+}
+
+.wall__cols {
+  display: flex;
+  gap: var(--wall-gap, 1.5rem);
+  padding: calc(var(--space-3xl) + 3rem) var(--wall-gap, 1.5rem) var(--space-3xl);
+  align-items: flex-start;
+}
+
+.wall__col {
+  flex: var(--w, 1) 1 0;
+  min-width: 0;
+}
+
+.wall__cell {
+  position: relative;
+  margin-bottom: var(--wall-gap, 1.5rem);
+  cursor: pointer;
+  /* 图在框里放大，框自己不动——所以圆角与裁切都放在这一层 */
+  border-radius: 14px;
+  overflow: hidden;
+  /* 扩散：由 js 按到点击点的距离写入 --dx/--dy，越近推得越远 */
+  transform: translate3d(var(--dx, 0px), var(--dy, 0px), 0) scale(var(--s, 1));
+  transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.62s cubic-bezier(0.22, 1, 0.36, 1),
+    filter 0.62s cubic-bezier(0.22, 1, 0.36, 1);
+}
+/* 入场：和全站同一套语言 */
+.wall__cell.is-pending {
+  opacity: 0;
+  filter: blur(4px);
+  transform: translate3d(0, 22px, 0);
+}
+.wall__cell img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 14px;
+  background: var(--ink-2);
+  /* 悬停时图在框里轻微放大，和第一版一致。幅度只给 4%——再大就成了轮播图 */
+  transition: transform 0.62s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity var(--dur-1, 0.24s) var(--ease-out);
+  will-change: transform;
+}
+.wall__cell:hover img { transform: scale(1.04); opacity: 0.94; }
+
+/* 分类标签：平时不出现，悬停才浮出来，和第一版一致 */
+.wall__tag {
+  position: absolute;
+  left: 0.85rem;
+  top: 0.85rem;
+  padding: 0.3em 0.9em;
+  border-radius: var(--radius-pill);
+  background: rgba(20, 20, 22, 0.42);
+  backdrop-filter: blur(14px);
+  color: #fff;
+  font-size: var(--text-xs);
+  letter-spacing: 0;
+  opacity: 0;
+  transition: opacity var(--dur-1, 0.24s) var(--ease-out);
+  pointer-events: none;
+}
+.wall__cell:hover .wall__tag { opacity: 1; }
+
+/* ---- 详情层 -----------------------------------------------------------
+   图墙模糊后退，详情图在原地渐显。内容与第一版一致：一张整图 + 标题。 */
+.pdetail {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: clamp(1.5rem, 5vw, 5rem);
+  opacity: 0;
+  pointer-events: none;
+  /* 渐显与渐隐都放慢：0.4s 几乎是硬切，看不出"浮出来"。
+     退出比进入再慢一点，收得住。 */
+  transition: opacity 0.55s var(--ease-veil);
+}
+.pdetail.is-open { opacity: 1; pointer-events: auto; transition-duration: 0.46s; }
+
+/* 卡片原来没写宽度，图就按 base.css 的 max-width:100% 铺满整层，点开几乎占满屏。
+   收到大约原来的一半：宽度上限压到视口的 46%，高度再兜一道，长图不会顶出视口。 */
+.pdetail__card {
+  width: min(46vw, 34rem);
+  transform: scale(0.94);
+  transition: transform 0.55s var(--ease-veil);
+}
+.pdetail.is-open .pdetail__card { transform: none; transition-duration: 0.5s; }
+.pdetail__shot {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: calc(100vh - 6rem);
+  object-fit: contain;
+  border-radius: 14px;
+}
+
+@media (max-width: 767px) {
+  .pdetail__card { width: min(86vw, 28rem); }
+}
+
+
+/* 底部那句话沿用第一版原文。之前压在深底上太暗看不清，提到接近正文的亮度。 */
+.wall__foot {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0 var(--margin) calc(var(--space-3xl) + 1rem);
+  color: rgba(255, 255, 255, 0.88);
+  font-size: var(--text-base);
+}
+.wall__foot img {
+  width: 1.35rem;
+  height: 1.35rem;
+  /* 小红书那个图标本身是深色 logo，压在黑底上和旁边的白字明显不是一个颜色。
+     整个刷成白色再套上和文字一样的透明度，两者就齐了。 */
+  filter: brightness(0) invert(1);
+  opacity: 0.88;
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+  .wall__cell, .pdetail__card { transition: none; }
+}
+@media (max-width: 767px) {
+  .wall__cols { --wall-gap: 0.75rem; }
+}

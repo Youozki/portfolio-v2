@@ -55,13 +55,20 @@
    千万不要给 main 加 view-transition-name——项目页的 main 有一万六千像素高，
    整元素快照又大又慢，超预算时浏览器会直接跳过整个过渡。 */
 ::view-transition-old(root) {
-  animation: page-out 240ms cubic-bezier(0.7, 0, 0.84, 0) both;
+  animation: page-out 260ms cubic-bezier(0.7, 0, 0.84, 0) both;
 }
 ::view-transition-new(root) {
-  animation: page-in 360ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: page-in 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
-@keyframes page-out { to { opacity: 0; filter: blur(5px); } }
-@keyframes page-in { from { opacity: 0; filter: blur(5px); } }
+/* 只淡出淡入的话，两页的底色和版式又差不多，换页那一下几乎看不出来
+   （项目页之间尤其明显）。加一点纵向位移与极轻的缩放，动作才读得出来：
+   旧页向上退、新页从下方浮上来。位移用 vh，跟视口一起走。 */
+@keyframes page-out {
+  to { opacity: 0; filter: blur(6px); transform: translateY(-2.4vh) scale(0.992); }
+}
+@keyframes page-in {
+  from { opacity: 0; filter: blur(6px); transform: translateY(2.8vh) scale(1.006); }
+}
 
 @media (prefers-reduced-motion: reduce) {
   @view-transition { navigation: none; }
@@ -160,19 +167,33 @@ a { color: inherit; text-decoration: none; }
 .band--accent .t-cap, .band--accent .t-label, .band--accent .t-num {
   color: rgba(255, 255, 255, 0.72);
 }
-.band--ink .row { border-top-color: var(--hair-on-ink); }
 
-/* ---- 发丝分隔行：augen 的信息行就是这个结构 -------------------------- */
+/* ---- 发丝分隔行：augen 的信息行就是这个结构 --------------------------
+   分隔线不用 border 而是伪元素：border 没法按比例伸长，伪元素可以按
+   --rule-scale 从左边延伸出来（和作品索引行同一套做法）。
+   默认值是 1，所以没有 JS 或降级时线照常在。 */
 .row {
+  position: relative;
   display: grid;
   grid-template-columns: minmax(0, 1.1fr) minmax(0, 3fr);
   column-gap: var(--gutter);
   align-items: start;
   padding-block: clamp(1.25rem, 2.2vw, 2rem);
-  border-top: var(--rule) solid var(--hair);
 }
-.row:last-child { border-bottom: var(--rule) solid var(--hair); }
-.band--ink .row:last-child { border-bottom-color: var(--hair-on-ink); }
+.row::before, .row:last-child::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: var(--rule);
+  background: var(--hair);
+  transform: scaleX(var(--rule-scale, 1));
+  transform-origin: 0 50%;
+}
+.row::before { top: 0; }
+.row:last-child::after { bottom: 0; }
+.band--ink .row::before,
+.band--ink .row:last-child::after { background: var(--hair-on-ink); }
 
 /* ---- 胶囊标签／按钮 -------------------------------------------------- */
 .pill {
@@ -185,28 +206,50 @@ a { color: inherit; text-decoration: none; }
   color: var(--accent);
   font-size: var(--text-sm);
   letter-spacing: 0;
-  line-height: 1.2;
-  white-space: nowrap;        /* 可点文字不许折行 */
-  transition: background-color var(--dur-1) var(--ease-out),
-    color var(--dur-1) var(--ease-out);
+  white-space: nowrap;
+  transition: background-color var(--dur-2) var(--ease-out),
+    color var(--dur-2) var(--ease-out);
 }
-.pill:hover, .pill.is-hover { background: var(--accent); color: var(--accent-ink); }
-.pill:active, .pill.is-active { transform: translateY(1px); }
-.pill[aria-disabled='true'] { opacity: 0.4; pointer-events: none; }
+.pill:hover { background: var(--accent); color: var(--accent-ink); }
+/* 悬停时文字整条往上滚一格，露出下面那一份完全一样的字（augen 首页的做法）。
+   两份字叠在一个裁切框里，滚的是 transform，不动布局。 */
+.pill--roll .pill__clip { display: block; overflow: hidden; height: 1.25em; }
+.pill--roll .pill__roll {
+  display: flex;
+  flex-direction: column;
+}
+.pill--roll .pill__text { display: block; line-height: 1.25; }
+/* 只向上滚一次，不回滚：动画跑完由 js 摘掉 class，transform 归零，
+   而上下两份字完全一样，所以归零的那一帧看不出任何变化。
+   （用 :hover + transition 的话，鼠标移开必然倒着滚回去。） */
+.pill--roll.is-rolling .pill__roll {
+  animation: pill-roll 360ms var(--ease-out) both;
+}
+@keyframes pill-roll {
+  from { transform: translateY(0); }
+  to { transform: translateY(-50%); }
+}
 .band--ink .pill { border-color: var(--accent); color: #6ab0ff; }
 .band--accent .pill { border-color: rgba(255, 255, 255, 0.6); color: #fff; }
 .band--accent .pill:hover { background: #fff; color: var(--accent); }
 
-/* ---- 标签串：索引页与项目页共用 -------------------------------------- */
-.work__tags { display: flex; flex-wrap: wrap; gap: var(--space-xs); margin-top: var(--space-2xs); }
+/* 标签：比胶囊小一档，只描边不填色 */
 .tag {
-  font-size: var(--text-xs);
-  letter-spacing: 0;
+  display: inline-flex;
+  align-items: center;
   padding: 0.3em 0.75em;
   border-radius: var(--radius-pill);
   border: var(--rule) solid var(--hair);
   color: var(--ink-soft);
+  font-size: var(--text-xs);
+  letter-spacing: 0;
   white-space: nowrap;
+}
+.work__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+  margin-top: var(--space-xs);
 }
 .band--ink .tag { border-color: var(--hair-on-ink); color: var(--on-ink-soft); }
 
@@ -271,11 +314,10 @@ a { color: inherit; text-decoration: none; }
 }
 .nav__roll > * { flex: 0 0 20px; height: 20px; }
 .nav__home.is-back .nav__roll { transform: translateY(-20px); }
-.nav__home:hover .nav__roll { transform: translateY(-2px); }
-.nav__home.is-back:hover .nav__roll { transform: translateY(-22px); }
 
-/* 自制标记：两片错开的圆角方，悬停分开 */
-.mark { overflow: hidden; }
+/* 自制标记：两片错开的圆角方，悬停分开。
+   注意别再用 .nav__roll 的 translateY 做悬停反馈——那一层是 20px 的裁切框，
+   往上顶一下图标底部就会被切掉一条。位移只放在 rect 上，画框里有余量。 */
 .mark rect {
   fill: none;
   stroke: currentColor;
@@ -284,6 +326,8 @@ a { color: inherit; text-decoration: none; }
 }
 .nav__home:hover .mark__a { transform: translate(-0.7px, -0.7px); }
 .nav__home:hover .mark__b { transform: translate(0.7px, 0.7px); }
+.mark--back path { transition: transform var(--dur-3) var(--ease-out); }
+.nav__home.is-back:hover .mark--back path { transform: translateX(-1.5px); }
 .nav__list { display: flex; align-items: center; flex: 0 0 auto; }
 .nav__link {
   flex: 0 0 auto;
@@ -292,6 +336,7 @@ a { color: inherit; text-decoration: none; }
   padding: 0.55rem 0.9rem;
   border-radius: var(--radius-pill);
   font-size: var(--text-sm);
+  font-weight: var(--weight-display);   /* 顶栏比正文细一档 */
   letter-spacing: 0;
   white-space: nowrap;
   color: var(--ink);
@@ -397,6 +442,26 @@ a { color: inherit; text-decoration: none; }
   :root { --cols: 2; --nav-h: 4rem; }
   .row { grid-template-columns: minmax(0, 1fr); row-gap: var(--space-sm); }
   .nav { top: auto; bottom: var(--space-md); }
+  /* 五个章节的胶囊在 390 宽的屏上比视口还宽，居中之后右边的 Outcome 直接被切掉。
+     把胶囊夹进视口内，章节条自己横向滚（滚动条藏掉），字距与内边距各收一档。 */
+  .nav { max-width: calc(100vw - 2 * var(--space-md)); }
+  .nav__list {
+    /* 桌面是 flex:0 0 auto（不许被压），移动端必须允许收缩，
+       否则它保持内容宽度直接溢出胶囊，右边的 Outcome 被视口切掉。 */
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    overscroll-behavior-x: contain;
+  }
+  .nav__list::-webkit-scrollbar { display: none; }
+  /* 右端淡出：滚动被裁的那一下要读成「还有」，不是读成没画完 */
+  .nav__list {
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 1.4rem), transparent);
+    mask-image: linear-gradient(to right, #000 calc(100% - 1.4rem), transparent);
+  }
+  .nav__link { padding: 0.5rem 0.62rem; letter-spacing: 0; }
 }
 @media (max-width: 479px) {
   .t-statement { overflow-wrap: anywhere; min-width: 0; }
