@@ -221,9 +221,11 @@ a { color: inherit; text-decoration: none; }
 .pill--roll .pill__text { display: block; line-height: 1.25; }
 /* 只向上滚一次，不回滚：动画跑完由 js 摘掉 class，transform 归零，
    而上下两份字完全一样，所以归零的那一帧看不出任何变化。
-   （用 :hover + transition 的话，鼠标移开必然倒着滚回去。） */
+   （用 :hover + transition 的话，鼠标移开必然倒着滚回去。）
+   缓动不用 --ease-out：那条曲线 40% 就走完 98%，时长拉长也只是"先窜一下再等"。
+   换成两头都缓的曲线，位移摊在整段时间里，读起来才真的是慢。 */
 .pill--roll.is-rolling .pill__roll {
-  animation: pill-roll 360ms var(--ease-out) both;
+  animation: pill-roll 620ms cubic-bezier(0.4, 0, 0.25, 1) both;
 }
 @keyframes pill-roll {
   from { transform: translateY(0); }
