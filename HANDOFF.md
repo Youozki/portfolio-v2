@@ -1,7 +1,10 @@
 # portfolio-v2 交接文档
 
 给新对话窗口用。工作目录 `/Users/zhucy/ComateProjects/Default Project/portfolio-v2`，
-远端 `git@github.com:Youozki/portfolio-v2.git`（main，最新 `ec37acc`）。
+远端 `git@github.com:Youozki/portfolio-v2.git`（main）。
+
+> 2026-09-05 更新：五个内页与首页已全部完成，§4 的字阶和 §8 的进度都按当前代码重写过。
+> 换机器迁移看迁移包里的《新机器上手说明.md》。
 
 ## 1. 这是什么
 
@@ -35,15 +38,18 @@
 
 ## 4. 设计系统（`css/tokens.css`，数值来自对 augen.pro 的 CDP 实测，别再自己猜）
 
-- 字阶：140 / 38 / 27 / 20 / 18 / 16 / 14 / 12，字重只有 300 与 350。
-  **140px 全站只出现一次，是压在产品图上的那句陈述，不是页面标题**；
-  augen 首屏标题实测只有 27px。所以 `--text-statement` 单独备用，页面标题一律走
-  `--text-h1`(38) / `--text-h2`(27)。
-- 字距：除 statement 是 +0.008em，其余一律 −0.02em。行高：augen 全站 1.2；
-  中文正文取 1.55（`--leading-cn`），英文正文 1.45。
-- 版心 `--page-max: 1200px`（从 1440 收窄，把信息聚到页面中部，两侧大留白）。
-- 颜色：paper `#EDEDEA` / ink `#0E0F11` / accent `#0071E3`；
-  毛玻璃 `--veil` rgba(237,237,234,.4) + `blur(28px)`，深底反色 `--veil-ink`。
+字阶经过两轮收缩，**当前值就是定稿，不要再放大**：
+
+- `--text-statement` clamp(2.75rem, 7.5vw, 6.75rem)（44→108）：全站只出现一次，
+  是压在产品图上的那句陈述，不是页面标题。
+- `--text-h1` clamp(1.375rem, 2vw, 1.8125rem)（22→29）、`--text-h2` clamp(1.125rem, 1.39vw, 1.25rem)（18→20）、
+  `--text-lg` 15→16、`--text-base` 14、`--text-sm` 13、`--text-xs` 12。
+- 字重只有两档：`--weight-display: 300` / `--weight-text: 400`
+  （这两个变量以前只被引用、从未定义，display 一直静默按 400 渲染，已修）。
+- 字距：除 statement 是 +0.008em，其余一律 −0.02em。行高：中文正文 1.55（`--leading-cn`），英文 1.45。
+- 版心 `--page-max: 960px`（1440 下内容宽约 770，占 53%）；`--margin: clamp(1.25rem, 6.6vw, 6rem)`。
+- 颜色：paper `#EDEDEA` / ink `#0E0F11` / accent `#0071E3`；发丝线 `--hair: rgba(14,15,17,.11)`，
+  深底 `--hair-on-ink: rgba(242,242,244,.1)`。
 - 形状：胶囊半径 54 / 94px，发丝线 1px。缓动 `--ease-out: cubic-bezier(.16,1,.3,1)`。
 
 ## 5. 文件地图
@@ -91,21 +97,25 @@
 - 动效不能只是「过渡」，要有形变、要有存在感；但特效不要花到抢主体内容。
 - 低质量、糊的图缩小使用；同系列图必须同规格。
 
-## 8. 当前状态
+## 8. 当前状态（2026-09-05）
 
-已完成：首页、Companion 内页（含设计策略段）、字体子集、素材流水线、
-导航与换页动效（最新一轮已无头验证过）。
+**六个页面全部完成并跑过无头验收**（`console 0 / broken 0 / overflowX 0`）：
+`index.html` + `case-companion / justpaper / oreate / terabox / practices`。
 
-未完成 —— **下一步就是这个**：
+- 四个画布内页由 `tools/build_case_pages.py` 从第一版**原封不动**生成：
+  1920px 绝对定位画布按 `--cs = 容器宽/1920` 缩放；章节头是画布自己的标题放大 + 发丝线 + 序号；
+  章节缝 `CHAPTER_GAP=140`、标题到正文 `HEAD_TO_BODY=250` 在生成阶段统一。
+  **改任何 css/js 后要重跑一次这个脚本**（它同时刷缓存戳）。
+  章节头是**按内容**识别的（v1 侧栏 `data-sec` 坐标和真实标题位置不一致），Outcome 那一节的标题是合成出来的。
+- `case-practices.html` 是手写的（不由生成器产出），改导航之类的共用结构时**两边都要动**。
+- 首页过场带：钉住 260vh，一条 ScrollTrigger 同时驱动上盖开合到 105°、五档残影、
+  蓝色开合弧（每帧重画路径，不用 dashoffset——`non-scaling-stroke` 会让虚线按屏幕像素算）、
+  三句话逐句浮出；右侧文字的纵向位置由 `interludeAlign()` 量出来（末行基线压在图纸地线上）。
+- 头像与标签页图标：正文是方框 + 全身像，favicon 按设计稿是圆形全身像（32 / 180 两档）。
+- 内页顶部返回按钮带 `#row-<id>`，回索引页直接落在该项目那一行（`landOnHash()` 自己落位，
+  因为作品行是脚本渲染的、且 Lenis 会覆盖原生锚点位置）。
 
-1. 按 **Just Paper → Oreate AI → Terabox → Practices** 的顺序做四个项目内页。
-   - 文案来自第一版正文；素材在 `~/Documents/所有的图/项目2`、`项目3`、`项目4`、`个人练习`。
-   - 做完每页要把 `js/index.js` 里对应条目的 `href` 填上（现在是 `''`）。
-   - 页面必须建在现有系统上：一根 60rem 内容栏、h1 38 / h2 27 / 正文 16、序号 `2` / `2.1…`、
-     导航 DOM 与其他页完全一致（含 `.nav__glass` 与 `js/nav-enter.js`）。
-2. 内页展示图加 augen 那种视差（用户同意「慢慢改」，还没做）。
-3. 每页做完跑一轮 `/impeccable` + GSAP 强化。
-4. 用户仍需在真实浏览器里验收：绿色粒子层、胶囊伸缩与文字滚动、换页模糊渐隐、策略段光点。
+还没做的：内页展示图的 augen 式视差（用户同意「慢慢改」）；Companion 页统一到新语言（用户已知，排在最后）。
 
 ## 9. 本机环境与验证手法
 
