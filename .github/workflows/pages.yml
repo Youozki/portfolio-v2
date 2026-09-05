@@ -1,0 +1,37 @@
+# 部署到 GitHub Pages。站是零构建的静态站，所以不用装依赖，直接把仓库原样发上去。
+# configure-pages 的 enablement 会在仓库还没开 Pages 时用工作流自己的 token 开启，
+# 所以本机没有 gh CLI／token 也能一次跑通。
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 同时只跑一个部署，新的推送把排队中的旧任务顶掉
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+        with:
+          enablement: true
+      # upload-pages-artifact 自己会排除 .git，仓库根目录就是站点根目录
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+      - id: deployment
+        uses: actions/deploy-pages@v4
