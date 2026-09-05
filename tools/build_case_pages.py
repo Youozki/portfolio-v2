@@ -22,7 +22,28 @@ from PIL import Image
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 V1 = os.path.join(os.path.dirname(ROOT), 'portfolio')
+# 画布正文（window.CASE_DOC_*）在 tools/v1-doc/ 里存了一份，仓库自带，所以这个脚本
+# 不依赖第一版仓库在不在。旁边有第一版时优先用它，方便第一版更新后同步过来。
+DOC_DIRS = [os.path.join(V1, 'pages'), os.path.join(ROOT, 'tools', 'v1-doc')]
+# 量图片原始尺寸的搜索顺序：v2 自己的 assets 就够（路径与第一版完全一致）
+IMG_ROOTS = [ROOT, V1]
 CANVAS_W = 1920
+
+
+def find_doc(name):
+    for d in DOC_DIRS:
+        p = os.path.join(d, name)
+        if os.path.exists(p):
+            return p
+    raise SystemExit('找不到画布正文 %s，tools/v1-doc/ 和第一版 pages/ 里都没有' % name)
+
+
+def find_img(rel):
+    for r in IMG_ROOTS:
+        p = os.path.join(r, rel)
+        if os.path.exists(p):
+            return p
+    return None
 
 # 顶层元素里 top 小于这个值的就是画布自带的页头（logo 107.8 / 标题与年份 173 /
 # 简介 267），一律删掉换成 v2 的头。往下最近的元素在 457，所以 400 是安全阈值。
@@ -113,7 +134,7 @@ _natural = {}
 def img_height(src_rel, width):
     """图只写了 width 时按原图比例算出显示高度——段高要靠它才不会把图裁掉。"""
     if src_rel not in _natural:
-        p = os.path.join(V1, src_rel)
+        p = find_img(src_rel)
         try:
             _natural[src_rel] = Image.open(p).size
         except Exception:
@@ -305,7 +326,7 @@ def strip_wide_rules(frag):
         nat = _natural.get(s.group(1))
         if nat is None:
             try:
-                nat = Image.open(os.path.join(V1, s.group(1))).size
+                nat = Image.open(find_img(s.group(1))).size
             except Exception:
                 nat = None
             _natural[s.group(1)] = nat
@@ -325,7 +346,7 @@ def prepare(cfg):
     2. 章节之间要拉开距离（用户要的「章节区分度」），做法是把每个章节起点
        之后的元素整体下移 CHAPTER_GAP。章节内部的相对位置一个都不动，
        所以排版还是原样，只是章节缝变宽了。"""
-    inner = load_doc(os.path.join(V1, 'pages', cfg['src']))
+    inner = load_doc(find_doc(cfg['src']))
     drop = set(cfg.get('drop_tops', ()))
     kids = []
     for name, frag in top_children(inner):
