@@ -11,9 +11,10 @@
      不看 location.hash）。而且这一下正好插在建 ScrollTrigger 的中间，refresh
      会递归到自己崩，入场动画整批建不出来，[data-reveal] 停在 opacity:0，
      看到的就是"整页空白"。
-     参数在这里立刻消费掉，位置由 landOnHash() 在动画建好之后自己落——顺带
-     也就解决了"回到首页再刷新还停在那一行"：地址栏里已经没有那一行了。
-     旧的 #row-<id> 链接继续认，直接打开或收藏过的地址不至于失效。 */
+     参数在这里读出来，地址栏的清理和落位都放到 landOnHash()——顺带也就解决了
+     "回到首页再刷新还停在那一行"：地址栏里已经没有那一行了。
+     旧的 #row-<id> 链接继续认，直接打开或收藏过的地址不至于失效。
+     注意只读不写：预渲染阶段改地址栏会让浏览器认为这份预渲染对不上号而作废。 */
   const landing = (() => {
     let id = '';
     try {
@@ -21,11 +22,7 @@
     } catch (e) { /* 老浏览器没有 URLSearchParams */ }
     if (!/^[a-z]+$/.test(id)) id = '';
     if (!id && /^#row-[a-z]+$/.test(location.hash)) id = location.hash.slice(5);
-    if (!id) return '';
-    try {
-      history.replaceState(history.state, '', location.pathname);
-    } catch (e) { /* file:// 下 replaceState 会被拒，落位本身不受影响 */ }
-    return '#row-' + id;
+    return id ? '#row-' + id : '';
   })();
 
   const navType = (() => {
@@ -363,6 +360,11 @@ ${SKILLS.map(([k, v]) => `<div class="row about__row" data-reveal="up">
     const el = document.querySelector(landing);
     if (!el) return;
 
+    // 地址栏在这里才清理：预渲染阶段改 URL 会让那份预渲染作废
+    try {
+      history.replaceState(history.state, '', location.pathname);
+    } catch (e) { /* file:// 下 replaceState 会被拒，落位本身不受影响 */ }
+
     /* 人一动就不再纠正位置——剩下的校准都是为了追字体和图片入位带来的位移，
        不是为了把人按在这一行上。 */
     let done = false;
@@ -407,8 +409,17 @@ ${SKILLS.map(([k, v]) => `<div class="row about__row" data-reveal="up">
     }
   }
 
+  /* 预渲染的文档会在用户还停在上一页时就把脚本跑完。建 trigger、切行这类"准备
+     工作"提前做正是我们要的（换页那一下才不卡），但"落位、归零位置"这类只该在
+     人真的看到时发生一次的动作必须等激活。不支持预渲染的浏览器里
+     document.prerendering 是 undefined，等于直接执行。 */
+  function whenActive(fn) {
+    if (document.prerendering) document.addEventListener('prerenderingchange', fn, { once: true });
+    else fn();
+  }
+
   try {
-    startAtTop();
+    whenActive(startAtTop);
     focusLadder();
     heroIntro();
     rowIntro();
@@ -418,7 +429,7 @@ ${SKILLS.map(([k, v]) => `<div class="row about__row" data-reveal="up">
     interludeAlign();
     pillRoll();
     if (S) { S.revealAll(); S.navInvert(); }
-    landOnHash();
+    whenActive(landOnHash);
   } catch (err) {
     fallback(err);
   }

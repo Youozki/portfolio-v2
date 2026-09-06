@@ -25,6 +25,13 @@
 <link rel="apple-touch-icon" href="assets/graphics/favicon-180.png" />
 <link rel="stylesheet" href="css/base.css?v=1788616064" />
 <link rel="stylesheet" href="css/index.css?v=1788616064" />
+<!-- 预渲染：鼠标在站内链接上停一下（eagerness: moderate）浏览器就在后台把目标页
+     下载、解析、布局好。点下去时新文档是现成的，顶栏胶囊那条动画不用再和"新页面
+     首帧"抢主线程——卡顿的来源就是那一下。
+     Chromium 生效；Safari / Firefox 不认这个 script，当作没写，行为和现在一样。 -->
+<script type="speculationrules">
+{"prerender":[{"where":{"href_matches":"/*"},"eagerness":"moderate"}]}
+</script>
 </head>
 <body>
 
@@ -55,7 +62,7 @@
   </ul>
 </nav>
 <!-- 紧跟导航同步执行：胶囊的伸缩要在首帧就起手，不能排在 gsap / lenis 后面 -->
-<script src="js/nav-enter.js?v=1788616064"></script>
+<script src="js/nav-enter.js?v=1788616065"></script>
 
 <main>
   <!-- 幕一：入口。整屏铺满的主视觉，文字压在左下角（augen 的排法） -->
@@ -221,8 +228,8 @@
 <script src="vendor/ScrollTrigger.min.js"></script>
 <script src="vendor/SplitText.min.js"></script>
 <script src="vendor/lenis.min.js"></script>
-<script src="js/site.js?v=1788616063"></script>
-<script src="js/index.js?v=1788616063"></script>
+<script src="js/site.js?v=1788616065"></script>
+<script src="js/index.js?v=1788616065"></script>
 <!-- three 有 608KB。用 defer 会挤在新文档首帧之前解析，跨页过渡的预算被它吃掉，
      结果就是"有时候有胶囊动画、有时候瞬间切过去"。改成空闲后再注入：
      首屏那张图是 <img>，粒子层只是叠上去的一层，晚一点出现完全不影响阅读。

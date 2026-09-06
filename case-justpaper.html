@@ -11,6 +11,10 @@
 <link rel="stylesheet" href="css/case-doc.css?v=1788616064" />
 <link rel="stylesheet" href="css/kit.css?v=1788616060" />
 <link rel="stylesheet" href="css/signatures.css?v=1788616060" />
+<!-- 预渲染：见 index.html 里的说明。Chromium 生效，其余浏览器忽略。 -->
+<script type="speculationrules">
+{"prerender":[{"where":{"href_matches":"/*"},"eagerness":"moderate"}]}
+</script>
 </head>
 <body class="is-case">
 
@@ -38,7 +42,7 @@
     <li><a class="nav__link" href="#outcome"><span class="nav__label"><span class="nav__text">Outcome</span></span></a></li>
   </ul>
 </nav>
-<script src="js/nav-enter.js?v=1788616064"></script>
+<script src="js/nav-enter.js?v=1788616065"></script>
 
 <div class="progress" id="progress" aria-hidden="true"><span></span></div>
 
@@ -7940,7 +7944,7 @@
 <script src="vendor/gsap.min.js"></script>
 <script src="vendor/ScrollTrigger.min.js"></script>
 <script src="vendor/lenis.min.js"></script>
-<script src="js/site.js?v=1788616063"></script>
+<script src="js/site.js?v=1788616065"></script>
 <script src="js/case-doc.js?v=1788616064"></script>
 <script src="js/kit.js?v=1788616060"></script>
 <script src="js/case-dual.js?v=1788616060"></script>

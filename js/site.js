@@ -156,12 +156,16 @@
   }
 
   /* 项目页：进场后把顶栏图标向上滚一格，换成返回箭头。
-     延迟 420ms 是等换页渐显走完，让人看得见"换"这个动作。 */
+     延迟 420ms 是等换页渐显走完，让人看得见"换"这个动作。
+     预渲染时要等激活再起算，否则这 420ms 在用户还没过来的时候就走完了，
+     人到的时候箭头已经在那儿，看不到"换"。 */
   function navGlyph() {
     const home = document.getElementById('navHome');
     if (!home || !document.body.classList.contains('is-case')) return;
     if (reduced) { home.classList.add('is-back'); return; }
-    setTimeout(() => home.classList.add('is-back'), 420);
+    const roll = () => setTimeout(() => home.classList.add('is-back'), 420);
+    if (document.prerendering) document.addEventListener('prerenderingchange', roll, { once: true });
+    else roll();
   }
 
   navHandoff();

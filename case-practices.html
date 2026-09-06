@@ -10,6 +10,10 @@
 <link rel="stylesheet" href="css/base.css?v=1788616064" />
 <link rel="stylesheet" href="css/case.css" />
 <link rel="stylesheet" href="css/practices.css" />
+<!-- 预渲染：见 index.html 里的说明。Chromium 生效，其余浏览器忽略。 -->
+<script type="speculationrules">
+{"prerender":[{"where":{"href_matches":"/*"},"eagerness":"moderate"}]}
+</script>
 </head>
 <body class="is-case is-wall">
 
@@ -31,7 +35,7 @@
     </span>
   </a>
 </nav>
-<script src="js/nav-enter.js?v=1788616064"></script>
+<script src="js/nav-enter.js?v=1788616065"></script>
 
 <main>
   <div class="wall" id="wall">
