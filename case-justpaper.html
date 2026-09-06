@@ -7937,12 +7937,22 @@
   </section>
 </main>
 
-<script src="vendor/gsap.min.js"></script>
-<script src="vendor/ScrollTrigger.min.js"></script>
-<script src="vendor/lenis.min.js"></script>
-<script src="js/site.js?v=1788616063"></script>
-<script src="js/case-doc.js?v=1788616064"></script>
-<script src="js/kit.js?v=1788616060"></script>
-<script src="js/case-dual.js?v=1788616060"></script>
+<!-- 画布缩放必须同步，其余等第一帧画完再注入；说明见 case-companion.html。
+     kit.js / case-dual.js 依赖 gsap 与 SITE，所以排在同一条队列里按序执行。 -->
+<script src="js/case-doc.js?v=1788616066"></script>
+<script>
+  (() => {
+    const list = ['vendor/gsap.min.js', 'vendor/ScrollTrigger.min.js',
+      'vendor/lenis.min.js', 'js/site.js?v=1788616066',
+      'js/kit.js?v=1788616060', 'js/case-dual.js?v=1788616060'];
+    const boot = () => list.forEach((src) => {
+      const el = document.createElement('script');
+      el.src = src;
+      el.async = false;
+      document.body.appendChild(el);
+    });
+    requestAnimationFrame(() => requestAnimationFrame(boot));
+  })();
+</script>
 </body>
 </html>

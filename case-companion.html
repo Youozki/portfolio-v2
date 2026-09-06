@@ -1922,10 +1922,25 @@
   </section>
 </main>
 
-<script src="vendor/gsap.min.js"></script>
-<script src="vendor/ScrollTrigger.min.js"></script>
-<script src="vendor/lenis.min.js"></script>
-<script src="js/site.js?v=1788616063"></script>
-<script src="js/case-doc.js?v=1788616064"></script>
+<!-- 画布的缩放必须同步跑：--doc-h 没写进去之前 .case-doc-wrap 高度是 0，
+     画布会先塌一下再撑开，所以 case-doc.js 留在这儿。 -->
+<script src="js/case-doc.js?v=1788616066"></script>
+<!-- 其余这几个首帧一个都用不上，但同步解析要占掉一百多毫秒，正压在顶栏胶囊
+     起手的那一段上（实测内页开头一个 180–207ms 的长任务）。等第一帧画完再注入：
+     并行下载、按顺序执行（动态插入的脚本默认 async，要显式关掉）。
+     代价是 Lenis 晚两三百毫秒接管，这段时间滚动是系统原生的。 -->
+<script>
+  (() => {
+    const list = ['vendor/gsap.min.js', 'vendor/ScrollTrigger.min.js',
+      'vendor/lenis.min.js', 'js/site.js?v=1788616066'];
+    const boot = () => list.forEach((src) => {
+      const el = document.createElement('script');
+      el.src = src;
+      el.async = false;
+      document.body.appendChild(el);
+    });
+    requestAnimationFrame(() => requestAnimationFrame(boot));
+  })();
+</script>
 </body>
 </html>

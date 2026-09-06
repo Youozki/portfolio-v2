@@ -168,5 +168,20 @@
   navGlyph();
 
   window.SITE = { lenis, reduced, hasGsap, scrollTo, revealAll, navInvert, marquee, EASE_REVEAL };
+
+  /* 内页的顶栏反色以前是 case-doc.js 调的。现在这批脚本改成首帧之后才注入，
+     case-doc.js 反而跑在前面，那时 window.SITE 还不存在，调用会被它自己的
+     判空吃掉——顶栏在内页头那段蓝底上就还是深色，几乎读不出来。所以这件事
+     交给 site.js 自己做：谁最后到，谁负责。 */
+  if (document.body && document.body.classList.contains('is-case')) navInvert();
+
+  /* 同样因为晚到：load 事件可能已经过去了，case-doc.js 挂在 load 上的那次
+     refresh 白跑（那时 ScrollTrigger 还没加载）。这里补一次，让 trigger 的
+     位置把图片入位后的布局算进去。 */
+  if (hasGsap && window.ScrollTrigger && document.readyState === 'complete') {
+    requestAnimationFrame(() => {
+      try { ScrollTrigger.refresh(); } catch (err) { /* 位置略有偏差不影响阅读 */ }
+    });
+  }
 })();
 

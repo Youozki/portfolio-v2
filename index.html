@@ -221,13 +221,15 @@
 <script src="vendor/ScrollTrigger.min.js"></script>
 <script src="vendor/SplitText.min.js"></script>
 <script src="vendor/lenis.min.js"></script>
-<script src="js/site.js?v=1788616063"></script>
-<script src="js/index.js?v=1788616063"></script>
+<script src="js/site.js?v=1788616066"></script>
+<script src="js/index.js?v=1788616066"></script>
 <!-- three 有 608KB。用 defer 会挤在新文档首帧之前解析，跨页过渡的预算被它吃掉，
      结果就是"有时候有胶囊动画、有时候瞬间切过去"。改成空闲后再注入：
      首屏那张图是 <img>，粒子层只是叠上去的一层，晚一点出现完全不影响阅读。
-     另外要先躲开顶栏胶囊伸缩的那 640ms：浏览器在首帧之后就认为自己空闲了，
-     608KB 的解析挤进去，胶囊那一段就掉帧（实测最坏一帧 290ms）。 -->
+     时机要躲开首屏入场的整段：主视觉 0.1–1.6s、文字 0.75–1.45s、胶囊 1.05–1.6s、
+     顶栏下滑 1.5–2.5s。608KB 的解析挤进去就是一个一百多毫秒的长任务，实测正好
+     落在 1.3s 上——左下角那组字和项目胶囊的卡顿就是它。所以等到 2.6s 之后再要
+     空闲：屏幕上该动的都动完了，这时候解析没人看得出来。 -->
 <script>
   (() => {
     const load = (src) => new Promise((ok) => {
@@ -242,7 +244,7 @@
     setTimeout(() => {
       if ('requestIdleCallback' in window) requestIdleCallback(boot, { timeout: 2500 });
       else boot();
-    }, 900);
+    }, 2600);
   })();
 </script>
 </body>

@@ -407,6 +407,15 @@ ${SKILLS.map(([k, v]) => `<div class="row about__row" data-reveal="up">
     }
   }
 
+  /* 过场那一段（现画的 SVG 细节、纵向对齐）在四屏之下，但它建 DOM、读布局的
+     开销全压在首屏入场那 1.6s 里——实测首屏开头一个 96ms、一个 64ms 的长任务，
+     左下角那组字和项目胶囊就是在这儿掉帧。挪到入场之后再做，看不出差别。 */
+  function later(fn) {
+    const run = () => { try { fn(); } catch (err) { fallback(err); } };
+    if ('requestIdleCallback' in window) setTimeout(() => requestIdleCallback(run, { timeout: 800 }), 1700);
+    else setTimeout(run, 1700);
+  }
+
   try {
     startAtTop();
     focusLadder();
@@ -414,11 +423,10 @@ ${SKILLS.map(([k, v]) => `<div class="row about__row" data-reveal="up">
     rowIntro();
     aboutIntro();
     aboutHead();
-    blueprint();
-    interludeAlign();
     pillRoll();
     if (S) { S.revealAll(); S.navInvert(); }
     landOnHash();
+    later(() => { blueprint(); interludeAlign(); });
   } catch (err) {
     fallback(err);
   }

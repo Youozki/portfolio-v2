@@ -92,10 +92,9 @@
   initHScroll(document);
   initMarquee(document);
 
-  /* 顶栏压到蓝底（band--accent）或黑底（band--ink）上时整体反白。
-     site.js 里就有这套判定，只是画布页一直没调用——所以内页头那一段蓝底上
-     章节名还是深色，几乎读不出来。 */
-  if (window.SITE && window.SITE.navInvert) window.SITE.navInvert();
+  /* 顶栏压到蓝底（band--accent）或黑底（band--ink）上时整体反白，这件事交给
+     site.js 自己做了——它现在首帧之后才注入，跑在这个文件后面，这里调用的时候
+     window.SITE 还不存在。 */
 
   /* ---- 画布内的入场与视差 ----------------------------------------------
      画布是坐标定位的，不能改 top/left，所以动效只走 transform 与 opacity。
