@@ -377,10 +377,30 @@ a { color: inherit; text-decoration: none; }
 .js [data-reveal] { opacity: 0; }
 .js [data-reveal='up'] { transform: translate3d(0, 1.5rem, 0); }
 .js [data-reveal='line'] { opacity: 1; }
+/* fog 只走 opacity + blur，所以这里不给 transform，免得多一次位移 */
+.js [data-reveal='fog'] { filter: blur(8px); }
 
 /* SplitText 拆出来的行，靠 clip 容器做上推 */
 .line-clip { overflow: clip; }
 .js .line-inner { transform: translate3d(0, 105%, 0); }
+
+/* 上面这些"加了 .js 就先藏起来"的状态，前提是 GSAP 一定会把它们放出来。
+   万一入场那一批建不起来（ScrollTrigger 递归崩、脚本 404、旧浏览器），
+   内容就永远留在隐藏态了。这个 class 由 js/index.js 的 catch 挂上：动画
+   可以不播，字和图不能不在。!important 是用来压过 GSAP 写进元素的内联态。 */
+html.motion-fallback [data-reveal],
+html.motion-fallback .line-inner,
+html.motion-fallback [data-hero='text'],
+html.motion-fallback [data-hero='move'],
+html.motion-fallback [data-about-head],
+html.motion-fallback .interlude__line {
+  opacity: 1 !important;
+  transform: none !important;
+  filter: none !important;
+}
+html.motion-fallback .work__row,
+html.motion-fallback .about__row { --rule-scale: 1 !important; }
+html.motion-fallback .work__row .tag { opacity: 1 !important; transform: none !important; }
 
 /* ---- 换页过渡：轻微模糊 + 渐隐渐显（augen 的做法） -------------------
    只作用在 main 上，导航和过渡层本身不参与，避免整屏"抖一下"。 */
@@ -419,6 +439,29 @@ a { color: inherit; text-decoration: none; }
 @keyframes pill-stretch {
   from { transform: scaleX(var(--pill-from, 1)); }
   to { transform: scaleX(1); }
+}
+
+/* 顶栏入场：整条胶囊从视口上方滑下来。
+   只在没有胶囊伸缩的时候演——首次进站、刷新、以及前后两页胶囊同宽的换页。
+   有伸缩的时候那条动作本身就是连续的，再叠一层下滑就是两个方向在打架。
+   只动 transform，绝对不要动 opacity：opacity < 1 会给 .nav 建一个 backdrop
+   root，里面的 .nav__glass 就采样不到页面内容，磨砂整段失效、只剩一层半透明
+   底色，等动画结束才"啪"地糊上来。位移本身已经够读出入场了。
+   起手时间由 --nav-drop-delay 给：首页要等主视觉那段模糊转清晰走完（见
+   index.css），内页没有那一段，短一点就够。
+   移动端胶囊在底部（.nav 改成 bottom），所以那边从下面升上来。 */
+.js .nav.is-drop {
+  animation: nav-drop 1s cubic-bezier(0.16, 1, 0.3, 1) var(--nav-drop-delay, 0.2s) both;
+}
+@keyframes nav-drop {
+  from { transform: translate(-50%, calc(-100% - var(--space-lg))); }
+  to { transform: translate(-50%, 0); }
+}
+@media (max-width: 767px) {
+  @keyframes nav-drop {
+    from { transform: translate(-50%, calc(100% + var(--space-lg))); }
+    to { transform: translate(-50%, 0); }
+  }
 }
 
 

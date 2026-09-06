@@ -204,21 +204,48 @@
 }
 
 /* ---- 画布里的入场与视差 -----------------------------------------------
-   和首页同一套语言：opacity + blur + 轻微上移，缓动也是同一条。
-   只动 transform 与 opacity，绝对定位的坐标一个都不改，所以排版不变。
-   幅度按实测那一档给（视差 10px），要的是「有存在感但不抢内容」。 */
+   分三种，由 js/case-doc.js 按块自己的字号判定：
+   —— 正文（[data-doc-reveal='lines']）：一行一行位移＋渐显。行是按浏览器
+      自己的换行位置切出来的，坐标、字号、行高、断行全不动。
+   —— 图与容器（默认）：整块位移＋渐显，不带模糊。
+   —— 章节标题（[data-doc-reveal='head']）：只从模糊到清晰，一点不位移。
+   视差仍是实测那一档 10px，要的是「有存在感但不抢内容」。 */
 .case-doc [data-doc-reveal] {
   opacity: 0;
-  transform: translate3d(0, 18px, 0);
-  filter: blur(4px);
-  transition: opacity 0.62s cubic-bezier(0.22, 1, 0.36, 1),
-    transform 0.62s cubic-bezier(0.22, 1, 0.36, 1),
-    filter 0.62s cubic-bezier(0.22, 1, 0.36, 1);
+  transform: translate3d(0, 44px, 0);
+  transition: opacity 0.78s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.78s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .case-doc [data-doc-reveal].is-in {
+  /* 终态回到块自己的透明度：画布正文本来是 0.8，由 js/case-doc.js 搬到 --doc-o */
+  opacity: var(--doc-o, 1);
+  transform: none;
+}
+.case-doc [data-doc-reveal='head'] {
+  transform: none;
+  filter: blur(10px);
+  transition: opacity 1.2s cubic-bezier(0.33, 1, 0.68, 1),
+    filter 1.2s cubic-bezier(0.33, 1, 0.68, 1);
+}
+.case-doc [data-doc-reveal='head'].is-in {
+  filter: none;
+}
+/* 正文块自己不动，动的是里面的行 */
+.case-doc [data-doc-reveal='lines'] {
   opacity: 1;
   transform: none;
-  filter: none;
+  transition: none;
+}
+.case-doc .doc-line {
+  display: block;
+  opacity: 0;
+  transform: translate3d(0, 44px, 0);
+  transition: opacity 1.15s cubic-bezier(0.1, 1, 0.2, 1) calc(var(--i, 0) * 80ms),
+    transform 1.15s cubic-bezier(0.1, 1, 0.2, 1) calc(var(--i, 0) * 80ms);
+}
+.case-doc [data-doc-reveal='lines'].is-in .doc-line {
+  opacity: var(--doc-o, 1);
+  transform: none;
 }
 /* 大图再叠一层很浅的视差，位移写在 --pz 上 */
 .case-doc [data-doc-px] {
@@ -228,5 +255,6 @@
 
 @media (prefers-reduced-motion: reduce) {
   .case-doc [data-doc-reveal] { opacity: 1; transform: none; filter: none; transition: none; }
+  .case-doc .doc-line { opacity: 1; transform: none; transition: none; }
   .case-doc [data-doc-px] { transform: none; }
 }

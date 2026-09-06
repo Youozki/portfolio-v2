@@ -81,6 +81,21 @@
     items.forEach((el) => {
       const mode = el.dataset.reveal;
       const delay = parseFloat(el.dataset.revealDelay || '0');
+
+      /* fog：只从模糊到清晰，不位移。给"关于"那三句话用——它们并排站着，
+         一起往上顶反而看得出是三块在动；只让字从雾里显出来，读起来更静。
+         时长比普通 reveal 长一倍多，缓动也换成收得慢的曲线，才是"慢慢出现"。 */
+      if (mode === 'fog') {
+        gsap.fromTo(el,
+          { opacity: 0, filter: 'blur(8px)' },
+          {
+            opacity: 1, filter: 'blur(0px)',
+            duration: 1.3, delay: delay * 0.6, ease: 'power1.out', overwrite: 'auto',
+            scrollTrigger: { trigger: el, start: 'top 92%', once: true },
+          });
+        return;
+      }
+
       gsap.fromTo(el,
         { opacity: 0.08, y: mode === 'soft' ? 24 : 44, scale: 0.984, filter: 'blur(3px)' },
         {

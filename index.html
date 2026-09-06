@@ -3,13 +3,28 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
+<!-- 只在"刷新"这一种加载里接管滚动位置恢复，而且必须 inline、必须在这儿：
+     浏览器还原位置发生在脚本之后、布局长出来那一刻，而作品行、关于行、联系
+     方式都是 js/index.js 渲染的——文档先短后长，还原就正好落在 index.js 建
+     ScrollTrigger 的中间。两件事一撞，refresh 会递归到自己崩（读 undefined
+     的 end），入场动画整批建不出来，[data-reveal] 停在 opacity:0，看到的就是
+     "在下面刷新之后整页空白"。改成手动之后，刷新一律从顶上重演一遍。
+     判断 type 是必要的：跨文档换页时把 scrollRestoration 设成 manual，Chrome
+     会直接跳过 @view-transition 的换页过渡（实测从项目页回首页就没有过渡了），
+     所以普通换页、前进后退都留给浏览器自己管。 -->
+<script>
+  try {
+    const nav = performance.getEntriesByType('navigation')[0];
+    if (nav && nav.type === 'reload') history.scrollRestoration = 'manual';
+  } catch (e) { /* 老浏览器没有 navigation timing，按浏览器默认行为走 */ }
+</script>
 <title>朱晨宇 — 用户体验设计师</title>
 <meta name="description" content="朱晨宇的作品集。用户体验设计师，联想体验设计、百度 AI 产品设计。" />
 <!-- 标签页头像：用的就是「关于我」那张个人插画，裁到头＋猫、垫上纸色底 -->
 <link rel="icon" href="assets/graphics/favicon.png" sizes="32x32" />
 <link rel="apple-touch-icon" href="assets/graphics/favicon-180.png" />
-<link rel="stylesheet" href="css/base.css" />
-<link rel="stylesheet" href="css/index.css" />
+<link rel="stylesheet" href="css/base.css?v=1788616064" />
+<link rel="stylesheet" href="css/index.css?v=1788616064" />
 </head>
 <body>
 
@@ -40,7 +55,7 @@
   </ul>
 </nav>
 <!-- 紧跟导航同步执行：胶囊的伸缩要在首帧就起手，不能排在 gsap / lenis 后面 -->
-<script src="js/nav-enter.js"></script>
+<script src="js/nav-enter.js?v=1788616064"></script>
 
 <main>
   <!-- 幕一：入口。整屏铺满的主视觉，文字压在左下角（augen 的排法） -->
@@ -84,7 +99,7 @@
         <p class="t-body" data-reveal="up" data-reveal-delay="0.08">接触 AI 产品后，对设计的看法也有了新的认识，从一味追求设计审美，到 AI 时代我们的产品到底要解决什么样的问题，如何管理 AI 体验设计中的不确定性。进而通过用户洞察、逻辑拆解及跨团队协作，从业务目标和技术可行性出发来推进体验创新。结合自身的设计优势，利用动态视觉建立生动的反馈机制，让静态界面充满节奏感。更能够将理性逻辑与感性美学相融合，推动高品质产品落地。</p>
       </div>
 
-      <blockquote class="about__quote" data-reveal="up">
+      <blockquote class="about__quote" data-reveal="fog">
         <p class="t-h2">Steve Jobs 曾说，用户不知道自己想要什么，直到你把产品放在他们面前。<br />
         我相信好的产品，从来都是与用户产生联系，并回馈以各个细节。</p>
       </blockquote>
@@ -206,11 +221,13 @@
 <script src="vendor/ScrollTrigger.min.js"></script>
 <script src="vendor/SplitText.min.js"></script>
 <script src="vendor/lenis.min.js"></script>
-<script src="js/site.js"></script>
-<script src="js/index.js"></script>
+<script src="js/site.js?v=1788616063"></script>
+<script src="js/index.js?v=1788616063"></script>
 <!-- three 有 608KB。用 defer 会挤在新文档首帧之前解析，跨页过渡的预算被它吃掉，
      结果就是"有时候有胶囊动画、有时候瞬间切过去"。改成空闲后再注入：
-     首屏那张图是 <img>，粒子层只是叠上去的一层，晚一点出现完全不影响阅读。 -->
+     首屏那张图是 <img>，粒子层只是叠上去的一层，晚一点出现完全不影响阅读。
+     另外要先躲开顶栏胶囊伸缩的那 640ms：浏览器在首帧之后就认为自己空闲了，
+     608KB 的解析挤进去，胶囊那一段就掉帧（实测最坏一帧 290ms）。 -->
 <script>
   (() => {
     const load = (src) => new Promise((ok) => {
@@ -222,8 +239,10 @@
     });
     const boot = () => load('vendor/three.min.js').then(() => load('js/hero-gl.js'));
     if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    if ('requestIdleCallback' in window) requestIdleCallback(boot, { timeout: 2500 });
-    else setTimeout(boot, 1200);
+    setTimeout(() => {
+      if ('requestIdleCallback' in window) requestIdleCallback(boot, { timeout: 2500 });
+      else boot();
+    }, 900);
   })();
 </script>
 </body>

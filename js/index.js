@@ -3,6 +3,38 @@
   'use strict';
   const S = window.SITE;
 
+  /* ---- 先把返回落位的目标摘下来自己保管 ---------------------------------
+     内页的返回按钮带的是 index.html?row=<id>。用查询参数而不是 #row-<id>：
+     作品行是脚本渲染出来的，地址栏里留着 hash，浏览器就会在行插进 DOM 之后
+     自己滚一次，而且那一下发生在文档还没长够的时候，滚动量被截短，行最后停在
+     半空中；replaceState 把 hash 摘掉也取消不了这次跳转（目标是跟着导航记的，
+     不看 location.hash）。而且这一下正好插在建 ScrollTrigger 的中间，refresh
+     会递归到自己崩，入场动画整批建不出来，[data-reveal] 停在 opacity:0，
+     看到的就是"整页空白"。
+     参数在这里立刻消费掉，位置由 landOnHash() 在动画建好之后自己落——顺带
+     也就解决了"回到首页再刷新还停在那一行"：地址栏里已经没有那一行了。
+     旧的 #row-<id> 链接继续认，直接打开或收藏过的地址不至于失效。 */
+  const landing = (() => {
+    let id = '';
+    try {
+      id = new URLSearchParams(location.search).get('row') || '';
+    } catch (e) { /* 老浏览器没有 URLSearchParams */ }
+    if (!/^[a-z]+$/.test(id)) id = '';
+    if (!id && /^#row-[a-z]+$/.test(location.hash)) id = location.hash.slice(5);
+    if (!id) return '';
+    try {
+      history.replaceState(history.state, '', location.pathname);
+    } catch (e) { /* file:// 下 replaceState 会被拒，落位本身不受影响 */ }
+    return '#row-' + id;
+  })();
+
+  const navType = (() => {
+    try {
+      const entry = performance.getEntriesByType('navigation')[0];
+      return entry ? entry.type : '';
+    } catch (e) { return ''; }
+  })();
+
   /* 全部文案与年份均取自第一版，未作改写；标签来自各案例正文里我自己写的参与范围。 */
   const PROJECTS = [
     { id: 'companion', no: '1', title: 'Companion App', year: '2025', team: 'IDG UI/UX 组',
@@ -170,14 +202,17 @@ ${SKILLS.map(([k, v]) => `<div class="row about__row" data-reveal="up">
     });
   }
 
-  /* ---- 关于的头像与那两句话：和全站同一套入场，依次亮起 ---------------- */
+  /* ---- 关于的头像与那两句话：只从模糊到清晰，不位移 --------------------
+     和下面的引言（data-reveal="fog"）是同一套参数：三句话并排站着，一起往上
+     顶反而看得出是三块在动；只让字从雾里慢慢显出来。时长 1.3s、缓动收得慢，
+     "慢慢出现"这四个字全靠这两个值。 */
   function aboutHead() {
     if (!S || S.reduced || !S.hasGsap) return;
     const items = document.querySelectorAll('[data-about-head]');
     if (!items.length) return;
-    gsap.fromTo(items, { y: 16, opacity: 0, filter: 'blur(6px)' },
-      { y: 0, opacity: 1, filter: 'blur(0px)', duration: 0.72, ease: 'expo.out',
-        stagger: 0.12,
+    gsap.fromTo(items, { opacity: 0, filter: 'blur(8px)' },
+      { opacity: 1, filter: 'blur(0px)', duration: 1.3, ease: 'power1.out',
+        stagger: 0.18,
         scrollTrigger: { trigger: '#about', start: 'top 72%', once: true } });
   }
 
@@ -301,35 +336,90 @@ ${SKILLS.map(([k, v]) => `<div class="row about__row" data-reveal="up">
     });
   }
 
-  /* ---- 从项目内页返回：直接落在那一行的入口上 --------------------------
-     内页顶部的返回按钮带的是 index.html#row-<id>。作品行是脚本渲染出来的，
-     浏览器做原生锚点跳转时元素不一定已经在，Lenis 接管滚动之后原生的位置
-     也会被它自己的内部值覆盖，所以这里自己落位：上方留出约 14vh，行不至于
-     贴在导航底下；落位后刷新 ScrollTrigger，入场动画和导航反色才算准。 */
-  function landOnHash() {
-    if (!/^#row-[a-z]+$/.test(location.hash)) return;
-    const el = document.querySelector(location.hash);
-    if (!el) return;
-    const jump = () => {
-      const cur = S && S.lenis ? S.lenis.scroll : scrollY;
-      const y = Math.max(0, el.getBoundingClientRect().top + cur - innerHeight * 0.14);
-      if (S && S.lenis) S.lenis.scrollTo(y, { immediate: true });
-      else scrollTo(0, y);
-      if (window.ScrollTrigger) ScrollTrigger.refresh();
-    };
-    jump();
-    requestAnimationFrame(jump);          // 字体、图片入位后行的位置还会变
-    if (document.fonts && document.fonts.ready) document.fonts.ready.then(jump);
+  /* ---- 兜底 -------------------------------------------------------------
+     上面这些入场都建立在"GSAP 一定会把 [data-reveal] 放出来"上。真炸了
+     （ScrollTrigger 递归崩、脚本没加载、浏览器太老），内容不能跟着一起没。 */
+  function fallback(err) {
+    document.documentElement.classList.add('motion-fallback');
+    if (window.console && console.warn) console.warn('首页入场退到可读状态：', err);
   }
 
-  focusLadder();
-  heroIntro();
-  rowIntro();
-  aboutIntro();
-  aboutHead();
-  blueprint();
-  interludeAlign();
-  pillRoll();
-  if (S) { S.revealAll(); S.navInvert(); }
-  landOnHash();
+  /* 刷新（且只有刷新）时位置恢复被 index.html 接管成 manual 了，这里把 Lenis
+     的内部值也归零，让首页从顶上完整重演一遍。普通换页和前进后退不碰：那两种
+     情况下位置该由浏览器还原，硬拉回顶部会把人从原来的位置上甩走。 */
+  function startAtTop() {
+    if (navType !== 'reload') return;
+    if (S && S.lenis) S.lenis.scrollTo(0, { immediate: true, force: true });
+    else scrollTo(0, 0);
+  }
+
+  /* ---- 从项目内页返回：直接落在那一行的入口上 --------------------------
+     上方留出约 14vh，行不至于贴在导航底下。这一步必须排在所有入场动画建好
+     之后：trigger 要在 scroll 0 这个安定的位置上建，建完再跳。
+     跳完只 update() 不 refresh()——trigger 的位置是文档坐标，滚动并没有改
+     布局，而在非零位置上调 refresh() 正是那条递归崩溃的老路。 */
+  function landOnHash() {
+    if (!landing) return;
+    const el = document.querySelector(landing);
+    if (!el) return;
+
+    /* 人一动就不再纠正位置——剩下的校准都是为了追字体和图片入位带来的位移，
+       不是为了把人按在这一行上。 */
+    let done = false;
+    const stop = () => { done = true; };
+    ['wheel', 'touchstart', 'pointerdown', 'keydown'].forEach((type) => {
+      addEventListener(type, stop, { once: true, passive: true });
+    });
+
+    /* 判据是"这一行离视口顶还有多远"，不是"我们把滚动量设成了多少"：文档
+       在字体和图片入位过程中会一直变长，只盯滚动量就会把长出来的那一段
+       误判成用户自己滚过了，行也就停在半空中（移动端尤其明显）。 */
+    const jump = () => {
+      if (done) return;
+      const want = innerHeight * 0.14;      // 上方留一档，行不至于贴在导航底下
+      const top = el.getBoundingClientRect().top;
+      if (Math.abs(top - want) < 8) return;
+      const cur = S && S.lenis ? S.lenis.scroll : scrollY;
+      const y = Math.max(0, top + cur - want);
+      if (S && S.lenis) S.lenis.scrollTo(y, { immediate: true });
+      else scrollTo(0, y);
+      if (window.ScrollTrigger) ScrollTrigger.update();
+    };
+
+    jump();
+    requestAnimationFrame(jump);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(jump);
+    // 图片解码完文档还会再长一次，load 之后再校一次
+    if (document.readyState === 'complete') jump();
+    else addEventListener('load', jump, { once: true });
+
+    /* 只在这几个时点校准接不住：字体子集、懒加载的 logo、画布图片是陆续入位的，
+       文档一段一段往下长，行也就跟着往下走（移动端实测行最后停在半空，差了
+       将近九百像素）。所以在头一秒多里盯着 body 的高度变化反复校，人一动就撤。 */
+    [120, 300, 700, 1200].forEach((ms) => setTimeout(jump, ms));
+    if (window.ResizeObserver) {
+      const ro = new ResizeObserver(() => {
+        if (done) ro.disconnect();
+        else jump();
+      });
+      ro.observe(document.body);
+      setTimeout(() => ro.disconnect(), 2500);
+    }
+  }
+
+  try {
+    startAtTop();
+    focusLadder();
+    heroIntro();
+    rowIntro();
+    aboutIntro();
+    aboutHead();
+    blueprint();
+    interludeAlign();
+    pillRoll();
+    if (S) { S.revealAll(); S.navInvert(); }
+    landOnHash();
+  } catch (err) {
+    fallback(err);
+  }
 })();
