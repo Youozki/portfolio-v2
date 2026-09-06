@@ -26,7 +26,15 @@
 
   let dropDelay = 0;
 
-  if (!reduced && glass && from > 2 && target > 2 && Math.abs(from - target) > 2) {
+  /* 前后两页胶囊宽度差多少倍。Practices 的顶栏只有一个图标（47px），首页是
+     220px，差 4.65 倍——玻璃层横向拉到 4.65 倍，94px 的圆角和 1px 的描边跟着
+     一起拉，胶囊会先变成一个透镜形状再弹回来，实测最坏一帧 138ms。这种跨度读成
+     "同一颗胶囊在伸缩"本来就不成立，超过 2.5 倍就不伸缩了，让它重新落一次。
+     首页↔其它内页是 1.9 倍，仍然走伸缩。 */
+  const span = from > 2 && target > 2 ? Math.max(from, target) / Math.min(from, target) : 0;
+  const canMorph = !reduced && glass && span > 0 && span <= 2.5 && Math.abs(from - target) > 2;
+
+  if (canMorph) {
     // scaleX 的原点在左边缘（图标那一端），再把整条导航反向平移半个差值，
     // 于是胶囊看着是"原地两端伸缩"，图标一直贴在胶囊头上
     nav.style.setProperty('--pill-from', String(from / target));
@@ -44,16 +52,22 @@
       nav.style.removeProperty('--pill-shift');
     }, { once: true });
   } else if (!reduced) {
-    /* 没有伸缩可演的时候（首次进站、刷新、前后两页胶囊同宽）让它从上方滑下来，
-       顶栏才有个"进场"，不是凭空出现。判断放在这里而不是无条件加：伸缩本身
-       已经是连续动作，再叠一层下滑就是两个方向在打架。 */
+    /* 没有伸缩可演的时候（首次进站、刷新、前后两页胶囊同宽、宽度差太夸张）让它
+       从上方滑下来，顶栏才有个"进场"，不是凭空出现。判断放在这里而不是无条件加：
+       伸缩本身已经是连续动作，再叠一层下滑就是两个方向在打架。 */
     let navType = '';
     try {
       const entry = performance.getEntriesByType('navigation')[0];
       navType = entry ? entry.type : '';
     } catch (e) { /* 老浏览器没有 navigation timing */ }
 
-    if (from <= 2 || navType === 'reload') {
+    if (from <= 2 || navType === 'reload' || span > 2.5) {
+      /* 首页的下滑要等主视觉那 1.5s（见 index.css 的 --nav-drop-delay）。但带
+         ?row= 回来是落在项目行上、主视觉早在屏幕外了，再等 1.5s 就是顶栏凭空
+         消失一秒半。这种情况下立刻起手。 */
+      if (/(?:^|[?&])row=/.test(location.search)) {
+        nav.style.setProperty('--nav-drop-delay', '0.12s');
+      }
       nav.classList.add('is-drop');
       nav.addEventListener('animationend', (e) => {
         // 动画带 both，跑完要撤掉，否则 .nav 自己的 transform 过渡被它压住
