@@ -239,7 +239,20 @@
 .work__list.is-focusing .work__item[data-far='0'] { opacity: 1; filter: none; }
 
 /* ---- 幕二 · 关于：深色带做分章 ---------------------------------------- */
-.about { padding-block: var(--space-4xl) var(--space-3xl); }
+.about { padding-block: var(--space-4xl) var(--space-3xl); position: relative; overflow: clip; }
+
+/* 光点层：铺满这一带，压在文字下面，不接指针事件。深色底上光感比首屏强，
+   所以点数和不透明度都在 js 里给了更小的一档。 */
+.about__gl {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+.about > .page { position: relative; z-index: 1; }
+
 
 /* 头像：方框（圆角只留 --radius-sm 那一档，和站里其它容器同规格），纸色底 +
    一圈发丝，线稿的黑才立得住；里面是角色全身像（图留了透明底，底色由这里给）。
