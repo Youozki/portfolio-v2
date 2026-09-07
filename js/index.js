@@ -168,7 +168,7 @@ ${SKILLS.map(([k, v]) => `<div class="row about__row" data-reveal="up">
       { filter: 'blur(0px)', scale: 1, opacity: 1, duration: 1.5, ease: 'expo.out' }, 0);
     tl.fromTo(texts,
       { filter: 'blur(10px)', opacity: 0, y: 14 },
-      { filter: 'blur(0px)', opacity: 1, y: 0, duration: 0.7, ease: 'expo.out', stagger: 0.09 },
+      { filter: 'blur(0px)', opacity: 1, y: 0, duration: 0.9, ease: 'expo.out', stagger: 0.09 },
       0.75);
     tl.fromTo(moves,
       { y: 18, opacity: 0 },
@@ -327,13 +327,19 @@ ${SKILLS.map(([k, v]) => `<div class="row about__row" data-reveal="up">
 
   /* ---- 首屏胶囊：悬停时文字向上滚一格就停住，不回滚 -------------------- */
   function pillRoll() {
-    document.querySelectorAll('.pill--roll').forEach((el) => {
-      const roll = el.querySelector('.pill__roll');
-      if (!roll) return;
-      el.addEventListener('pointerenter', () => el.classList.add('is-rolling'));
-      el.addEventListener('focus', () => el.classList.add('is-rolling'));
+    const arm = (el, roll) => {
+      if (!el || !roll) return;
+      const start = () => el.classList.add('is-rolling');
+      el.addEventListener('pointerenter', start);
+      el.addEventListener('focus', start);
       roll.addEventListener('animationend', () => el.classList.remove('is-rolling'));
+    };
+    document.querySelectorAll('.pill--roll').forEach((el) => {
+      arm(el, el.querySelector('.pill__roll'));
     });
+    // 右下角那个箭头同一套机制，方向在 CSS 里反过来（往下滚）
+    const cue = document.querySelector('.hero__cue');
+    if (cue) arm(cue, cue.querySelector('.cue__roll'));
   }
 
   /* ---- 兜底 -------------------------------------------------------------
@@ -417,6 +423,9 @@ ${SKILLS.map(([k, v]) => `<div class="row about__row" data-reveal="up">
   }
 
   try {
+    // 没有 GSAP 就没人来解开 .js 挂上的那些隐藏态（首屏图现在也在其中），
+    // 而这条路不抛异常，所以要显式退到可读状态
+    if (!S || !S.hasGsap) fallback('没有 GSAP');
     startAtTop();
     focusLadder();
     heroIntro();

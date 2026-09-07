@@ -393,6 +393,7 @@ html.motion-fallback .line-inner,
 html.motion-fallback [data-hero='text'],
 html.motion-fallback [data-hero='move'],
 html.motion-fallback [data-about-head],
+html.motion-fallback .hero__key img,
 html.motion-fallback .interlude__line {
   opacity: 1 !important;
   transform: none !important;
@@ -478,6 +479,15 @@ html.motion-fallback .work__row .tag { opacity: 1 !important; transform: none !i
 @media (prefers-reduced-motion: reduce) {
   .js [data-reveal] { opacity: 1 !important; transform: none !important; }
   .js .line-inner { transform: none !important; }
+  /* heroIntro() 在 reduced 下直接 return，所以起始态得在这里撤掉 */
+  .js .hero__key img { opacity: 1 !important; filter: none !important; transform: none !important; }
+  /* 箭头的入场是 CSS 动画，上面那条 animation-duration: 1ms 只压时长、不动
+     animation-delay，所以 1.75s 的延迟还在，配 fill: both 就是"前 1.75s 完全看不见"。
+     减弱动效下两条动画都不该跑，直接关掉并落到终态。 */
+  .hero__cue .cue__clip { animation: none !important; transform: none !important; opacity: 0.6 !important; }
+  .hero__cue .cue__roll { transform: translateY(calc(-1 * var(--cue-track))) !important; animation: none !important; }
+  /* heroIntro() 在 reduced 下不跑，[data-hero="move"] 的初始态也得在这里撤掉 */
+  .js .hero__cue { opacity: 1 !important; transform: none !important; }
   .nav { transition-duration: 150ms; }
   * { animation-duration: 1ms !important; animation-iteration-count: 1 !important; }
 }

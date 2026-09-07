@@ -21,6 +21,13 @@
   object-position: center;
   will-change: transform, filter;
 }
+/* 入场的起始态必须写在 CSS 里，不能只由 heroIntro() 的 fromTo 去设。
+   .js 是 nav-enter.js 同步加的（在 <nav> 之后、这张图被解析之前），所以这条
+   规则在图第一次上屏之前就生效了。之前没有这条：图按原样一边下载一边从上往下
+   画出来，等 index.js 跑到（本地 391ms，慢网络更晚）才被 GSAP 按回
+   blur(26px)/opacity .35，看上去就是"图先加载出来、又消失、再模糊到清晰"。
+   数值必须和 heroIntro() 的 from 完全一致，否则接手那一帧会跳。 */
+.js .hero__key img { opacity: 0.35; filter: blur(26px); transform: scale(1.09); }
 /* three 的粒子/路径层：铺在图上面、文字下面，不接指针事件 */
 .hero__gl {
   position: absolute;
@@ -62,20 +69,80 @@
   right: clamp(1.25rem, 3.4vw, 3.5rem);
   bottom: clamp(3rem, 8vh, 6rem);
   z-index: 2;
-  width: 2.25rem;
-  height: 2.25rem;
+  /* --cue-track 是胶囊的内高（去掉两条发丝），hover 滚动的行程和两份箭头的
+     格高都用它，这样箭头正好从胶囊顶走到底，且不会被 1px 边框错开。 */
+  --cue-track: calc(3rem - 2 * var(--rule));
+  width: 1.375rem;
+  /* 立起来的胶囊（augen 的做法）：箭头从上沿滚下来，所以要有一段高度当轨道，
+     而且必须 clip，不然会看见箭头在胶囊外面飞。箭头本身在胶囊里居中——
+     对着 augen 那张图量过，它的箭头是在竖胶囊的正中间，不是偏下。 */
+  height: 3rem;
+  overflow: clip;
   display: grid;
   place-items: center;
   border-radius: var(--radius-pill);
-  background: var(--veil);
+  /* 这里必须用"比背景暗"的灰，不能用 --veil 那种浅色：箭头落点那块图亮度 232，
+     而 --veil 的底色是 #ededea（237），差 5 级——0.3 也好 0.55 也好，实测亮度差
+     只有 2.3 级，等于没有。改成极淡的墨灰，量出来差 12 级，和 augen 那张图上
+     白底 255 配 #f0f0f0 的观感一档。发丝留一条浅白的，万一压到图里深色的部分
+     还能靠边界立住。 */
+  background: rgba(20, 22, 26, 0.07);
+  border: var(--rule) solid rgba(255, 255, 255, 0.28);
   -webkit-backdrop-filter: var(--blur-veil-sm);
   backdrop-filter: var(--blur-veil-sm);
-  font-size: var(--text-sm);
+  /* 箭头比 --text-sm(13) 再小一档：胶囊收到 22×48 之后 13px 的字形在里面显得挤，
+     11px 才是"一个小记号"的分量。这里不用令牌，--text-xs(12) 是正文的可读下限，
+     而这个箭头不承载阅读。 */
+  font-size: 0.6875rem;
 }
-.hero__cue span { animation: cue 2.6s var(--ease-in-out) infinite; }
+/* 胶囊本体的入场交给 heroIntro() 那条 [data-hero="move"] 的 tween，和项目胶囊
+   完全同参。但初始态得写在 CSS 里：GSAP 是 index.js 跑到才接手的，不写这条的话
+   慢网络上会先看见一个灰胶囊、再被按回 opacity 0——就是首屏图踩过的那个坑。 */
+.js .hero__cue { opacity: 0; }
+/* 两条动画叠在一个元素上：cue-in 先跑（both 保留终态），到点之后列在后面的
+   cue 接手 transform 和 opacity。排在胶囊本体落位（约 1.9s）之后起手。
+   挂在 .cue__clip 上而不是里面的 span：里层的 transform 留给 hover 的滚动，
+   两级各管一件事，不会互相覆盖。 */
+.hero__cue .cue__clip {
+  display: block;
+  overflow: hidden;
+  /* 撑满胶囊内高，hover 的行程才有整个胶囊那么长（原来只有一行字高 ≈14px） */
+  align-self: stretch;
+  justify-self: stretch;
+  height: var(--cue-track);
+  animation: cue-in 0.62s cubic-bezier(0.16, 1, 0.3, 1) 1.95s both,
+    cue 2.6s var(--ease-in-out) 2.57s infinite;
+}
+@keyframes cue-in {
+  from { transform: translateY(-1.4rem); opacity: 0; }
+  to { transform: translateY(0); opacity: 0.5; }
+}
 @keyframes cue {
   0%, 100% { transform: translateY(0); opacity: 0.5; }
   50% { transform: translateY(3px); opacity: 1; }
+}
+/* hover 往下滚一整个胶囊高。两份箭头各占一格 --cue-track，静止时整条上移一格
+   （露出下面那份、它在自己那格里居中），滚到 0 就是露出上面那份 —— 所以看到的是
+   一个箭头从胶囊底部走出去、另一个从顶部走进来，行程正好是胶囊的高度。
+   项目胶囊是 0 → -50% 往上，这里正好反过来。
+   同样只滚一次不回滚：动画跑完由 js 摘掉 class，两份箭头一模一样，归零看不出来。 */
+.hero__cue .cue__roll {
+  display: flex;
+  flex-direction: column;
+  transform: translateY(calc(-1 * var(--cue-track)));
+}
+.hero__cue .cue__roll > span {
+  display: grid;
+  place-items: center;
+  height: var(--cue-track);
+  line-height: 1;
+}
+.hero__cue.is-rolling .cue__roll {
+  animation: cue-roll 620ms cubic-bezier(0.4, 0, 0.25, 1) both;
+}
+@keyframes cue-roll {
+  from { transform: translateY(calc(-1 * var(--cue-track))); }
+  to { transform: translateY(0); }
 }
 
 /* 从入口胶囊跳过来时，让目标行亮一下，交代"你到了这里" */

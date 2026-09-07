@@ -13,6 +13,12 @@
      会直接跳过 @view-transition 的换页过渡（实测从项目页回首页就没有过渡了），
      所以普通换页、前进后退都留给浏览器自己管。 -->
 <script>
+  /* html.js 原来是 nav-enter.js 加的，那是个外部脚本 —— 慢网络下它要等一个往返，
+     而首屏那张图可能在那之前就开始往屏幕上画了。于是：图按原样一行行显出来，
+     等 .js 一挂、GSAP 一接手，又被按回 blur(26px)/opacity .35，看上去就是
+     "图先加载出来、消失、再模糊到清晰"。放在这里 inline 加，零网络依赖，
+     在 <body> 任何内容被解析之前就生效。nav-enter.js / site.js 再加一次无害。 */
+  document.documentElement.classList.add('js');
   try {
     const nav = performance.getEntriesByType('navigation')[0];
     if (nav && nav.type === 'reload') history.scrollRestoration = 'manual';
@@ -23,8 +29,8 @@
 <!-- 标签页头像：用的就是「关于我」那张个人插画，裁到头＋猫、垫上纸色底 -->
 <link rel="icon" href="assets/graphics/favicon.png" sizes="32x32" />
 <link rel="apple-touch-icon" href="assets/graphics/favicon-180.png" />
-<link rel="stylesheet" href="css/base.css?v=1788616064" />
-<link rel="stylesheet" href="css/index.css?v=1788790020" />
+<link rel="stylesheet" href="css/base.css?v=1788790070" />
+<link rel="stylesheet" href="css/index.css?v=1788790070" />
 </head>
 <body>
 
@@ -78,7 +84,11 @@
         <a class="pill pill--roll" data-hero="move" href="#row-practices"><span class="pill__clip"><span class="pill__roll"><span class="pill__text">Practices</span><span class="pill__text" aria-hidden="true">Practices</span></span></span></a>
       </div>
     </div>
-    <a class="hero__cue" href="#about" aria-label="向下浏览"><span>↓</span></a>
+    <!-- data-hero="move" 让它跟左边五个项目胶囊进同一条 tween（同样的 y 18 /
+         0.55s / expo.out / stagger 0.055），排在它们后面一档。
+         两份一样的箭头上下叠着，hover 时整条往下滚一格：上面那份进来、下面那份走掉。
+         和项目胶囊同一个机制（见 base.css 的 pill-roll），只是方向反过来。 -->
+    <a class="hero__cue" data-hero="move" href="#about" aria-label="向下浏览"><span class="cue__clip"><span class="cue__roll"><span>↓</span><span aria-hidden="true">↓</span></span></span></a>
   </header>
 
   <!-- 幕二：关于。深色带做分章 -->
@@ -223,7 +233,7 @@
 <script src="vendor/SplitText.min.js"></script>
 <script src="vendor/lenis.min.js"></script>
 <script src="js/site.js?v=1788616063"></script>
-<script src="js/index.js?v=1788616066"></script>
+<script src="js/index.js?v=1788790050"></script>
 <!-- three 有 608KB。用 defer 会挤在新文档首帧之前解析，跨页过渡的预算被它吃掉，
      结果就是"有时候有胶囊动画、有时候瞬间切过去"。改成空闲后再注入：
      首屏那张图是 <img>，粒子层只是叠上去的一层，晚一点出现完全不影响阅读。
@@ -240,7 +250,7 @@
       el.onerror = ok;              // 加载失败就当没有这一层，页面照常
       document.body.appendChild(el);
     });
-    const boot = () => load('vendor/three.min.js').then(() => load('js/hero-gl.js?v=1788790021'));
+    const boot = () => load('vendor/three.min.js').then(() => load('js/hero-gl.js?v=1788790072'));
     if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     setTimeout(() => {
       if ('requestIdleCallback' in window) requestIdleCallback(boot, { timeout: 2500 });
