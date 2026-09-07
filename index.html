@@ -29,8 +29,8 @@
 <!-- 标签页头像：用的就是「关于我」那张个人插画，裁到头＋猫、垫上纸色底 -->
 <link rel="icon" href="assets/graphics/favicon.png" sizes="32x32" />
 <link rel="apple-touch-icon" href="assets/graphics/favicon-180.png" />
-<link rel="stylesheet" href="css/base.css?v=1788790070" />
-<link rel="stylesheet" href="css/index.css?v=1788790070" />
+<link rel="stylesheet" href="css/base.css?v=1788790080" />
+<link rel="stylesheet" href="css/index.css?v=1788790080" />
 </head>
 <body>
 
@@ -67,7 +67,17 @@
   <!-- 幕一：入口。整屏铺满的主视觉，文字压在左下角（augen 的排法） -->
   <header class="band band--paper hero" id="top">
     <figure class="hero__key" id="heroKey">
+      <!-- 四档同一张图的不同分辨率，浏览器按屏幕自己挑。之前只有 2880 那一档，
+           390×844 / DPR 3 的手机实际只需要 1170px 宽，却要下满 253KB。
+           sizes="100vw"：这张图整屏铺满，宽度就等于视口宽。
+           fetchpriority="high"：它和底部那 155KB 脚本同时开始下载，慢网络上要让它
+           先拿到带宽——这是首屏唯一的主视觉。 -->
       <img src="assets/graphics/hero-key.webp"
+           srcset="assets/graphics/hero-key-960.webp 960w,
+                   assets/graphics/hero-key-1440.webp 1440w,
+                   assets/graphics/hero-key-1920.webp 1920w,
+                   assets/graphics/hero-key.webp 2880w"
+           sizes="100vw" fetchpriority="high"
            alt="一组等距视角的旋钮模块与苔藓植物，界面与实体控件长在一起" width="2880" height="1555" />
     </figure>
     <canvas class="hero__gl" id="heroGL" aria-hidden="true"></canvas>

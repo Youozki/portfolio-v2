@@ -96,9 +96,7 @@
   font-size: 0.6875rem;
 }
 /* 胶囊本体的入场交给 heroIntro() 那条 [data-hero="move"] 的 tween，和项目胶囊
-   完全同参。但初始态得写在 CSS 里：GSAP 是 index.js 跑到才接手的，不写这条的话
-   慢网络上会先看见一个灰胶囊、再被按回 opacity 0——就是首屏图踩过的那个坑。 */
-.js .hero__cue { opacity: 0; }
+   完全同参；起始态由 base.css 里 .js [data-hero='move'] 统一给。 */
 /* 两条动画叠在一个元素上：cue-in 先跑（both 保留终态），到点之后列在后面的
    cue 接手 transform 和 opacity。排在胶囊本体落位（约 1.9s）之后起手。
    挂在 .cue__clip 上而不是里面的 span：里层的 transform 留给 hover 的滚动，

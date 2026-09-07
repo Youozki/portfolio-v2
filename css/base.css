@@ -384,6 +384,14 @@ a { color: inherit; text-decoration: none; }
 .line-clip { overflow: clip; }
 .js .line-inner { transform: translate3d(0, 105%, 0); }
 
+/* 首屏那三行字和六个胶囊的起始态。原来只写在 heroIntro() 的 fromTo 里，慢网络上
+   CSS 先到（页面开始画）而底部那 155KB 阻塞脚本还要等一两个往返，于是它们先满
+   不透明地画在屏上、再被 GSAP 按回去——实测冷缓存 + 600ms 延迟下这一帧持续 652ms。
+   本地看不到，因为本地是 JS 先跑完（567ms）才第一次上屏（728ms）。
+   数值必须和 heroIntro() 的 from 一字不差，否则 GSAP 接手那一帧会跳。 */
+.js [data-hero='text'] { opacity: 0; transform: translateY(14px); filter: blur(10px); }
+.js [data-hero='move'] { opacity: 0; transform: translateY(18px); }
+
 /* 上面这些"加了 .js 就先藏起来"的状态，前提是 GSAP 一定会把它们放出来。
    万一入场那一批建不起来（ScrollTrigger 递归崩、脚本 404、旧浏览器），
    内容就永远留在隐藏态了。这个 class 由 js/index.js 的 catch 挂上：动画
@@ -486,8 +494,9 @@ html.motion-fallback .work__row .tag { opacity: 1 !important; transform: none !i
      减弱动效下两条动画都不该跑，直接关掉并落到终态。 */
   .hero__cue .cue__clip { animation: none !important; transform: none !important; opacity: 0.6 !important; }
   .hero__cue .cue__roll { transform: translateY(calc(-1 * var(--cue-track))) !important; animation: none !important; }
-  /* heroIntro() 在 reduced 下不跑，[data-hero="move"] 的初始态也得在这里撤掉 */
-  .js .hero__cue { opacity: 1 !important; transform: none !important; }
+  /* heroIntro() 在 reduced 下不跑，它那几个初始态都得在这里撤掉 */
+  .js [data-hero='text'],
+  .js [data-hero='move'] { opacity: 1 !important; transform: none !important; filter: none !important; }
   .nav { transition-duration: 150ms; }
   * { animation-duration: 1ms !important; animation-iteration-count: 1 !important; }
 }
