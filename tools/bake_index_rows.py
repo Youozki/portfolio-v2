@@ -89,7 +89,7 @@ def about_html():
                    ' alt="%s" width="294" height="96" loading="lazy" />' % (logo, logo, esc(org))
                    ) if logo else ''
             out.append(
-                '          <div class="row about__row">\n'
+                '          <div class="row about__row" data-reveal="up">\n'
                 '            <span class="t-cap">%s</span>\n'
                 '            <span><span class="t-lead about__org">%s%s</span>'
                 '<span class="t-cap about__sub">%s</span></span>\n'

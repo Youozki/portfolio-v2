@@ -13,6 +13,10 @@
   overflow: clip;
   display: block;
 }
+/* 从项目页带 ?row= 回来时，首屏在落位脚本之前就解析完了，慢机器上会先画出一帧
+   主视觉（"先卡在首页图上"）。这段时间只藏可见性，布局一点不动，所以目标行的位置
+   仍然量得准。解除在 index.html 里作品列表后面那段脚本，另有 1.5s 的定时兜底。 */
+.is-landing .hero { visibility: hidden; }
 .hero__key { position: absolute; inset: 0; margin: 0; }
 .hero__key img {
   width: 100%;

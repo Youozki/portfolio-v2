@@ -333,18 +333,43 @@
     else setTimeout(run, 1700);
   }
 
+  /* ---- 建 trigger 的那一瞬间必须站在 scroll 0 上 ------------------------
+     index.html 里作品列表后面那段 inline 脚本已经在首帧之前把文档摆到目标行上了
+     （这样第一帧画的就是 Selected Work，而不是先卡在首屏主视觉那里）。但 trigger
+     只能在 scroll 0 这个安定位置上建：在非零位置上建，ScrollTrigger 会在自己的
+     refresh 里递归到 undefined.end 崩掉，入场整批建不出来，整页退到 motion-fallback
+     （这次改动第一版就是这么炸的，实测两页都复现）。
+     两件事都要，就压进同一个任务：按回 0 → 建 → 放回去。任务中间浏览器不渲染，
+     所以画面上一帧都不会退回首屏。放回去之后只 update()，不 refresh()——文档布局
+     没变，refresh() 正是那条递归的老路。 */
+  function atTopForSetup(build) {
+    const y = window.scrollY || 0;
+    if (!y) { build(); return; }
+    scrollTo(0, 0);
+    try {
+      build();
+    } finally {
+      scrollTo(0, y);
+      if (S && S.lenis) S.lenis.scrollTo(y, { immediate: true, force: true });
+      if (window.ScrollTrigger) ScrollTrigger.update();
+    }
+  }
+
   try {
     // 没有 GSAP 就没人来解开 .js 挂上的那些隐藏态（首屏图现在也在其中），
     // 而这条路不抛异常，所以要显式退到可读状态
     if (!S || !S.hasGsap) fallback('没有 GSAP');
     startAtTop();
     focusLadder();
-    heroIntro();
-    rowIntro();
-    aboutIntro();
-    aboutHead();
+    atTopForSetup(() => {
+      heroIntro();
+      rowIntro();
+      aboutIntro();
+      aboutHead();
+      if (S) { S.revealAll(); }
+    });
     pillRoll();
-    if (S) { S.revealAll(); S.navInvert(); }
+    if (S) { S.navInvert(); }
     landOnHash();
     later(() => { blueprint(); interludeAlign(); });
   } catch (err) {

@@ -88,6 +88,28 @@
     （换页头 100-200ms 主线程在解析脚本，逐帧补间必然掉帧）。
   - 入场逻辑放在 `js/nav-enter.js` 并紧跟 `<nav>`，排到 gsap/lenis 后面会晚一百多毫秒起手。
 - Chrome 持久化 profile 缓存很凶，无头验证必须带 `?v=$(date +%s)`，`http.server` 要用 `--directory`。
+- **返回首页的落位（2026-09-08 定稿）**：两条要同时满足，缺一条就出问题。
+  - 位置必须在**首帧之前**摆好，所以落位脚本 inline 写在 `index.html` 作品列表的**下一行**
+    （放 `<head>` 量不到位置，交给 `js/index.js` 太晚——它排在 gsap/lenis 后面，实测那一帧
+    文档已是全高、滚动量还是 0，画的就是首屏主视觉，也就是用户说的"先卡在首页图那里"）。
+    首屏在这之前就解析完了，所以 `<head>` 里先挂 `html.is-landing` 把首屏 `visibility: hidden`，
+    落位脚本摆好后立刻解除（另有 1.5s 定时兜底）。
+  - ScrollTrigger 必须在 `scroll 0` 上建。两件事都要，就压进**同一个任务**：
+    `atTopForSetup()` 先把滚动量按回 0 → 建全部入场 → 再放回去（任务中间浏览器不渲染，
+    画面上一帧都不会退回首屏），最后只 `ScrollTrigger.update()`，不 `refresh()`。
+    在非零位置上建 trigger 会在 refresh 里递归到 `undefined.end`，整页退到 `motion-fallback`——
+    这一轮第一版就是这么炸的，两页都复现。
+  - 内页返回链接一律用 `index.html?row=<id>`，**不要用 `#row-<id>`**：带 hash 浏览器自己还会
+    再滚一次（实测 651ms），而且把行顶死在视口顶上，留出的 14vh 又被抹掉。
+- **内页第一帧就要是对的版式**：画布高度与缩放的兜底值写在 CSS 里
+  （`height: var(--doc-h, calc(var(--span) * 100vw / 1920))`、`scale(var(--cs, calc(100vw / 1920px)))`），
+  `js/case-doc.js` 仍是权威值。兜底缺失时画布在脚本跑起来之前高度是 0，第一帧是"蓝底＋结语"
+  挤在一起的塌版，等 gsap/lenis 下完才撑开——这是"点进内页觉得慢"里最明显的一下。
+  首屏那两三张画布图另外要转成 `fetchpriority="high"` 的 eager（`tools/eager_first_screen.py`，
+  判据是画布坐标落在 `[y0, y0+900]`；按"top 小于阈值"筛会把嵌套在 mockup 里的图全捞进来）。
+- 内页顶栏的反色态（`is-inverted`）直接写死在 HTML 里：这几页开场都压在蓝底上，
+  等 `site.js` 的 `navInvert()` 来加要排在 gsap/ScrollTrigger/lenis 后面，那之前顶栏一直是
+  浅色玻璃底——用户看到的"加载完才变成正确的颜色"。滚动之后的切换仍由 `navInvert()` 接管。
 
 ## 7. 用户反馈里反复出现的判据
 

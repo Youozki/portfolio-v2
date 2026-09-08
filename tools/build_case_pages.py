@@ -156,6 +156,34 @@ def lazify(frag):
     return re.sub(r'<img\b[^>]*?>', one, frag, flags=re.S)
 
 
+def eager_first_screen(page):
+    """首屏那两三张画布图改回 eager（整页组装完再跑，判据要的是最终画布坐标）。
+
+    lazy 的图不进预扫描，要等布局算完才排队，而画布的布局还要等 case-doc.js 把缩放
+    系数写进去——那已经在 gsap/lenis 下载完之后了，于是"点进内页还得再等图"。
+
+    判据用第一段画布的 y0：落在 [y0, y0+900] 里的才算首屏。嵌套在 mockup／跑马灯里
+    的图，top 是相对各自父容器的小数值（0.02、16.57 这种），一律小于 y0，自然排除；
+    单纯按"top 小于某个阈值"筛会把它们全捞进来（Just Paper 实测 301 张）。
+    独立脚本 tools/eager_first_screen.py 是同一段逻辑，用来给已有页面补做一次。
+    """
+    m = re.search(r'class="case-slice" style="--y0:([\d.]+)px', page)
+    if not m:
+        return page, []
+    y0 = float(m.group(1))
+    hit = []
+
+    def one(im):
+        tag = im.group(0)
+        t = re.search(r'top:(-?[\d.]+)px', tag)
+        if not t or not (y0 <= float(t.group(1)) <= y0 + 900) or 'loading="lazy"' not in tag:
+            return tag
+        tag = re.sub(r'\s*loading="lazy"', '', tag)
+        hit.append(tag)
+        return tag.replace('<img', '<img fetchpriority="high"', 1)
+    return re.sub(r'<img\b[^>]*?>', one, page, flags=re.S), hit
+
+
 def load_doc(path):
     """第一版正文存成 window.CASE_DOC_X = "…"; 这里取出并还原成真 HTML。"""
     s = open(path, encoding='utf-8').read()
@@ -341,8 +369,11 @@ CASES = [
     ),
 ]
 
-# 顶部返回：回到索引页时直接落在本项目那一行的入口上，而不是主页最顶上
-NAV_HOME = '''  <a class="nav__home" id="navHome" href="index.html#row-%s" aria-label="返回作品索引">
+# 顶部返回：回到索引页时直接落在本项目那一行的入口上，而不是主页最顶上。
+# 用 ?row= 而不是 #row-：带 hash 的话浏览器自己会再滚一次（实测在 651ms，比我们
+# 落位晚），而且它把行顶死在视口顶上，把留出的那 14vh 又抹掉，看着就是"落好了
+# 又跳一下"。index.html 里的落位脚本认这个参数。
+NAV_HOME = '''  <a class="nav__home" id="navHome" href="index.html?row=%s" aria-label="返回作品索引">
     <span class="nav__glyphs" aria-hidden="true">
       <span class="nav__roll">
         <svg class="mark" viewBox="0 0 24 24" width="20" height="20">
@@ -613,11 +644,11 @@ def build(cfg):
     # 正文＝一整张画布，不再切段。切段会把章节之间的元素连带丢掉，
     # 也会因为段高取整而裁到内容，所以退回整幅渲染。
     body.append(
-        '  <div class="case-doc-wrap" data-span="%.2f">\n'
+        '  <div class="case-doc-wrap" data-span="%.2f" style="--span:%.2f">\n'
         '    <div class="case-doc">\n'
         '      <div class="case-slice" style="--y0:%.2fpx">%s</div>\n'
         '    </div>\n'
-        '  </div>\n' % (span, y0, doc_html))
+        '  </div>\n' % (span, span, y0, doc_html))
 
     href, no, title, desc = cfg['next']
     body.append('''  <section class="band band--accent act coda">
@@ -662,7 +693,11 @@ def build(cfg):
 </head>
 <body class="is-case">
 
-<nav class="nav" id="nav" aria-label="章节导航">
+<!-- 顶栏一开场就压在蓝底（band--accent）上，所以反色态直接写死在 class 里。
+     交给 site.js 的 navInvert() 加就太晚了：它要等 gsap/ScrollTrigger/lenis 全下完，
+     那之前顶栏一直是浅色玻璃底压在蓝底上（用户看到的"加载完才变成正确的颜色"）。
+     滚动之后的切换仍旧由 navInvert() 接管。 -->
+<nav class="nav is-inverted" id="nav" aria-label="章节导航">
   <span class="nav__glass" aria-hidden="true"></span>
 %s
   <ul class="nav__list">
@@ -687,10 +722,11 @@ def build(cfg):
     out = os.path.join(ROOT, 'case-%s.html' % cfg['id'])
     page = re.sub(r'(href="css/[a-z-]+\.css)"', r'\1?v=%d"' % STAMP, page)
     page = re.sub(r'(src="js/[a-z-]+\.js)"', r'\1?v=%d"' % STAMP, page)
+    page, eager = eager_first_screen(page)
     open(out, 'w', encoding='utf-8').write(page)
-    print('%-11s 画布 y0=%.0f 高 %.0fpx  %d KB  章节 %s'
+    print('%-11s 画布 y0=%.0f 高 %.0fpx  %d KB  章节 %s  首屏 eager %d'
           % (cfg['id'], y0, span, len(page) // 1024,
-             '/'.join(c[1] for c in cfg['chapters'])))
+             '/'.join(c[1] for c in cfg['chapters']), len(eager)))
 
 
 if __name__ == '__main__':

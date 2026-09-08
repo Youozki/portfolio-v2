@@ -23,6 +23,18 @@
     const nav = performance.getEntriesByType('navigation')[0];
     if (nav && nav.type === 'reload') history.scrollRestoration = 'manual';
   } catch (e) { /* 老浏览器没有 navigation timing，按浏览器默认行为走 */ }
+  /* 带 ?row= 从项目页返回时：落位那段脚本在作品列表后面（要等目标行解析出来才量得到
+     位置），而首屏在它之前就解析完了，慢一点的机器上会先画出一帧主视觉——就是"先卡
+     在首页图上再跳到 Selected Work"。这里先把首屏藏起来（只藏可见性，不动布局，
+     所以行的位置一点不变），落位脚本摆好位置后立刻放开。
+     兜底两道：落位脚本无论成败都会摘掉这个 class，再加一个定时器，万一那段脚本
+     压根没跑到，也不能把首屏永久藏着。 */
+  try {
+    if (/[?&]row=[a-z]+/.test(location.search) || /^#row-[a-z]+$/.test(location.hash)) {
+      document.documentElement.classList.add('is-landing');
+      setTimeout(function () { document.documentElement.classList.remove('is-landing'); }, 1500);
+    }
+  } catch (e) { }
 </script>
 <title>朱晨宇 — 用户体验设计师</title>
 <meta name="description" content="朱晨宇的作品集。用户体验设计师，联想体验设计、百度 AI 产品设计。" />
@@ -30,7 +42,7 @@
 <link rel="icon" href="assets/graphics/favicon.png" sizes="32x32" />
 <link rel="apple-touch-icon" href="assets/graphics/favicon-180.png" />
 <link rel="stylesheet" href="css/base.css?v=1788790100" />
-<link rel="stylesheet" href="css/index.css?v=1788790100" />
+<link rel="stylesheet" href="css/index.css?v=1789690112" />
 </head>
 <body>
 
@@ -128,22 +140,22 @@
       <div class="about__grid" id="aboutRows">
         <div class="about__block">
           <p class="t-label">Experiences</p>
-          <div class="row about__row">
+          <div class="row about__row" data-reveal="up">
             <span class="t-cap">2025.9 – 2026.4</span>
             <span><span class="t-lead about__org"><img class="about__logo" data-logo="lenovo" src="assets/logos/lenovo.webp" alt="联想" width="294" height="96" loading="lazy" />联想</span><span class="t-cap about__sub">体验设计实习生</span></span>
           </div>
-          <div class="row about__row">
+          <div class="row about__row" data-reveal="up">
             <span class="t-cap">2026.4 – 至今</span>
             <span><span class="t-lead about__org"><img class="about__logo" data-logo="baidu" src="assets/logos/baidu.webp" alt="百度" width="294" height="96" loading="lazy" />百度</span><span class="t-cap about__sub">AI 产品经理实习生（设计侧）</span></span>
           </div>
         </div>
         <div class="about__block">
           <p class="t-label">Education</p>
-          <div class="row about__row">
+          <div class="row about__row" data-reveal="up">
             <span class="t-cap">2022 – 2024</span>
             <span><span class="t-lead about__org">湖南城市学院</span><span class="t-cap about__sub">环境设计 学士</span></span>
           </div>
-          <div class="row about__row">
+          <div class="row about__row" data-reveal="up">
             <span class="t-cap">2024 – 2027</span>
             <span><span class="t-lead about__org">湖南师范大学</span><span class="t-cap about__sub">数字媒体设计 硕士</span></span>
           </div>
@@ -253,6 +265,26 @@
       </ol>
     </div>
   </section>
+  <!-- 返回落位必须发生在首帧之前，所以就写在作品列表的下一行：解析到这里时目标那
+       一行已经在 DOM 里、位置可读，而文档还没画过第一帧。放在 <head> 里没用（那时
+       还量不到位置），交给 js/index.js 也太晚——它排在 gsap/lenis 后面，实测那一帧
+       （文档已经是全高、滚动量还是 0）画的就是首屏主视觉，也就是"先卡在首页图上"。
+       这里只负责把位置摆对；后面 landOnHash() 仍会在字体和图片入位后反复校准。 -->
+  <script>
+    (function () {
+      try {
+        var m = location.search.match(/[?&]row=([a-z]+)/);
+        var id = m ? m[1] : (/^#row-[a-z]+$/.test(location.hash) ? location.hash.slice(5) : '');
+        var el = id && document.getElementById('row-' + id);
+        if (el) {
+          var y = el.getBoundingClientRect().top + (window.pageYOffset || 0) - innerHeight * 0.14;
+          window.scrollTo(0, Math.max(0, y));
+        }
+      } catch (e) { /* 位置摆不对也不能挡住页面，后面还有 landOnHash() 兜着 */ }
+      // 首屏的临时隐藏在这儿解除（见 <head> 里的 is-landing），成败都要解除
+      document.documentElement.classList.remove('is-landing');
+    })();
+  </script>
 
   <!-- 过场：铰链开合的线框推演。图不是位图，是现画的 SVG 线框，
        所以能跟着滚动从闭合转到 105°，并且留下过程残影。 -->
@@ -376,7 +408,7 @@
 <script src="vendor/SplitText.min.js"></script>
 <script src="vendor/lenis.min.js"></script>
 <script src="js/site.js?v=1788616063"></script>
-<script src="js/index.js?v=1788790100"></script>
+<script src="js/index.js?v=1789690112"></script>
 <!-- three 有 608KB。用 defer 会挤在新文档首帧之前解析，跨页过渡的预算被它吃掉，
      结果就是"有时候有胶囊动画、有时候瞬间切过去"。改成空闲后再注入：
      首屏那张图是 <img>，粒子层只是叠上去的一层，晚一点出现完全不影响阅读。

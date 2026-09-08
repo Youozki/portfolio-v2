@@ -135,6 +135,11 @@
 
 /* 底部那句话沿用第一版原文。之前压在深底上太暗看不清，提到接近正文的亮度。 */
 .wall__foot {
+  /* 它在 .wall 外面（图墙自己会滚），所以图墙那层 filter 管不到它：详情打开时
+     整片图墙退到模糊里，只有这一行还是全清晰的白字，读起来像是浮在详情上面的
+     一块残留。这里跟着一起退——同一条缓动同一档时长，读成"整个背景一起后退"。
+     模糊只给 12px：这行字才 16px，给到图墙那样的 18px 就整段糊没了。 */
+  transition: filter 0.6s var(--ease-veil), opacity 0.6s var(--ease-veil);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -151,10 +156,11 @@
   filter: brightness(0) invert(1);
   opacity: 0.88;
 }
+body.is-detail-open .wall__foot { filter: blur(12px); opacity: 0.45; }
 
 
 @media (prefers-reduced-motion: reduce) {
-  .wall__cell, .pdetail__card { transition: none; }
+  .wall__cell, .pdetail__card, .wall__foot { transition: none; }
 }
 @media (max-width: 767px) {
   .wall__cols { --wall-gap: 0.75rem; }

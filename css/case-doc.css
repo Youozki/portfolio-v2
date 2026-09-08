@@ -11,8 +11,13 @@
 .case-doc-wrap {
   position: relative;
   overflow: hidden;
-  /* 缩放后的实际高度，由 js/case-doc.js 按 data-span × 缩放系数写入 */
-  height: var(--doc-h, 0);
+  /* 缩放后的实际高度，由 js/case-doc.js 按 data-span × 缩放系数写入。
+     兜底值不能留 0：case-doc.js 排在 gsap/ScrollTrigger/lenis 后面，在它跑起来之前
+     画布高度是 0、缩放系数也没写，第一帧画出来是"蓝底 + 结语"挤在一起的塌版，等脚本
+     下完才撑开——"点进内页觉得慢"里看得最明显的就是这一下。
+     兜底按 100vw 折算（脚本拿的是 clientWidth，两者只差滚动条那点宽度，随后会被
+     它校正）。--span 由生成器写在行内，和 data-span 同一个值。 */
+  height: var(--doc-h, calc(var(--span, 0) * 100vw / 1920));
   /* 画布第一张图不能贴着 intro 的蓝底。留白必须加在这里（画布自己的浅底上），
      加在头的 padding-bottom 上只会让蓝色变高，看着还是没有空隙。
      绝对定位的 .case-slice 以 padding 盒为参照，所以这里必须 content-box，
@@ -34,7 +39,8 @@
 
 .case-doc {
   width: 1920px;
-  transform: scale(var(--cs, 1));
+  /* 同上：--cs 由脚本写入，兜底自己按视口宽算一遍，第一帧就是对的比例 */
+  transform: scale(var(--cs, calc(100vw / 1920px)));
   transform-origin: 0 0;
   /* 对齐设计稿导出时依赖的默认值：行高 1.5、系统无衬线、边框默认灰。
      不要让 v2 的 --leading-cn / Geist 继承进来，否则每一行文字都会错位。 */
