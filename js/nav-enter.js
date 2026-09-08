@@ -83,4 +83,32 @@
   if (dropDelay) setTimeout(() => nav.classList.add('is-ready'), dropDelay);
   // 下一帧再放行，保证先落一帧初始态（文字在下面、胶囊是上一页的宽度）
   else requestAnimationFrame(() => nav.classList.add('is-ready'));
+
+  /* ---- 移动端：往下读的时候把胶囊收下去 --------------------------------
+     移动端胶囊在视口底部（见 base.css），一屏又窄，它就常年压着正文最下面那一行。
+     往下滚收起，往上滑一点就回来——手要用它的时候一定在，读正文的时候一定不挡。
+     故意不做"停手几百毫秒自动回来"：停手正是在读，那时候把胶囊放回去等于又盖住
+     那一行，这个毛病就没修掉。回来的触发只有两个：往上滑，或者滚到页面最底下
+     （那儿是"下个项目"，胶囊得在）。
+     只在窄屏挂监听：桌面端胶囊在顶部，没这个问题。
+     移动端滚动是系统原生的（site.js 里 syncTouch: false），所以 window 的 scroll
+     事件可靠，不用去问 Lenis。位移写在 translate 上，与 transform 上的居中位移、
+     换页时的胶囊伸缩关键帧互不干扰。 */
+  if (matchMedia('(max-width: 767px)').matches) {
+    let last = window.scrollY || 0;
+    /* 只认手动滚动。带 ?row= 从项目页返回时，落位脚本会用 scrollTo 直接跳几千像素，
+       那也是一次 scroll 事件、方向朝下，不设这道闸的话人刚回到首页胶囊就先藏起来了。 */
+    let armed = false;
+    ['touchstart', 'wheel', 'keydown'].forEach((type) => {
+      addEventListener(type, () => { armed = true; }, { once: true, passive: true });
+    });
+    addEventListener('scroll', () => {
+      const y = window.scrollY || 0;
+      const atEnd = y + window.innerHeight >= document.documentElement.scrollHeight - 48;
+      // 6px 死区：iOS 的橡皮筋回弹会来回抖几个像素，不留死区胶囊会跟着抽
+      if (y < last - 6 || y <= 80 || atEnd) nav.classList.remove('is-tucked');
+      else if (armed && y > last + 6) nav.classList.add('is-tucked');
+      last = y;
+    }, { passive: true });
+  }
 })();

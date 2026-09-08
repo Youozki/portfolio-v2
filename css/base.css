@@ -497,6 +497,8 @@ html.motion-fallback .work__row .tag { opacity: 1 !important; transform: none !i
   /* heroIntro() 在 reduced 下不跑，它那几个初始态都得在这里撤掉 */
   .js [data-hero='text'],
   .js [data-hero='move'] { opacity: 1 !important; transform: none !important; filter: none !important; }
+  /* 移动端胶囊的收起本身是功能性的（不然它盖着正文），保留动作、只去掉过渡 */
+  .nav { transition: none !important; }
   .nav { transition-duration: 150ms; }
   * { animation-duration: 1ms !important; animation-iteration-count: 1 !important; }
 }
@@ -526,6 +528,13 @@ html.motion-fallback .work__row .tag { opacity: 1 !important; transform: none !i
     mask-image: linear-gradient(to right, #000 calc(100% - 1.4rem), transparent);
   }
   .nav__link { padding: 0.5rem 0.62rem; letter-spacing: 0; }
+  /* 往下读的时候把胶囊收下去，向上滑或停手 0.9s 再回来。
+     底部固定的胶囊会一直压着正文——移动端一屏本来就窄，胶囊常年盖住最下面那一行
+     （Just Paper 双屏那段实测被盖掉一整行）。收起／回来由 js/nav-enter.js 切 class。
+     用 translate 这个独立属性，不要用 transform：transform 上已经有居中位移
+     （translate(-50%, 0)）和换页时的胶囊伸缩关键帧，两边写同一个属性必然打架。 */
+  .nav { transition: translate var(--dur-3) var(--ease-out); }
+  .nav.is-tucked { translate: 0 calc(100% + var(--space-md) + 0.5rem); }
 }
 @media (max-width: 479px) {
   .t-statement { overflow-wrap: anywhere; min-width: 0; }
