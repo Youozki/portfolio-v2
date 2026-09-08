@@ -129,6 +129,16 @@
 /* 大字压在设备后面，字距收紧一点，像 augen 那样是一整块 */
 .statement--device .statement__type { letter-spacing: 0.02em; }
 
+/* 窄屏上这一处会整句消失：大字跟着 --text-statement 掉到它的下限 44px（TIZIO 宽
+   105px），而设备图停在自己的下限 6.5rem（104px），两个数字撞在一起——图和字一样宽、
+   又叠在同一格里，字就被完全盖住（390px 实测重叠 104/105px）。
+   桌面上的比例是设备 158px 对大字 258px，字从两边各露出 50px。这里按同一比例给窄屏
+   单独定一版：字随视口放到 18vw，设备收到 24vw，字仍旧比图宽出三分之一。 */
+@media (max-width: 767px) {
+  .statement--device .statement__type { font-size: clamp(3.4rem, 18vw, 5rem); }
+  .statement--device .statement__art { width: clamp(4.75rem, 24vw, 7rem); }
+}
+
 /* 三张布局方案图尺寸差一档（Infinite Canvas 那张内容本来就短），
    所以容器统一画幅、图 contain 顶对齐——同系列同规格是在容器上保证的。 */
 .plate--spec { aspect-ratio: 0.55; background: none; }
