@@ -29,8 +29,8 @@
 <!-- 标签页头像：用的就是「关于我」那张个人插画，裁到头＋猫、垫上纸色底 -->
 <link rel="icon" href="assets/graphics/favicon.png" sizes="32x32" />
 <link rel="apple-touch-icon" href="assets/graphics/favicon-180.png" />
-<link rel="stylesheet" href="css/base.css?v=1788790080" />
-<link rel="stylesheet" href="css/index.css?v=1788790080" />
+<link rel="stylesheet" href="css/base.css?v=1788790100" />
+<link rel="stylesheet" href="css/index.css?v=1788790100" />
 </head>
 <body>
 
@@ -125,8 +125,53 @@
         我相信好的产品，从来都是与用户产生联系，并回馈以各个细节。</p>
       </blockquote>
 
-      <div class="about__grid" id="aboutRows"></div>
-      <div class="about__skills" id="aboutSkills"></div>
+      <div class="about__grid" id="aboutRows">
+        <div class="about__block">
+          <p class="t-label">Experiences</p>
+          <div class="row about__row">
+            <span class="t-cap">2025.9 – 2026.4</span>
+            <span><span class="t-lead about__org"><img class="about__logo" data-logo="lenovo" src="assets/logos/lenovo.webp" alt="联想" width="294" height="96" loading="lazy" />联想</span><span class="t-cap about__sub">体验设计实习生</span></span>
+          </div>
+          <div class="row about__row">
+            <span class="t-cap">2026.4 – 至今</span>
+            <span><span class="t-lead about__org"><img class="about__logo" data-logo="baidu" src="assets/logos/baidu.webp" alt="百度" width="294" height="96" loading="lazy" />百度</span><span class="t-cap about__sub">AI 产品经理实习生（设计侧）</span></span>
+          </div>
+        </div>
+        <div class="about__block">
+          <p class="t-label">Education</p>
+          <div class="row about__row">
+            <span class="t-cap">2022 – 2024</span>
+            <span><span class="t-lead about__org">湖南城市学院</span><span class="t-cap about__sub">环境设计 学士</span></span>
+          </div>
+          <div class="row about__row">
+            <span class="t-cap">2024 – 2027</span>
+            <span><span class="t-lead about__org">湖南师范大学</span><span class="t-cap about__sub">数字媒体设计 硕士</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="about__skills" id="aboutSkills">
+        <p class="t-label">Skills</p>
+        <div class="row about__row" data-reveal="up">
+          <span class="t-lead">产品</span>
+          <span class="t-body about__skillval">多模态 / 用户心理 / 模型推动 / 功能迭代 / 需求挖掘 / 服务蓝图 / 用户体验地图…</span>
+        </div>
+        <div class="row about__row" data-reveal="up">
+          <span class="t-lead">视频</span>
+          <span class="t-body about__skillval">AfterEffects / Premiere / Protopie / Spline / Rive</span>
+        </div>
+        <div class="row about__row" data-reveal="up">
+          <span class="t-lead">二维</span>
+          <span class="t-body about__skillval">Figma / Illustrator / Photoshop</span>
+        </div>
+        <div class="row about__row" data-reveal="up">
+          <span class="t-lead">三维</span>
+          <span class="t-body about__skillval">Zbrush / Blender / 3DS Max</span>
+        </div>
+        <div class="row about__row" data-reveal="up">
+          <span class="t-lead">AI</span>
+          <span class="t-body about__skillval">IDE 类 / 视觉生成类</span>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -134,7 +179,78 @@
   <section class="band band--paper work" id="work" aria-labelledby="work-title">
     <div class="page">
       <h2 class="t-h1 work__title" id="work-title">Selected Work</h2>
-      <ol class="work__list" id="workList"></ol>
+      <ol class="work__list" id="workList">
+        <li class="work__item" id="row-companion">
+          <a class="work__row" href="case-companion.html" data-id="companion" data-reveal="up">
+            <span class="work__meta">
+              <span class="t-num work__no">1</span>
+              <span class="t-cap work__year">2025</span>
+              <span class="t-cap work__team">IDG UI/UX 组</span>
+            </span>
+            <span class="work__main">
+              <span class="t-h1 work__name">Companion App</span>
+              <span class="t-body work__desc">Tiko 是一位智能协作助手，能够帮助用户更快速地获取信息、完成决策并简化日常工作流程，为用户带来更顺畅的使用体验。</span>
+              <span class="work__tags"><span class="tag">交互体验</span><span class="tag">视觉</span><span class="tag">表情动效</span></span>
+            </span>
+          </a>
+        </li>
+        <li class="work__item" id="row-justpaper">
+          <a class="work__row" href="case-justpaper.html" data-id="justpaper" data-reveal="up">
+            <span class="work__meta">
+              <span class="t-num work__no">2</span>
+              <span class="t-cap work__year">2026</span>
+              <span class="t-cap work__team">IDG UI/UX 组</span>
+            </span>
+            <span class="work__main">
+              <span class="t-h1 work__name">Just Paper</span>
+              <span class="t-body work__desc">原生笔记软件，结合双屏的产品特点为用户构建笔记使用新体验。</span>
+              <span class="work__tags"><span class="tag">组件库</span><span class="tag">设计规范</span><span class="tag">双屏交互</span></span>
+            </span>
+          </a>
+        </li>
+        <li class="work__item" id="row-oreate">
+          <a class="work__row" href="case-oreate.html" data-id="oreate" data-reveal="up">
+            <span class="work__meta">
+              <span class="t-num work__no">3</span>
+              <span class="t-cap work__year">2026</span>
+              <span class="t-cap work__team">PSIG 海外产品创新组</span>
+            </span>
+            <span class="work__main">
+              <span class="t-h1 work__name">Oreate AI</span>
+              <span class="t-body work__desc">AI 全模态内容，快速生成 AI 图像、视频等多元需求，支持 PPT、助力深度研究与写作。</span>
+              <span class="work__tags"><span class="tag">多模态</span><span class="tag">视觉范式</span><span class="tag">模型交互</span></span>
+            </span>
+          </a>
+        </li>
+        <li class="work__item" id="row-terabox">
+          <a class="work__row" href="case-terabox.html" data-id="terabox" data-reveal="up">
+            <span class="work__meta">
+              <span class="t-num work__no">4</span>
+              <span class="t-cap work__year">2026</span>
+              <span class="t-cap work__team">PSIG 海外产品创新组</span>
+            </span>
+            <span class="work__main">
+              <span class="t-h1 work__name">Terabox</span>
+              <span class="t-body work__desc">百度网盘海外版本，主打内容 + AI，海外方向强化多模态与 AI 能力。</span>
+              <span class="work__tags"><span class="tag">AI 编辑器</span><span class="tag">Agent</span><span class="tag">海外迁移</span></span>
+            </span>
+          </a>
+        </li>
+        <li class="work__item" id="row-practices">
+          <a class="work__row" href="case-practices.html" data-id="practices" data-reveal="up">
+            <span class="work__meta">
+              <span class="t-num work__no">5</span>
+              <span class="t-cap work__year">—</span>
+              <span class="t-cap work__team">个人练习</span>
+            </span>
+            <span class="work__main">
+              <span class="t-h1 work__name">Practices</span>
+              <span class="t-body work__desc">个人技能练习作品，包括 UI 页面、MG 动效／三维动效（静帧展示）、建模视觉等。</span>
+              <span class="work__tags"><span class="tag">UI</span><span class="tag">MG 动效</span><span class="tag">三维</span></span>
+            </span>
+          </a>
+        </li>
+      </ol>
     </div>
   </section>
 
@@ -233,7 +349,24 @@
     <div class="page contact__inner">
       <p class="t-num">6</p>
       <h2 class="t-h1" id="contact-title">大概就这些，期待面聊 ：）</h2>
-      <ul class="contact__list" id="contactList"></ul>
+      <ul class="contact__list" id="contactList">
+        <li class="contact__item" data-reveal="up">
+          <span class="t-label contact__key">Tel</span>
+          <span class="t-h2 contact__val">18817076170</span>
+        </li>
+        <li class="contact__item" data-reveal="up">
+          <span class="t-label contact__key">Wechat</span>
+          <span class="t-h2 contact__val">IfiGottA</span>
+        </li>
+        <li class="contact__item" data-reveal="up">
+          <span class="t-label contact__key">Email</span>
+          <span class="t-h2 contact__val">670156618@qq.com</span>
+        </li>
+        <li class="contact__item" data-reveal="up">
+          <span class="t-label contact__key">小红书</span>
+          <span class="t-h2 contact__val">Youozki</span>
+        </li>
+      </ul>
     </div>
   </section>
 </main>
@@ -243,7 +376,7 @@
 <script src="vendor/SplitText.min.js"></script>
 <script src="vendor/lenis.min.js"></script>
 <script src="js/site.js?v=1788616063"></script>
-<script src="js/index.js?v=1788790050"></script>
+<script src="js/index.js?v=1788790100"></script>
 <!-- three 有 608KB。用 defer 会挤在新文档首帧之前解析，跨页过渡的预算被它吃掉，
      结果就是"有时候有胶囊动画、有时候瞬间切过去"。改成空闲后再注入：
      首屏那张图是 <img>，粒子层只是叠上去的一层，晚一点出现完全不影响阅读。

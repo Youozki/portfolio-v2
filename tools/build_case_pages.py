@@ -45,6 +45,30 @@ def find_img(rel):
             return p
     return None
 
+
+def retarget(frag):
+    """把正文里指向已经不存在的图的 src 换到同名 .webp。
+
+    起因：Just Paper 的七张长截图从 PNG 换成了 WebP（11.3MB → 1.2MB），v2 这边
+    tools/v1-doc/ 的副本同步改了，但 DOC_DIRS 会优先读旁边第一版仓库的 pages/，
+    那份还是 .png——于是重跑这个脚本会把 404 引用写回来（实测四张图挂掉）。
+    与其规定"必须先改第一版"，不如让脚本自己按 v2 的 assets 现状纠正，
+    这样无论正文从哪份读都不会写出坏引用。
+
+    存在性只看 v2 自己的 ROOT，不能用 find_img——它会顺带在第一版仓库里找到，
+    而第一版那边 PNG 还在，于是判断成"文件存在"，坏引用照样写出来（我第一版就栽在这）。
+    """
+    def one(m):
+        rel = m.group(1)
+        if os.path.exists(os.path.join(ROOT, rel)):
+            return m.group(0)
+        alt = os.path.splitext(rel)[0] + '.webp'
+        if os.path.exists(os.path.join(ROOT, alt)):
+            return m.group(0).replace(rel, alt)
+        print('  !! 图不存在且没有 .webp 替代：%s' % rel)
+        return m.group(0)
+    return re.sub(r'src="(assets/[^"]+)"', one, frag)
+
 # 顶层元素里 top 小于这个值的就是画布自带的页头（logo 107.8 / 标题与年份 173 /
 # 简介 267），一律删掉换成 v2 的头。往下最近的元素在 457，所以 400 是安全阈值。
 HEAD_CUT = 400
@@ -76,6 +100,62 @@ def bump_top(frag, delta):
     return new + frag[m.end():]
 
 
+def eager_spans(frag):
+    """标出"里面的图必须 eager"的容器区间：横向画廊与跑马灯。
+
+    这些容器里的图往右铺出去几千像素（Oreate 那条跑马灯 track 宽 16588px），
+    容器自己 overflow 藏着、靠 CSS 动画横向走。浏览器判断 lazy 只看"离视口远不远"，
+    横向溢出的部分永远算远，于是竖着滚一整页都不会去抓。
+
+    第一版的正文自己就给这批图标了 loading="lazy"（而且属性还写重了两遍），
+    所以这不是懒加载改动引入的：main 上实测同样有 60 张跑马灯里的图一直空着。
+    这里连带把已有的 lazy 摘掉，让它们恢复成 eager。
+    """
+    spans = []
+    pat = re.compile(r'<div\b[^>]*?(?:\bdata-hscroll\b|class="[^"]*marquee[^"]*")[^>]*?>')
+    for m in pat.finditer(frag):
+        i, depth = m.end(), 1
+        end = len(frag)
+        for t in re.finditer(r'<(/?)div\b[^>]*?>', frag[i:]):
+            depth += -1 if t.group(1) else 1
+            if depth == 0:
+                end = i + t.end()
+                break
+        spans.append((m.start(), end))
+    return spans
+
+
+def lazify(frag):
+    """给正文里还没标 loading 的 <img> 补上 lazy + 异步解码。
+
+    为什么必须做：Just Paper 有 528 张图，其中 376 张来自第一版正文、原样保留、
+    没有 loading 属性，于是进页面的瞬间浏览器一次抓 320 张——而首屏里实际只有
+    1 张看得见。这批请求把带宽和解码线程占满，新文档的第一帧被推到 1.7s 之后，
+    跨文档过渡因此有三分之一的概率被 Chrome 直接跳过（控制台报 Transition was skipped）。
+
+    为什么竖向的可以一律 lazy、不用挑首屏：lazy 只推迟视口之外的图，落在视口里（或视口
+    附近约 1250px 内）的照样立刻抓。画布上的图都带 width/height 或绝对定位，
+    不会因为延后加载而跳版。第一版正文里的 top 是各章节内的相对坐标，
+    拿它判断首屏是判断不出来的，所以不做这个区分。
+
+    例外见 eager_spans。
+    """
+    skip = eager_spans(frag)
+
+    def one(m):
+        tag, inside = m.group(0), any(a <= m.start() < b for a, b in skip)
+        if inside:
+            # 横向容器里的图一律 eager；第一版重复写了两遍属性，一起清掉
+            tag = re.sub(r'\s*loading="[a-z]*"', '', tag)
+            tag = re.sub(r'(\s*decoding="async")+', r'\1', tag)
+            tag = re.sub(r'(\s*alt="")+', r'\1', tag)
+            return tag
+        if 'loading=' in tag:
+            return tag
+        return '<img loading="lazy" decoding="async"' + tag[4:]
+    return re.sub(r'<img\b[^>]*?>', one, frag, flags=re.S)
+
+
 def load_doc(path):
     """第一版正文存成 window.CASE_DOC_X = "…"; 这里取出并还原成真 HTML。"""
     s = open(path, encoding='utf-8').read()
@@ -83,7 +163,7 @@ def load_doc(path):
     html = json.loads(s[a:b + 1])
     m = re.match(r'\s*<div[^>]*>', html)
     inner = html[m.end():]
-    return inner[:inner.rindex('</div>')]
+    return lazify(retarget(inner[:inner.rindex('</div>')]))
 
 
 def top_children(src):
