@@ -120,7 +120,13 @@
   max-height: calc(100vh - 6rem);
   object-fit: contain;
   border-radius: 14px;
+  /* 详情图是复用同一个 <img> 只换 src，换完浏览器会继续画旧的那一帧直到新图解码完，
+     于是点第二张时先看到上一张。这里默认藏起来，js 解码完才挂 is-ready 放出来。
+     0.34s 的渐显比整层 0.46s 略快一档，读起来是"图落在已经打开的框里"。 */
+  opacity: 0;
+  transition: opacity 0.34s var(--ease-veil);
 }
+.pdetail__shot.is-ready { opacity: 1; }
 
 @media (max-width: 767px) {
   .pdetail__card { width: min(86vw, 28rem); }

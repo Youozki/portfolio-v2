@@ -108,6 +108,45 @@
   const shot = detail.querySelector('.pdetail__shot');
   let open = false;
 
+  /* 换 src 之后浏览器会继续画旧的那一帧，直到新图解码完——这就是"点第二张时
+     先看到上一张"。所以换 src 前先摘掉 is-ready（CSS 里 opacity 0），解码完再放出来。
+     token 是防连点：手快时旧图可能后到，不能让它覆盖当前这张。 */
+  let shotToken = 0;
+  // 和 case-practices.html 里占位用的同一张 1px 透明图
+  const BLANK = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+  function showShot(src, alt) {
+    const mine = ++shotToken;
+    const ready = () => { if (mine === shotToken) shot.classList.add('is-ready'); };
+    shot.classList.remove('is-ready');
+    /* 先把 src 换成那张 1px 透明图：只摘 class 不够——opacity 有 0.34s 过渡，
+       这段时间里元素画的还是上一张的像素，看上去就是"先闪一下上一张"。
+       换成透明图是立即生效的，旧像素当场没了，不会出现坏图图标。 */
+    shot.src = BLANK;
+    shot.alt = alt;
+    // 用 onload/onerror 属性而不是 addEventListener：连点时自动换掉上一个回调
+    shot.onload = ready;
+    shot.onerror = ready;          // 加载失败也要露出来，至少看得见 alt
+    shot.src = src;
+    if (shot.complete) ready();    // 缓存命中时 onload 不会再触发
+    // 兜底：万一 onload 因为某种原因没来，也不能把图永远藏着（藏死比看到旧图更糟）
+    setTimeout(ready, 1200);
+  }
+
+  /* 十五张详情图合计 2.1MB，而这一页本身只有 2.4KB HTML，空闲时全预热掉，
+     点开就是本地缓存，等待感直接没了。指针移到卡片上再单独催一次，
+     覆盖"页面刚打开就点"的情况。 */
+  const warmed = new Set();
+  function warm(src) {
+    if (warmed.has(src)) return;
+    warmed.add(src);
+    const im = new Image();
+    im.decoding = 'async';
+    im.src = src;
+  }
+  const warmAll = () => ITEMS.forEach((it) => warm(DIR + it.shot));
+  if ('requestIdleCallback' in window) requestIdleCallback(warmAll, { timeout: 3000 });
+  else setTimeout(warmAll, 1500);
+
   function spread(from) {
     if (reduced) return;
     const r0 = from.getBoundingClientRect();
@@ -141,8 +180,7 @@
     const it = ITEMS[i];
     if (!it) return;
     open = true;
-    shot.src = DIR + it.shot;
-    shot.alt = it.title;
+    showShot(DIR + it.shot, it.title);
     detail.querySelector('.pdetail__card').setAttribute('aria-label', it.title);
     spread(from);
     wall.classList.add('is-detail');
@@ -166,6 +204,14 @@
     if (!el) return;
     openDetail(Number(el.dataset.i), el);
   });
+
+  // 指针一落到卡片上就先把它的详情图拉下来，比空闲预热更早一步
+  colsBox.addEventListener('pointerenter', (e) => {
+    const el = e.target.closest && e.target.closest('.wall__cell');
+    if (!el) return;
+    const it = ITEMS[Number(el.dataset.i)];
+    if (it) warm(DIR + it.shot);
+  }, true);
   // 详情开着时，点图以外的任何地方都退出（右上角的叉号已按要求去掉）
   detail.addEventListener('click', (e) => {
     if (e.target.closest('.pdetail__card')) return;
