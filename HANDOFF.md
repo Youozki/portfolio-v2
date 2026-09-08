@@ -131,4 +131,27 @@
 - **本机无头 Chrome 拿不到 WebGL 上下文**（`--disable-gpu`、`--enable-unsafe-swiftshader`、
   `--use-angle=metal` 三种都试过，`webgl: false`），所以粒子层的观感只能由用户在真实浏览器里判断。
 
+## 10. 部署（2026-09-07 上线）
+
+正式地址 **https://ptfchy.xyz**（`www` 同时可用）。备用 https://youozki.github.io/portfolio-v2/ 保留，两边不冲突。
+
+- **托管**：EdgeOne Pages（腾讯云国际站），绑 GitHub 仓库 `Youozki/portfolio-v2` 的 `main`，
+  推一次自动部署一次。框架预设「其他/静态网站」，安装与编译命令留空，输出目录 `/`。
+- **加速区域选的是「全球可用区（不含中国大陆）」**，因为另两个选项的自定义域名都要 ICP 备案。
+  代价是走境外节点（落地 IP `43.174.x.x`），国内比 GitHub Pages 好一截但不是最优；
+  要真正的国内速度必须先备案再换区域。
+- **`.edgeone.dev` 那个预览域名不能当公开链接**：官方为内容合规做了限制——不含中国大陆的区域，
+  中国大陆网络一律 401；含中国大陆的区域则要用控制台生成的签名链接、有效期 3 小时。
+- **DNS 在 DNSPod（NS `dorado/karen.dnspod.net`），记录加在「权威解析」**，三条都不能删：
+  - `@` CNAME → `ptfchy.xyz.pages.dnsoe7.com`
+  - `www` CNAME → 同一目标
+  - `edgeonereclaim` TXT → EdgeOne 归属权校验（免费证书自动续期也依赖它）
+- **证书**：TrustAsia DV，90 天，裸域与 `www` 各一张，到期前腾讯云自动重签下发，
+  前提是 CNAME 一直指着 EdgeOne。
+- **开关**：强制 HTTPS 开、OCSP 装订开、**HSTS 故意不开**（一旦被浏览器缓存，
+  证书出问题时访客硬性打不开且清不掉，作品集不值得冒这个风险）。
+- **顺序坑**：证书装好之前绝对不能开强制 HTTPS，否则 HTTP 访客被跳到坏的 HTTPS，整站打不开。
+- 换主机不需要改仓库：全站相对路径，子路径（GitHub Pages 的 `/portfolio-v2/`）和根路径都能跑。
+  **不要加 `CNAME` 文件**，那是 GitHub Pages 专用的，会动到备用地址。
+
 
