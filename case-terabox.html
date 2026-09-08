@@ -239,6 +239,14 @@
   </section>
 </main>
 
+<!-- 鼠标停在链接上就把目标页的 HTML 先取下来（moderate ≈ 悬停 200ms 或按下指针）。
+     线上实测换页 TTFB 是 512–1286ms，节点在境外，这一段是等出来的；预取之后点击时
+     HTML 已经在本地。只取文档。用 prefetch 而不是 prerender：后者会在后台把整页真
+     渲染一遍（脚本也跑），流量与 CPU 双份，而且跨文档过渡的激活路径要另外验一轮。 -->
+<script type="speculationrules">
+{"prefetch":[{"where":{"href_matches":"/*.html"},"eagerness":"moderate"}]}
+</script>
+
 <script src="vendor/gsap.min.js"></script>
 <script src="vendor/ScrollTrigger.min.js"></script>
 <script src="vendor/lenis.min.js"></script>
