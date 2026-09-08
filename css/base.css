@@ -53,12 +53,16 @@
 
 /* 正文用默认的 root 快照（只有一个视口大小，所以每次都跑得起来）。
    千万不要给 main 加 view-transition-name——项目页的 main 有一万六千像素高，
-   整元素快照又大又慢，超预算时浏览器会直接跳过整个过渡。 */
+   整元素快照又大又慢，超预算时浏览器会直接跳过整个过渡。
+   时长按反馈加长：260/420ms → 380/720ms。进入这一条同时把缓动换掉——原来的
+   (0.16,1,0.3,1) 前段极陡，420ms 时已经走到 98%，只加时长根本读不出来
+   （Practices 详情层踩过同一个坑，见 practices.css 里的 --ease-veil）。
+   换成中段更平的 (0.4,0,0.25,1)，模糊散开的那个过程才真的看得见。 */
 ::view-transition-old(root) {
-  animation: page-out 260ms cubic-bezier(0.7, 0, 0.84, 0) both;
+  animation: page-out 380ms cubic-bezier(0.7, 0, 0.84, 0) both;
 }
 ::view-transition-new(root) {
-  animation: page-in 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: page-in 720ms cubic-bezier(0.4, 0, 0.25, 1) both;
 }
 /* 只淡出淡入的话，两页的底色和版式又差不多，换页那一下几乎看不出来
    （项目页之间尤其明显）。加一点纵向位移与极轻的缩放，动作才读得出来：
