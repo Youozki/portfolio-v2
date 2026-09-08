@@ -111,6 +111,28 @@
   等 `site.js` 的 `navInvert()` 来加要排在 gsap/ScrollTrigger/lenis 后面，那之前顶栏一直是
   浅色玻璃底——用户看到的"加载完才变成正确的颜色"。滚动之后的切换仍由 `navInvert()` 接管。
 
+### 6.1 换页快慢是投递配置决定的（2026-09-08 实测）
+
+线上原来一跳换页要 1.4–3.0s，拆开看两个来源，都不在代码里：
+
+- **TTFB 512–1286ms**：节点在境外，纯往返。解法是 Speculation Rules 预取——六个页面各
+  一条 `{"prefetch":[{"where":{"href_matches":"/*.html"},"eagerness":"moderate"}]}`，
+  鼠标停在链接上 200ms 就把目标页文档取下来。实测 TTFB 降到 16–109ms。
+  用 prefetch 不用 prerender：后者在后台把整页真渲染（脚本也跑），流量与 CPU 双份，
+  而且跨文档过渡的激活路径要另外验一轮。
+- **每次换页十几个 304**：css/js 原来是 `max-age=0, must-revalidate`，内容没变也要问一遍，
+  而站点只有 HTTP/1.1，这些请求还要挤 6 条连接（实测 FCP 卡在 case-doc.css 的 1875ms）。
+  解法是仓库根目录的 `edgeone.json`（EdgeOne Pages 支持从仓库配响应头，不用去控制台）：
+  vendor/fonts/assets 一年 immutable，css/js 七天。
+
+改完实测：同一会话内再进项目页 FCP 240ms、返回首页 484ms（原来 2348–2960ms），
+资源全部读本地。首次进某一页仍要下它自己的 css 与图（828–1604ms）。
+
+两条注意：
+- **给 css/js 加引用时必须带 `?v=`**，否则七天内改了样式访客拿不到（case-practices 的
+  case.css 就漏过一次）。vendor 不用带，那是钉住的第三方库。
+- 站点还只有 HTTP/1.1，控制台里开 HTTP/2 / HTTP/3 能再省首次访问的排队。
+
 ## 7. 用户反馈里反复出现的判据
 
 - 字**宁小勿大**；组与组之间不要太松散。用户多次说「还是太大了」，最后是靠实测 augen 才收住的。
