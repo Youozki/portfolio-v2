@@ -66,12 +66,16 @@
 }
 /* 只淡出淡入的话，两页的底色和版式又差不多，换页那一下几乎看不出来
    （项目页之间尤其明显）。加一点纵向位移与极轻的缩放，动作才读得出来：
-   旧页向上退、新页从下方浮上来。位移用 vh，跟视口一起走。 */
+   旧页向上退、新页从下方浮上来。位移用 vh，跟视口一起走。
+   模糊量按反馈从 6px 加到 14px。快照是一张贴图，模糊会向外采到贴图之外（那儿是
+   透明的），边缘因此会透出一圈虚边——6px 时看不出来，14px 就是四边一圈发虚。
+   所以进入这一条的起始缩放从 1.006 抬到 1.02：新页起手时两侧各多出一点画面，
+   那圈虚边被顶到视口外。旧页的 0.992 不动——它是往里收的，改大反而读成"迎上来"。 */
 @keyframes page-out {
-  to { opacity: 0; filter: blur(6px); transform: translateY(-2.4vh) scale(0.992); }
+  to { opacity: 0; filter: blur(14px); transform: translateY(-2.4vh) scale(0.992); }
 }
 @keyframes page-in {
-  from { opacity: 0; filter: blur(6px); transform: translateY(2.8vh) scale(1.006); }
+  from { opacity: 0; filter: blur(14px); transform: translateY(2.8vh) scale(1.02); }
 }
 
 @media (prefers-reduced-motion: reduce) {
