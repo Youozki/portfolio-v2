@@ -54,28 +54,52 @@
 /* 正文用默认的 root 快照（只有一个视口大小，所以每次都跑得起来）。
    千万不要给 main 加 view-transition-name——项目页的 main 有一万六千像素高，
    整元素快照又大又慢，超预算时浏览器会直接跳过整个过渡。
-   时长按反馈加长：260/420ms → 380/720ms。进入这一条同时把缓动换掉——原来的
-   (0.16,1,0.3,1) 前段极陡，420ms 时已经走到 98%，只加时长根本读不出来
-   （Practices 详情层踩过同一个坑，见 practices.css 里的 --ease-veil）。
-   换成中段更平的 (0.4,0,0.25,1)，模糊散开的那个过程才真的看得见。 */
+   时长：260/420ms → 380/720ms → 460/720ms。缓动也换过两轮，原来的 (0.16,1,0.3,1)
+   前段极陡，420ms 时已经走到 98%，只加时长根本读不出来（Practices 详情层踩过同一个
+   坑，见 practices.css 里的 --ease-veil）。
+
+   分层是这里的关键，按反馈"上一页的蓝色白色色块会闪一下"重排过一次。之前两层各自
+   opacity 0↔1 对着淡，看着就是两页硬叠：冻帧实测 280ms 那一帧旧页的蓝底和新页的白
+   图墙同时清清楚楚（两层混合是 normal——我们用 animation 简写覆盖掉了 Chrome 那条
+   -ua-mix-blend-mode-plus-lighter，所以半透明处就是老老实实互相透）。
+   现在改成一层压一层：旧页 z-index 拉到上面、整幅先糊掉但仍然不透明，糊到位了才淡出；
+   新页从头到尾 opacity 1 待在下面，只把模糊解开。于是任何一帧都只有一张画面在主导，
+   读起来是"整幅模糊 → 化开 → 底下那张从模糊里长出来"，而不是两页在打架。
+   新页不做 opacity 是有意的：两层同时半透明的那一段会露出快照背后的浏览器底色。 */
 ::view-transition-old(root) {
-  animation: page-out 380ms cubic-bezier(0.7, 0, 0.84, 0) both;
+  z-index: 2;
+  animation: page-out 400ms linear both;
 }
 ::view-transition-new(root) {
-  animation: page-in 720ms cubic-bezier(0.4, 0, 0.25, 1) both;
+  z-index: 1;
+  animation: page-in 780ms linear both;
 }
-/* 只淡出淡入的话，两页的底色和版式又差不多，换页那一下几乎看不出来
-   （项目页之间尤其明显）。加一点纵向位移与极轻的缩放，动作才读得出来：
-   旧页向上退、新页从下方浮上来。位移用 vh，跟视口一起走。
-   模糊量按反馈从 6px 加到 14px。快照是一张贴图，模糊会向外采到贴图之外（那儿是
-   透明的），边缘因此会透出一圈虚边——6px 时看不出来，14px 就是四边一圈发虚。
-   所以进入这一条的起始缩放从 1.006 抬到 1.02：新页起手时两侧各多出一点画面，
-   那圈虚边被顶到视口外。旧页的 0.992 不动——它是往里收的，改大反而读成"迎上来"。 */
+/* 纵向位移去掉了：旧页往上退，底边就会横着切出一条下层画面，跟"整幅一起模糊"是两
+   回事。动作交给极轻的放大——顺带解决模糊的边。快照是一张贴图，模糊会向外采到贴图
+   之外（那儿是透明的），四边因此透出一圈虚边；两层起手都比 1 大一点，那圈虚边就被
+   顶到视口外面去。40 多像素的模糊在 1440 宽上要 3% 上下的余量，1.05 / 1.06 够用。
+
+   两条关键帧是错开的，模糊量也比之前重得多，这两件事都是为了同一个毛病：
+   反馈说"上一页的蓝色白色色块会闪一下"。冻帧看过三版才定下来——
+     v1（两层各自 opacity 0↔1 对着淡）：280ms 那一帧旧页的蓝底和新页的白图墙同时
+       清清楚楚。两层混合是 normal，我们用 animation 简写覆盖掉了 Chrome 那条
+       -ua-mix-blend-mode-plus-lighter，半透明处就是老老实实互相透。
+     v2（旧页压上面、先糊后退，新页前半段挂在 16px）：叠影段还是能认出卡片轮廓和
+       配色。16px 糊不掉 300px 宽的图墙卡片，交叉那一段就还是"蓝色块 + 白色块并置"。
+     v3（本版）：交叉那 200ms 里两层都糊到 24–44px，版式彻底化成色团，混出来是一片
+       颜色在流动，认不出是两张页面；旧页退干净之后新页才把模糊化开。
+   交叉是躲不掉的（两层都半透明的那一段会露出快照背后的浏览器底色，所以新页全程
+   opacity 1、只解模糊），能做的是让交叉段里没有任何可辨认的版式。
+   缓动因此写在关键帧上而不是简写里：整条 animation 用 linear，各段自己带曲线。 */
 @keyframes page-out {
-  to { opacity: 0; filter: blur(14px); transform: translateY(-2.4vh) scale(0.992); }
+  0%   { opacity: 1; filter: blur(0px);  transform: scale(1);     animation-timing-function: cubic-bezier(0.4, 0, 0.6, 1); }
+  40%  { opacity: 1; filter: blur(24px); transform: scale(1.022); animation-timing-function: cubic-bezier(0.5, 0, 0.75, 1); }
+  100% { opacity: 0; filter: blur(44px); transform: scale(1.05); }
 }
 @keyframes page-in {
-  from { opacity: 0; filter: blur(14px); transform: translateY(2.8vh) scale(1.02); }
+  0%   { filter: blur(44px); transform: scale(1.06); animation-timing-function: linear; }
+  50%  { filter: blur(30px); transform: scale(1.04); animation-timing-function: cubic-bezier(0.33, 0, 0.2, 1); }
+  100% { filter: blur(0px);  transform: scale(1); }
 }
 
 @media (prefers-reduced-motion: reduce) {
