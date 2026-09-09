@@ -82,10 +82,25 @@
       track.innerHTML += track.innerHTML;
       const half = track.scrollWidth / 2;
       if (!half) return;
-      track.animate(
+      const anim = track.animate(
         [{ transform: 'translateX(0)' }, { transform: 'translateX(' + -half + 'px)' }],
         { duration: (half / speed) * 1000, iterations: Infinity, easing: 'linear' }
       );
+
+      /* 离开视口就暂停，并把 will-change 撤掉。
+         轨道是 4492×111 的合成层、里面 92 张图（复制过一份），动画一直跑的话滚动
+         全程都在合成它——iOS 上"向下滑动时页面自己刷新"（WebContent 被 jetsam 回收）
+         就有这一份压力。暂停之后它只在自己露脸的那几屏里活着。
+         没有 IntersectionObserver 的浏览器保持原样，不影响。 */
+      if (!('IntersectionObserver' in window)) return;
+      anim.pause();
+      track.style.willChange = 'auto';
+      new IntersectionObserver((entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) { track.style.willChange = 'transform'; anim.play(); }
+          else { anim.pause(); track.style.willChange = 'auto'; }
+        });
+      }, { rootMargin: '20% 0px 20% 0px' }).observe(box);
     });
   }
 
