@@ -131,7 +131,43 @@
 两条注意：
 - **给 css/js 加引用时必须带 `?v=`**，否则七天内改了样式访客拿不到（case-practices 的
   case.css 就漏过一次）。vendor 不用带，那是钉住的第三方库。
-- 站点还只有 HTTP/1.1，控制台里开 HTTP/2 / HTTP/3 能再省首次访问的排队。
+- 站点已开 HTTP/2（2026-09-09）。开关在 EdgeOne Makers 控制台 → 项目 → 域名管理 → 自定义域名
+  那一行，前置条件是 SSL 证书已配好。收益：不节流下 justpaper 233 张图全部就绪 5.0s（HTTP/1.1
+  时代同样口径的 4G 节流要 23.4s）。副作用：一次性突发两百多个请求会撞到边缘节点的并发流上限，
+  报 `net::ERR_HTTP2_SERVER_REFUSED_STREAM`，被拒的图空白且不重试；正常滚动式 lazy 加载
+  一屏十几张够不到上限，但以后若报「图墙有个别图不出来」，先查这个。
+
+### 6.2 换页过渡最终是「纯渐隐」，中间那些方案都被否掉了（2026-09-09）
+
+现在全部代码就三行：`::view-transition-old(root)` 走 `page-out 600ms ease`（只动 opacity）、
+`::view-transition-new(root)` 是 `animation: none`。`animation: none` 不能省——不写的话浏览器
+会给新页套 UA 默认的 fade-in，两层同时半透明就透出快照背后的页面底色，深色页之间换页闪一下纸色。
+
+一路试过又被否掉的（`css/base.css` 注释里有完整记录，别再重走）：
+位移（旧页上移会横切出一条下层画面）→ 缩放（1.006~1.06 试了好几档，反馈两次都指着它：
+「旁边的色块溢出了」「像页面收缩了一下」）→ 大模糊 44px（糊成色块）→ 20px（头晕）→ 12px
+→ 磨砂 `blur(5px) saturate contrast`（brightness 提亮那版被指「刺眼」，实测平均亮度从 100
+冲到 116，进浅色页会撞 255 上限，所以雾化只能用 contrast 压反差、不能用 brightness）。
+
+### 6.3 内页图片必须按显示尺寸补小档（2026-09-09，iOS 崩溃的根因）
+
+用户报手机端「反复出现问题与网页崩溃，尤其是 oreate 那页」，是图片解码内存超限：
+oreate 105 个 `<img>` 文件字节只有 5.3MB，但按 `宽×高×4` 算解码内存 188MB，其中非 lazy 的
+占 151MB，一进页面全量解码，iOS 的 WebContent 进程被 jetsam 杀掉。
+
+根因是画布做法的副作用：**`transform: scale()` 是合成变换，不改变解码尺寸**。1254×700 的图
+在 390 宽手机上只显示 63px，照样按 1254×700 解码。手机内存预算比桌面小一个量级，所以只在手机崩。
+
+修法在 `tools/shrink_case_images.py`：按画布坐标宽度 cw 生成 `cw*0.8` 与 `cw*2` 两档小图，
+`sizes` 手写成 `(cw/19.2)vw`。**`sizes` 必须手写**——浏览器选 srcset 候选时不看祖先的
+transform scale，只看 sizes 声明值。实测 390×844 dpr3 看完整页：oreate 188→11MB、
+justpaper 151→32MB、companion 58→7MB、terabox 34→5MB。
+
+两个坑：
+- **跑马灯（`.marquee`）与横向长图带里的图不能 lazy**。轨道一直在横移，lazy 会让还没进过视口
+  的那几张在转过来的瞬间才请求。补 lazy 那一轮就是这么引入了空位，后来单独解掉。
+- 量解码内存不能用 `naturalWidth`：有 srcset 时它会做 density 校正、返回的是布局宽度。
+  要按 `currentSrc` 回查真实文件像素。
 
 ## 7. 用户反馈里反复出现的判据
 
@@ -141,9 +177,12 @@
 - 动效不能只是「过渡」，要有形变、要有存在感；但特效不要花到抢主体内容。
 - 低质量、糊的图缩小使用；同系列图必须同规格。
 
-## 8. 当前状态（2026-09-05）
+## 8. 当前状态（2026-09-09）
 
-**六个页面全部完成并跑过无头验收**（`console 0 / broken 0 / overflowX 0`）：
+**六个页面全部完成，桌面 1440×900 dpr2 与手机 390×844 dpr3 两档都跑过全页无头验收**：
+0 控制台报错、0 横向溢出、`motion-fallback` 全 false、进入过视口的图 0 未加载、
+`[data-reveal]` 没有停在 `opacity:0` 的；四跳换页过渡都在，帧距中位 16.7ms；
+从 practices 返回首页第一帧起 `rowTop` 就是 126、六帧不动。
 `index.html` + `case-companion / justpaper / oreate / terabox / practices`。
 
 - 四个画布内页由 `tools/build_case_pages.py` 从第一版**原封不动**生成：
@@ -162,6 +201,16 @@
   因为作品行是脚本渲染的、且 Lenis 会覆盖原生锚点位置）。
 
 还没做的：内页展示图的 augen 式视差（用户同意「慢慢改」）；Companion 页统一到新语言（用户已知，排在最后）。
+
+2026-09-09 复筛补掉的：六页 og/twitter 分享卡片（`assets/graphics/og-cover.jpg` 是从首页主视觉裁的
+1200×630，可以随时换成专门设计的）、四个内页的 `meta description`、552 处 `<img alt="">`。
+仍然留着的已知项：
+- `assets/` 里有 93 个没被任何页面引用的旧素材（大多是 justpaper 早期导出），没删，占 21MB 里的一部分。
+- oreate 有 9 张图排在画布坐标 x>1920 处，被 `overflow: hidden` 裁掉、用户看不见，是设计稿导出残留。
+  它们挂着 lazy 所以永远不下载，不影响体验，清理属于可选项。
+- `js/case-companion.js` 没有任何页面引用（死文件），问过是否删、没得到回复，所以留着。
+- `js/site.js` 里 `ease: 'reveal'` 用的 CustomEase 实际没加载，一直走 GSAP 默认缓动。
+  因为「修体验问题不许动既有动效参数」这条约束，只记录、没动。
 
 ## 9. 本机环境与验证手法
 
@@ -192,8 +241,10 @@
   - `edgeonereclaim` TXT → EdgeOne 归属权校验（免费证书自动续期也依赖它）
 - **证书**：TrustAsia DV，90 天，裸域与 `www` 各一张，到期前腾讯云自动重签下发，
   前提是 CNAME 一直指着 EdgeOne。
-- **开关**：强制 HTTPS 开、OCSP 装订开、**HSTS 故意不开**（一旦被浏览器缓存，
-  证书出问题时访客硬性打不开且清不掉，作品集不值得冒这个风险）。
+- **开关**：强制 HTTPS 开、OCSP 装订开、**HTTP/2 开**（2026-09-09）、**IPv6 开**（同日，
+  裸域与 www 的 CNAME 目标都下发了 `AAAA 240d:c010:75:1::19a`，A 记录仍在，正常双栈；
+  刚开时本地解析器查不到是下发延迟，用 `dig @8.8.8.8 AAAA <域名> +noall +answer` 查 CNAME 目标）、
+  **HSTS 故意不开**（一旦被浏览器缓存，证书出问题时访客硬性打不开且清不掉，作品集不值得冒这个风险）。
 - **顺序坑**：证书装好之前绝对不能开强制 HTTPS，否则 HTTP 访客被跳到坏的 HTTPS，整站打不开。
 - 换主机不需要改仓库：全站相对路径，子路径（GitHub Pages 的 `/portfolio-v2/`）和根路径都能跑。
   **不要加 `CNAME` 文件**，那是 GitHub Pages 专用的，会动到备用地址。
