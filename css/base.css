@@ -69,11 +69,11 @@
    之间换页就会闪一下纸色。 */
 ::view-transition-old(root) {
   z-index: 2;
-  animation: page-out 460ms cubic-bezier(0.42, 0, 0.58, 1) both;
+  animation: page-out 700ms cubic-bezier(0.42, 0, 0.58, 1) both;
 }
 ::view-transition-new(root) {
   z-index: 1;
-  animation: page-in 640ms cubic-bezier(0.55, 0, 0.3, 1) both;
+  animation: page-in 900ms cubic-bezier(0.82, 0, 0.3, 1) both;
 }
 /* 缩放和位移现在都没有了，这一版两层的 transform 完全不动。
    位移先去掉的：旧页往上退，底边就会横着切出一条下层画面，跟"整幅一起模糊"是两回事。
@@ -85,37 +85,42 @@
    量级，这个补偿就不需要了——宁可留一圈 5px 的柔边，也不要整页缩放。augen 那边同样是
    DOM 元素直接上 blur，边缘一样会有这圈衰减，它也没做补偿。
 
-   模糊改成"磨砂"：一路收下来是 44px（糊成色块）→ 20px（头晕）→ 12px（还是晕，反复
-   点更明显）→ 现在 5px，比 augen 实测的 6px 还轻一点（`.page-enter-active`：
+   模糊改成"磨砂"：一路收下来是 44px（糊成色块）→ 20px（头晕）→ 12px（还是晕）→ 5px
+   → 现在 3px，比 augen 实测的 6px 还轻一半（`.page-enter-active`：
    `transition: opacity .6s, visibility .6s, filter .5s` + `blur(6px)`，没写
    timing-function 走默认 ease，没有位移也没有缩放）。
    但光把模糊调小会退回"两页色块并置"——之前正是靠大模糊糊掉重叠段的。所以少掉的遮蔽
-   改由降饱和 + 降对比补上：旧页退到 `saturate(0.35) contrast(0.84)`，新页从
-   `saturate(0.6) contrast(0.88)` 起手。这两个加在一起就是磨砂玻璃的读法，颜色被冲淡、
-   反差被压平，重叠段里两页的配色都认不出来，而清晰度只丢一点。
-   降对比而不是提亮，这一条是踩过坑的：上一版用 `brightness(1.18→1.24)` 做雾，反馈
+   改由降饱和 + 降对比补上：旧页退到 `saturate(0.6) contrast(0.92)`，新页从
+   `saturate(0.78) contrast(0.94)` 起手。这两个加在一起就是磨砂玻璃的读法，颜色被冲淡、
+   反差被压平，而清晰度只丢一点。这三个数按反馈"磨砂的感觉再降低一点"又收过一轮
+   （blur 5→3px、saturate 0.35→0.6、contrast 0.84→0.92），现在遮蔽力已经不多，靠的是
+   下面那条时序：旧页在几乎不透明的状态下先雾化完，重叠段本身很短。
+   降对比而不是提亮，这一条是踩过坑的：曾用 `brightness(1.18→1.24)` 做雾，反馈
    "亮度变得非常高，甚至有点刺眼"。实测那版的画面平均亮度从 100 冲到 116（Terabox →
    Practices，480×300 采样），进浅色页的方向更糟，提亮会直接撞到 255 的上限。
    换成 contrast 之后同一条跳转的峰值只有 102，中段最大亮度从 255 压到 215——contrast
    把画面拉向中灰，深页提一点、浅页压一点，净效果是"蒙上一层灰雾"而不是"打了一盏灯"。
-   总时长也再收一档（720 → 640ms），反复点的时候少一点负担。
+
+   时长按"延长渐隐和渐显"加回来：460/640 → 700/900ms。之前一路收短是为了压头晕，那是
+   大模糊带来的；模糊只剩 3px 之后，长时间反而读得更从容。
 
    缓动每层一条，不在关键帧上拼接分段曲线（试过 linear + 两段拼接、中间还有一段
    "挂在 30px 不动"的平台，那个停顿就是"没有节奏感"的来源）。
      旧页 (0.42,0,0.58,1)：对称的 ease-in-out，慢—快—慢地雾化并退场。
-     新页 (0.55,0,0.3,1)：S 形，前段压慢——旧页退干净之后才真正化开，末段缓下来收住。
-   旧页那条关键帧里的 50% 是必须的，而且只能这么摆：磨砂的进度必须领先 opacity。前一半
-   时间里 opacity 还有 0.95，画面已经雾化到位；后一半才让位。两者共用一条曲线时，冻帧
-   看过那一帧旧页才雾化到一半、却已经半透明，"上蓝下白"那条硬分界线和底下新页的卡片
-   轮廓同时清清楚楚——色块并置就是这么回来的。 */
+     新页 (0.82,0,0.3,1)：S 形压得更深了（时长拉长后必须更深，否则旧页还在、新页已经
+       清晰，就是并置）——前段几乎不动，旧页退干净之后才真正化开，末段缓下来收住。
+   旧页那条关键帧里的 65% 是必须的，而且只能这么摆：磨砂的进度必须领先 opacity。前六成
+   多的时间里 opacity 还有 0.9，画面已经雾化到位；剩下 245ms 才是真正的渐隐。两者共用
+   一条曲线时，冻帧看过那一帧旧页才雾化到一半、却已经半透明，"上蓝下白"那条硬分界线和
+   底下新页的卡片轮廓同时清清楚楚——色块并置就是这么回来的。 */
 @keyframes page-out {
-  0%   { opacity: 1;    filter: blur(0px) saturate(1)    contrast(1); }
-  50%  { opacity: 0.95; filter: blur(4px) saturate(0.45) contrast(0.88); }
-  100% { opacity: 0;    filter: blur(5px) saturate(0.35) contrast(0.84); }
+  0%   { opacity: 1;    filter: blur(0px)   saturate(1)    contrast(1); }
+  65%  { opacity: 0.9;  filter: blur(2.5px) saturate(0.64) contrast(0.93); }
+  100% { opacity: 0;    filter: blur(3px)   saturate(0.6)  contrast(0.92); }
 }
 @keyframes page-in {
-  from { filter: blur(5px) saturate(0.6) contrast(0.88); }
-  to   { filter: blur(0px) saturate(1)   contrast(1); }
+  from { filter: blur(3px) saturate(0.78) contrast(0.94); }
+  to   { filter: blur(0px) saturate(1)    contrast(1); }
 }
 
 @media (prefers-reduced-motion: reduce) {
