@@ -363,17 +363,34 @@
   gap: var(--space-2xl);
 }
 .about__row { grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); }
+/* 左边的时间（t-cap，13px/1.35）和右边的公司名（t-lead，16px/1.55）字号不同，行盒也就
+   不同高：默认 align-items: start 时两边文字顶端差 5.6px——反馈说的"和左边的时间没有
+   顶对齐"。把时间那一列的行盒撑到和右边一样高（16×1.55 ÷ 13 ≈ 1.91），两个行盒顶端就
+   重合了，剩下的只是字面高度差的一半（约 1.5px，看不出来）。
+   写成 token 相除而不是硬编码数字，字阶以后再调也不用回来改这里。
+   只限定 t-cap 那一列：Skills 那几行第一列是 t-lead，行高本来就和右边一致。 */
+.about__row > .t-cap:first-child {
+  line-height: calc(var(--text-lg) * var(--leading-cn) / var(--text-sm));
+}
 .about__row > span:last-child { display: flex; flex-direction: column; gap: 0.35rem; }
 .about__sub { color: var(--on-ink-soft); }
 
-/* 公司 logo：和公司名共用一条基线。
-   inline-block 的基线是它的下边缘，所以只有"图片底边正好是字标基线"时才对得齐。
-   实测（tools 里量的）：百度的字标基线就在图片最底部（余量 0%），
-   而 Lenovo 是带红底的 lockup，字标基线在 68/96 处，下面还有 28.1% 的红底——
-   所以它会整体偏高。用 --logo-drop 把这段余量按比例补回去，两张就落在同一条线上。 */
-/* 用 flex 而不是行内流：inline-block 的 logo 会把整个行框撑高 5px，
-   于是左右两栏的行高差一档、两边的发丝线越往下越对不齐（用户指出的那处）。
-   flex 容器的高度只取最高那一项，基线对齐照旧靠 align-items: baseline。 */
+/* 公司 logo。三件事都是按反馈实测调的：视觉大小、公司名左对齐、和左边时间顶对齐。
+
+   1) 视觉大小：两张图的构成完全不同，锁同一个 height 反而不一致。
+      用 PIL 量过（`min(rgb)>200` 取白字、`alpha>30` 取内容）：
+        lenovo.webp 294×96  红底铺满，白色字标只占 y[20,68]，即图高的 51%
+        baidu.webp  230×96  透明底，字标内容 y[22,95]，占图高的 77%
+      所以两张都渲染成 21.6px 高时，联想的字只有 11px、百度的字有 16.6px——差 51%，
+      这就是"看起来大小不一致"。改成按【字标视觉高度】归一：--logo-ink 记下每张图里
+      字标占图高的比例，height 由 --logo-ink-h / --logo-ink 反算出来。
+      新加 logo 只需要量一个比例，不用手调高度。
+   2) 左对齐：logo 宽度天生不同（联想 69px、百度 35px），公司名紧跟在后面就会错开 14px。
+      给 logo 一个固定栏宽 --logo-col，图在框里 object-fit: contain 靠左放，公司名一律从
+      同一条竖线起。没有改成 grid：grid 的 baseline 对齐会把 logo 的下沉量算进行内基线，
+      结果是带 --logo-drop 的那一行（联想）把公司名整体推低 6.5px，反而更不齐。
+   3) 基线：--logo-drop 是图底到字标底的余量，按比例把 logo 往下压，让字标底边落在
+      文字基线上。lenovo 字标底在 68/96，下面还有 29.2% 的红底；baidu 几乎贴底。 */
 .about__org {
   display: flex;
   align-items: baseline;
@@ -381,19 +398,34 @@
   /* 高度锁成一行正文的高度：logo 比这一行略矮，多出来的两像素让它溢出，
      不参与布局。这样有 logo 的那一栏和没有 logo 的那一栏行高完全一致。 */
   height: calc(1em * var(--leading-cn));
+  --logo-col: 4.4rem;
+  --logo-ink-h: 0.72rem;
 }
 .about__logo {
   display: inline-block;
-  vertical-align: baseline;
   position: relative;
-  bottom: calc(var(--logo-h) * var(--logo-drop, 0) * -1);
+  /* 不参与基线对齐：logo 当 flex item 时它的 baseline 就是自己的底边，联想那张有
+     22.6px 高，比文字基线（约 18px）更深，flex 会把整行文字往下推 4.6px 去凑它——
+     那正是"公司名和左边的时间没顶对齐"里剩下的一半。改成 center 之后 logo 只在行盒里
+     垂直居中，文字位置完全不受它影响，两行的顶差一致。 */
+  align-self: center;
+  /* 两段修正：--logo-drop 把字标底压到文字基线附近；-0.18em 是行盒的补偿——
+     align-self: center 是相对整个行盒（含 leading）居中，而文字的视觉中心比行盒中心
+     高约 3px（实测两张都偏低 2.7–3.3px），减掉这一段之后 logo 的字标中心和公司名的
+     字面中心就落在一起了。 */
+  top: calc(var(--logo-h) * var(--logo-drop, 0) * 0.5 - 0.18em);
   height: var(--logo-h);
-  width: auto;
+  /* 固定栏宽 + contain 靠左：公司名的起点因此完全不受 logo 实际宽度影响。
+     试过"按宽高比补 padding"，在 clamp 字阶下会差 1px 出入（窄屏实测 108.1 vs 109.5）。
+     --logo-col 要比最宽那张的实际宽度大，否则 contain 会改按宽度缩放、把高度压小。 */
+  width: var(--logo-col);
+  object-fit: contain;
+  object-position: left center;
   flex: 0 0 auto;
-  --logo-h: 1.35rem;
+  --logo-h: calc(var(--logo-ink-h) / var(--logo-ink, 1));
 }
-.about__logo[data-logo='lenovo'] { --logo-drop: 0.281; }
-.about__logo[data-logo='baidu'] { --logo-drop: 0; }
+.about__logo[data-logo='lenovo'] { --logo-ink: 0.51; --logo-drop: 0.292; }
+.about__logo[data-logo='baidu'] { --logo-ink: 0.77; --logo-drop: 0.01; }
 
 .about__skills { margin-top: var(--space-3xl); }
 .about__skills .about__row { grid-template-columns: minmax(0, 1fr) minmax(0, 4fr); }
@@ -423,3 +455,7 @@
   .contact__item { flex: 1 1 40%; }
 }
 
+/* 备选素材：assets/logos/lenovo-mono.webp 是从官方 red lockup 里把白字抠出来的无底版
+   （透明底 241×51）。想让两个 logo 形态一致（都是纯字标）时把 index.html 的 src 换成它、
+   data-logo 换成 lenovo-mono 即可，尺寸还要按字高再校一次——白字的字母全高就是图高，
+   直接套 --logo-ink: 1 会比百度那张（内含熊掌）看着大一号。未启用。 */
