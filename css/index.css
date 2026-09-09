@@ -377,20 +377,20 @@
 
 /* 公司 logo。三件事都是按反馈实测调的：视觉大小、公司名左对齐、和左边时间顶对齐。
 
-   1) 视觉大小：两张图的构成完全不同，锁同一个 height 反而不一致。
-      用 PIL 量过（`min(rgb)>200` 取白字、`alpha>30` 取内容）：
-        lenovo.webp 294×96  红底铺满，白色字标只占 y[20,68]，即图高的 51%
-        baidu.webp  230×96  透明底，字标内容 y[22,95]，占图高的 77%
-      所以两张都渲染成 21.6px 高时，联想的字只有 11px、百度的字有 16.6px——差 51%，
-      这就是"看起来大小不一致"。改成按【字标视觉高度】归一：--logo-ink 记下每张图里
-      字标占图高的比例，height 由 --logo-ink-h / --logo-ink 反算出来。
-      新加 logo 只需要量一个比例，不用手调高度。
-   2) 左对齐：logo 宽度天生不同（联想 69px、百度 35px），公司名紧跟在后面就会错开 14px。
-      给 logo 一个固定栏宽 --logo-col，图在框里 object-fit: contain 靠左放，公司名一律从
-      同一条竖线起。没有改成 grid：grid 的 baseline 对齐会把 logo 的下沉量算进行内基线，
-      结果是带 --logo-drop 的那一行（联想）把公司名整体推低 6.5px，反而更不齐。
-   3) 基线：--logo-drop 是图底到字标底的余量，按比例把 logo 往下压，让字标底边落在
-      文字基线上。lenovo 字标底在 68/96，下面还有 29.2% 的红底；baidu 几乎贴底。 */
+   1) 视觉大小：两张图的构成不同，锁同一个 height 会不一致。用 PIL 量不透明区（alpha>30）：
+        lenovo.webp 294×96  红底铺满，可见区占图高 99%，中心在 49.0%
+        baidu.webp  230×96  透明底，可见区 y[22,95] 占 77%，中心偏下在 60.9%
+      归一的判据是【可见外框高度】——也就是眼睛看到的那个块有多高。--logo-ink 记下这个
+      比例，height 由 --logo-ink-h / --logo-ink 反算，两张的可见高度就都等于 --logo-ink-h。
+      走过一次弯路：先按"字标笔画高度"归一（把 lenovo 的白字高度当视觉尺寸，51%），
+      结果把百度缩得更小了——反馈说"百度越来越小，明明是联想偏大"。看红底 lockup 时
+      眼睛量的是整块红，不是里面那行白字，所以这里必须用可见外框。
+      色块天生比细笔画的字标重，所以 lenovo 额外乘一个 --logo-weight 收一点。
+   2) 左对齐：logo 宽度天生不同，公司名紧跟在后面就会错开 14px。给 logo 一个固定栏宽
+      --logo-col，图在框里 object-fit: contain 靠左放，公司名一律从同一条竖线起。
+      没有改成 grid：grid 的 baseline 对齐会把 logo 的位移算进行内基线，反而更不齐。
+   3) 垂直居中：--logo-mid 是可见区中心在图内的位置。百度那张上面空了一截（中心在 60.9%），
+      不补的话整个 logo 会看着偏低，所以按 (0.5 - mid) 把它顶回去。 */
 .about__org {
   display: flex;
   align-items: baseline;
@@ -399,33 +399,31 @@
      不参与布局。这样有 logo 的那一栏和没有 logo 的那一栏行高完全一致。 */
   height: calc(1em * var(--leading-cn));
   --logo-col: 4.4rem;
-  --logo-ink-h: 0.72rem;
+  /* 可见块的目标高度。想整体大一点/小一点只改这一个数。 */
+  --logo-ink-h: 1.16rem;
 }
 .about__logo {
   display: inline-block;
   position: relative;
-  /* 不参与基线对齐：logo 当 flex item 时它的 baseline 就是自己的底边，联想那张有
-     22.6px 高，比文字基线（约 18px）更深，flex 会把整行文字往下推 4.6px 去凑它——
-     那正是"公司名和左边的时间没顶对齐"里剩下的一半。改成 center 之后 logo 只在行盒里
-     垂直居中，文字位置完全不受它影响，两行的顶差一致。 */
+  /* 不参与基线对齐：logo 当 flex item 时它的 baseline 就是自己的底边，比文字基线更深时
+     flex 会把整行文字往下推去凑它（联想那张推了 4.6px）——那正是"公司名和左边的时间没
+     顶对齐"里剩下的一半。改成 center 之后 logo 只在行盒里垂直居中，文字位置不受影响。 */
   align-self: center;
-  /* 两段修正：--logo-drop 把字标底压到文字基线附近；-0.18em 是行盒的补偿——
-     align-self: center 是相对整个行盒（含 leading）居中，而文字的视觉中心比行盒中心
-     高约 3px（实测两张都偏低 2.7–3.3px），减掉这一段之后 logo 的字标中心和公司名的
-     字面中心就落在一起了。 */
-  top: calc(var(--logo-h) * var(--logo-drop, 0) * 0.5 - 0.18em);
+  /* 两段修正：把可见区中心顶回图中心；再减 0.18em——align-self: center 是相对整个行盒
+     （含 leading）居中，而文字的视觉中心比行盒中心略高。 */
+  top: calc((0.5 - var(--logo-mid, 0.5)) * var(--logo-h) - 0.06em);
   height: var(--logo-h);
   /* 固定栏宽 + contain 靠左：公司名的起点因此完全不受 logo 实际宽度影响。
-     试过"按宽高比补 padding"，在 clamp 字阶下会差 1px 出入（窄屏实测 108.1 vs 109.5）。
+     试过"按宽高比补 padding"，在 clamp 字阶下会有 1px 出入（窄屏实测 108.1 vs 109.5）。
      --logo-col 要比最宽那张的实际宽度大，否则 contain 会改按宽度缩放、把高度压小。 */
   width: var(--logo-col);
   object-fit: contain;
   object-position: left center;
   flex: 0 0 auto;
-  --logo-h: calc(var(--logo-ink-h) / var(--logo-ink, 1));
+  --logo-h: calc(var(--logo-ink-h) * var(--logo-weight, 1) / var(--logo-ink, 1));
 }
-.about__logo[data-logo='lenovo'] { --logo-ink: 0.51; --logo-drop: 0.292; }
-.about__logo[data-logo='baidu'] { --logo-ink: 0.77; --logo-drop: 0.01; }
+.about__logo[data-logo='lenovo'] { --logo-ink: 0.99; --logo-mid: 0.49; --logo-weight: 0.92; }
+.about__logo[data-logo='baidu'] { --logo-ink: 0.771; --logo-mid: 0.609; }
 
 .about__skills { margin-top: var(--space-3xl); }
 .about__skills .about__row { grid-template-columns: minmax(0, 1fr) minmax(0, 4fr); }
