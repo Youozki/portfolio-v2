@@ -11,6 +11,12 @@
 
 所以这里换判据：手机物理需求 = 画布坐标宽度 × (390/1920) × 3 ≈ 画布宽 × 0.61。
 低于这个需求的档不生成（会发虚），高于需求 1.2 倍的源图就补一档。
+
+2026-09-10 补：只按 1.0 倍需求出档会在【捏合放大】时立刻发虚——用户实测"图片很糊"，
+量出来正是这个原因（放大 3 倍时全页 ratio 掉到 0.31–0.44）。iOS 放大不会重挑 srcset，
+所以档位必须自带余量。这里给 HEADROOM = 1.5：手机 1 倍时 1.5 倍余量、放大 1.5 倍内
+仍然满分，再往上才开始软。同时把 srcset 里比这个目标更小的旧候选剔掉，否则浏览器
+只会挑那个最小的，等于余量白给。
 """
 import os
 import re
@@ -21,6 +27,7 @@ CANVAS = 1920
 MOBILE_VW = 390
 MOBILE_DPR = 3
 NEED = MOBILE_VW / CANVAS * MOBILE_DPR      # ≈ 0.609
+HEADROOM = 1.5                              # 捏合放大 1.5 倍以内不发虚
 MIN_GAIN = 1.2
 MIN_W = 48
 QUALITY = 82
@@ -60,7 +67,7 @@ def run(page, apply=False):
         except Exception:
             return tag
 
-        need = max(MIN_W, round(cw * NEED))
+        need = max(MIN_W, round(cw * NEED * HEADROOM))
         # 已有的候选里最小那一档；没有 srcset 就把源图当唯一候选
         cands = []
         cs = re.search(r'srcset="([^"]*)"', tag)
@@ -73,15 +80,20 @@ def run(page, apply=False):
             cands.append((ow, src))
         cands.sort()
         smallest = cands[0][0]
-        if smallest / need < MIN_GAIN:
+        # 已经有一档正好落在 [need, need*MIN_GAIN) 里就不用再折腾
+        if need <= smallest < need * MIN_GAIN:
+            return tag
+        if ow / need < MIN_GAIN and smallest >= need:
             return tag
 
-        out = build(src, need)
+        out = build(src, need) if ow > need else None
         if not out:
             return tag
         made.append(out)
         with Image.open(out) as im2:
             saved[0] += (smallest * round(oh * smallest / ow) - im2.width * im2.height) * 4 / 1048576
+        # 比目标还小的旧候选必须剔掉：留着浏览器只会挑最小那个，余量就白给了
+        cands = [(w, p) for w, p in cands if w > need]
         cands.insert(0, (need, out))
         parts = ', '.join(f'{p} {w}w' for w, p in cands)
         sizes = f'{cw / (CANVAS / 100):.2f}vw'

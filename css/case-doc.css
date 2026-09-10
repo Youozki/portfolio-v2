@@ -24,14 +24,23 @@
      否则 padding 会从 --doc-h 里扣，画布底部被 overflow 裁掉。 */
   box-sizing: content-box;
   padding-top: clamp(3.5rem, 6vw, 6.5rem);
-  /* 离屏的段不渲染。画布是 1920 宽的布局，transform: scale() 是绘制期变换，栅格化按
-     布局尺寸算——一段 1920×8500 换成贴图就是 62MB，五个内页都在 49–75MB，而且整段常驻。
-     首页没有画布所以从来不犯，内页五个全犯（terabox 只有 10 张图、4.6MB 解码也犯），
-     在 iOS 上就是 WebContent 被 jetsam 回收、"滚动时页面自己刷新"。
-     画布因此被 tools/split_case_slices.py 切成 3–5 段（切点选在没有元素跨越的空隙里），
-     每段一个 wrap，加上这一行之后只有视口附近的段会被栅格化，常驻从 62MB 掉到 15–19MB。
-     高度是显式写死的（--doc-h），所以不需要 contain-intrinsic-size，滚动条不会跳。 */
-  content-visibility: auto;
+}
+
+/* 离屏的段整段不进渲染树。画布是 1920 宽的布局、靠 transform: scale() 缩到视口宽，
+   栅格化按【视觉像素】算：捏合放大 N 倍，同一块内容的贴图就要 N² 倍字节。用户实测
+   "轻微放大还好，放大多了必崩，崩之前先自己刷新一次"——那次刷新就是 WebContent 被
+   jetsam 回收后自动重载，紧接着的滑动再撑一次就彻底崩。practices 页没有画布，所以
+   五个内页里只有它一直没事，这条能反过来确认元凶就是画布。
+
+   为什么不用 content-visibility: auto（上一版用的就是它，没治住）：
+   1. 它要 Safari 18+，用户机器上很可能压根没生效；
+   2. 它按【布局视口】判定离屏，捏合放大时布局视口不变，live 的区域一点不会跟着缩小，
+      而放大恰恰是最需要缩小 live 区域的时候。
+   所以换成 js/case-doc.js 里按 visualViewport 判定的 is-idle：放大时可视区变小，
+   保活的段数跟着变少，栅格化面积不再随缩放平方增长。哪个浏览器都吃这一套。
+   段高由 --doc-h 写死在 wrap 上，段内 display:none 不影响文档高度与滚动位置。 */
+.case-doc-wrap.is-idle > .case-doc {
+  display: none;
 }
 
 /* 画布切成多段之后，那段留白只能留给第一段：每段都带一份的话，段与段之间会各多出

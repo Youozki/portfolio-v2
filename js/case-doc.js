@@ -75,6 +75,24 @@
   /* 素材图墙：整条复制一份，位移到一半归零，所以看不出接缝 */
   function initMarquee(root) {
     if (window.SITE && window.SITE.reduced) return;
+    const items = [];
+    /* 捏合放大时轨道那一层贵得离谱：oreate 的轨道是 22117 画布 px 宽，手机 1 倍时
+       合成层约 11MB，放大 3 倍就是 99MB，而且它一直在动、每帧都要重新栅格化。
+       放大着看图墙本来也没意义，所以放大超过 1.5 倍就停下来，缩回去再继续。 */
+    const zoomedIn = () => !!(window.visualViewport && window.visualViewport.scale > 1.5);
+    const sync = () => {
+      const off = zoomedIn();
+      items.forEach((it) => {
+        const play = it.seen && !off;
+        if (play) {
+          it.track.style.willChange = 'transform';
+          it.anim.play();
+        } else {
+          it.anim.pause();
+          it.track.style.willChange = 'auto';
+        }
+      });
+    };
     root.querySelectorAll('.marquee').forEach((box) => {
       const track = box.querySelector('.marquee__track');
       if (!track) return;
@@ -93,15 +111,16 @@
          就有这一份压力。暂停之后它只在自己露脸的那几屏里活着。
          没有 IntersectionObserver 的浏览器保持原样，不影响。 */
       if (!('IntersectionObserver' in window)) return;
+      const it = { track, anim, seen: false };
+      items.push(it);
       anim.pause();
       track.style.willChange = 'auto';
       new IntersectionObserver((entries) => {
-        entries.forEach((e) => {
-          if (e.isIntersecting) { track.style.willChange = 'transform'; anim.play(); }
-          else { anim.pause(); track.style.willChange = 'auto'; }
-        });
+        entries.forEach((e) => { it.seen = e.isIntersecting; });
+        sync();
       }, { rootMargin: '20% 0px 20% 0px' }).observe(box);
     });
+    if (window.visualViewport) window.visualViewport.addEventListener('resize', sync);
   }
 
   initHScroll(document);
@@ -257,11 +276,54 @@
     addEventListener('scroll', onScroll, { passive: true });
     addEventListener('resize', onScroll);
     tick();
+
+    // 行位置量完了，这时候才能开始裁段
+    startCulling();
+  }
+
+  /* ---- 离屏的段不进渲染树 ------------------------------------------------
+     画布的栅格化按视觉像素算，捏合放大 N 倍，同一块内容要 N² 倍贴图；内页在 iOS 上
+     "放大后先自己刷新一次、再滑一下就崩"就是这么撑爆的。这里把远离可视区的段
+     display:none 掉（段高写死在 wrap 上，文档高度和滚动位置都不动）。
+     判据必须用 visualViewport 而不是布局视口：捏合放大时布局视口尺寸一点不变，只有
+     visualViewport 会跟着缩小——放大越多、保活的段越少，正好抵消掉那个平方。
+     放大倍数不高时留满一屏余量（等于不裁，观感零风险），放大之后收到半屏。
+     必须等 startCanvasMotion 量完行位置再开：display:none 的块量不出换行点，
+     提前裁会让离屏正文丢掉按行入场的那一档。 */
+  function startCulling() {
+    if (wraps.length < 2) return;
+    const vv = window.visualViewport;
+    let raf = 0;
+    const pass = () => {
+      raf = 0;
+      const vh = vv ? vv.height : innerHeight;
+      const top = (vv ? vv.offsetTop : 0) + (window.scrollY || 0);
+      const pad = vh * (vv && vv.scale > 1.2 ? 0.5 : 1);
+      const lo = top - pad;
+      const hi = top + vh + pad;
+      // 先把位置一次读完再统一写 class：边读边写会让每个 wrap 都强制一次重排
+      const rects = wraps.map((wrap) => wrap.getBoundingClientRect());
+      const sy = window.scrollY || 0;
+      wraps.forEach((wrap, i) => {
+        const t = rects[i].top + sy;
+        wrap.classList.toggle('is-idle', t + rects[i].height < lo || t > hi);
+      });
+    };
+    const ping = () => { if (!raf) raf = requestAnimationFrame(pass); };
+    addEventListener('scroll', ping, { passive: true });
+    addEventListener('resize', ping);
+    if (vv) {
+      vv.addEventListener('scroll', ping);
+      vv.addEventListener('resize', ping);
+    }
+    pass();
   }
 
   if (slices.length && !reduced) {
     if ('requestIdleCallback' in window) requestIdleCallback(startCanvasMotion, { timeout: 700 });
     else setTimeout(startCanvasMotion, 300);
+  } else {
+    startCulling();
   }
 
   /* 图片陆续解码完会改变布局判断，等图齐了再刷一次 ScrollTrigger */
