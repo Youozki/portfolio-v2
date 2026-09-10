@@ -107,6 +107,49 @@
   initHScroll(document);
   initMarquee(document);
   const restoreVisibleBigs = startBigImageUnload();
+  startAnchorJump();
+
+  /* ---- 顶栏章节链接 ------------------------------------------------------
+     章节锚点是画布里 1×1 的空元素，而离屏的段整段 display:none——被收起来的段里
+     锚点没有盒子，site.js 那句 lenis.scrollTo(el) 拿不到位置，于是"点了没反应"
+     （实测：锚点在活着的段里就正常，在收起来的段里一律滚到 0）。用户看到的
+     "只能 intro→problem→strategy 一个个点才动、outcome 怎么点都不动、terabox 好像正常"
+     就是这个：一次点击只把相邻的段唤醒，terabox 短、前三个锚点本来就在活段里。
+
+     所以位置不去量 DOM，直接按画布坐标算：
+       页面 Y = 段的页面顶 + 段的上留白 + (锚点画布 y − 段的 --y0) × 缩放系数
+     这三个值就算段被收起来也都拿得到（wrap 自己一直有高度）。
+     用捕获阶段拦下来：site.js 那个是冒泡阶段挂在 document 上的，捕获先跑，
+     stopPropagation 之后它就不会再拿错的位置去滚。 */
+  function startAnchorJump() {
+    document.addEventListener('click', (e) => {
+      const a = e.target.closest && e.target.closest('a[href^="#"]');
+      if (!a) return;
+      const id = a.getAttribute('href').slice(1);
+      if (!id) return;
+      const el = document.getElementById(id);
+      if (!el || !el.classList.contains('doc-anchor')) return;
+      const wrap = el.closest('.case-doc-wrap');
+      const slice = el.closest('.case-slice');
+      if (!wrap || !slice) return;
+      const doc = wrap.querySelector('.case-doc');
+      const cs = parseFloat(doc && doc.style.getPropertyValue('--cs')) || (wrap.clientWidth / CASE_W);
+      const y0 = parseFloat(slice.style.getPropertyValue('--y0')) || 0;
+      const ay = parseFloat(el.style.top) || 0;
+      const pad = parseFloat(getComputedStyle(wrap).paddingTop) || 0;
+      const y = wrap.getBoundingClientRect().top + (window.scrollY || 0)
+        + pad + (ay - y0) * cs;
+      e.preventDefault();
+      e.stopPropagation();
+      if (window.SITE && window.SITE.lenis) window.SITE.lenis.scrollTo(y, { duration: 0.9 });
+      else window.scrollTo({ top: y, behavior: reducedScroll() ? 'auto' : 'smooth' });
+    }, true);
+  }
+
+  function reducedScroll() {
+    return !!(window.SITE && window.SITE.reduced)
+      || matchMedia('(prefers-reduced-motion: reduce)').matches;
+  }
 
   /* ---- 大图离远了就把解码卸掉 --------------------------------------------
      justpaper 手机端 31.8MB 解码里，428 个文件只有 9 个 ≥1MB，合起来占 26.5MB
