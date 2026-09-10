@@ -106,6 +106,77 @@
 
   initHScroll(document);
   initMarquee(document);
+  const restoreVisibleBigs = startBigImageUnload();
+
+  /* ---- 大图离远了就把解码卸掉 --------------------------------------------
+     justpaper 手机端 31.8MB 解码里，428 个文件只有 9 个 ≥1MB，合起来占 26.5MB
+     （device-hero 8.0、image_4 5.6、两张 homepage_scroll 6.1、四张 visual_scroll 5.6、
+     image_7 1.2），剩下 416 个碎图一共才 3.6MB。所以只盯这几张大的：离得远就把 src
+     换成 1×1 透明图，解码内存立刻释放，靠近了再换回来（文件在 HTTP 缓存里，换回来很快）。
+     这也是 justpaper 比其它三页更容易崩的唯一可量到的差别——它的大图解码是别人的 2.5 倍。
+
+     哪些算"大"由 tools/mark_big_images.py 写在 data-big 上（按 390px/dpr3 真正会挑中
+     的那一档算字节），不在运行时猜——有 srcset 时 naturalWidth 是density 校正过的，猜不准。
+
+     两条保险：
+     1. 真正在视口里的绝不卸（display:none 的段除外，那本来就看不见）；
+     2. 裁段那一趟顺手把"停在占位图又已经进视口"的图恢复回来。
+        上一次做离屏卸载翻车就是栽在唤回时序上（30–56 张图停在 1×1 没回来）。 */
+  function startBigImageUnload() {
+    const BLANK = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==';
+    const bigs = [...document.querySelectorAll('img[data-big]')];
+    if (!bigs.length || !('IntersectionObserver' in window)) return null;
+
+    const onScreen = (r) => r.width > 0 && r.height > 0
+      && r.bottom > -8 && r.top < innerHeight + 8;
+
+    const park = (img) => {
+      if (img.dataset.parked || !img.naturalWidth || !img.naturalHeight) return;
+      if (onScreen(img.getBoundingClientRect())) return;
+      // 换成 1×1 之后高度会塌，先把比例固定住，段里的排版和横向滚动条宽度才不动
+      if (!img.style.aspectRatio) {
+        img.dataset.parkedAr = '1';
+        img.style.aspectRatio = img.naturalWidth + ' / ' + img.naturalHeight;
+      }
+      img.dataset.parked = img.getAttribute('src') || '';
+      const set = img.getAttribute('srcset');
+      if (set) {
+        img.dataset.parkedSet = set;
+        img.removeAttribute('srcset');
+      }
+      img.setAttribute('src', BLANK);
+    };
+
+    const restore = (img) => {
+      if (!img.dataset.parked) return;
+      if (img.dataset.parkedSet) {
+        img.setAttribute('srcset', img.dataset.parkedSet);
+        delete img.dataset.parkedSet;
+      }
+      img.setAttribute('src', img.dataset.parked);
+      delete img.dataset.parked;
+      if (img.dataset.parkedAr) {
+        img.style.aspectRatio = '';
+        delete img.dataset.parkedAr;
+      }
+    };
+
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => { if (e.isIntersecting) restore(e.target); else park(e.target); });
+    }, { rootMargin: '75% 0px 75% 0px' });
+    bigs.forEach((img) => io.observe(img));
+
+    /* 裁段那一趟会带着可视带（放大时会跟着缩小）再走一遍：
+       IntersectionObserver 的 rootMargin 是布局视口的百分比，放大之后一点不会收窄，
+       而放大恰恰是最需要少留几张大图的时候。这里按可视带重新判一次，
+       同时保住"与布局视口有交集的绝不卸"——宁可少省几 MB，也不能让人看见空图。 */
+    return (lo, hi) => bigs.forEach((img) => {
+      const r = img.getBoundingClientRect();
+      if (r.bottom > lo && r.top < hi) { restore(img); return; }
+      if (r.width > 0 && r.height > 0 && r.bottom > 0 && r.top < innerHeight) { restore(img); return; }
+      park(img);
+    });
+  }
 
   /* 顶栏压到蓝底（band--accent）或黑底（band--ink）上时整体反白。
      site.js 里就有这套判定，只是画布页一直没调用——所以内页头那一段蓝底上
@@ -320,6 +391,7 @@
         wrap.classList.toggle('is-idle', idle);
       });
       if (wake) back.forEach((wrap) => wake(wrap));
+      if (restoreVisibleBigs) restoreVisibleBigs(lo, hi);
     };
     const ping = () => { if (!raf) raf = requestAnimationFrame(pass); };
     addEventListener('scroll', ping, { passive: true });
