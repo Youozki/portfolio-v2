@@ -5,6 +5,9 @@
   'use strict';
 
   const CASE_W = 1920;
+  /* 手机版式接管的页面（js/case-mobile.js 会在 <html> 上挂 is-doc-mobile 并把画布拆掉），
+     这里整体让路：画布缩放、裁段、按行入场都不需要，也没有 .case-doc-wrap 可以量了。 */
+  if (document.documentElement.classList.contains('is-doc-mobile')) return;
   const wraps = [...document.querySelectorAll('.case-doc-wrap')];
   if (!wraps.length) return;
 

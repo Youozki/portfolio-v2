@@ -1,0 +1,168 @@
+/* 内页手机版式（试点：terabox）
+   桌面仍走 1920 坐标画布整幅缩放；手机上画布被 js/case-mobile.js 拆成一列：
+   正文回到正常字号的流式段落，图组各自成一张卡片按宽度等比缩放。
+   目的有两个：一是手机上不用捏合就能读，二是每屏落在渲染树里的内容少得多，
+   放大时的栅格化面积不再是"整幅设计稿 × 缩放²"。 */
+
+.case-m {
+  padding: 0 var(--m-pad, 22px) clamp(4rem, 14vw, 7rem);
+  max-width: 640px;
+  margin: 0 auto;
+}
+.case-m .doc-anchor {
+  /* 画布里的锚点是 position: absolute + 内联 top，进了流式版必须回到静态定位，
+     否则它还挂在设计稿的 y 上，章节跳转会落到文档之外 */
+  position: static;
+  display: block;
+  width: auto;
+  height: 0;
+  scroll-margin-top: 84px;
+}
+
+/* ---- 章节头：与桌面同构（发丝线 + 序号 + 章节名），尺寸按手机收 ---- */
+.case-m-ch {
+  margin: clamp(3rem, 11vw, 4.5rem) 0 clamp(1.5rem, 5vw, 2rem);
+  padding-top: 1.75rem;
+  position: relative;
+  font-size: 1.75rem;
+  font-weight: 300;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  color: rgba(50, 48, 46, 1);
+}
+.case-m-ch::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 1px;
+  background: rgba(50, 48, 46, 0.16);
+}
+.case-m-ch::after {
+  content: attr(data-no);
+  position: absolute;
+  top: 0.55rem;
+  left: 0;
+  font-size: 0.6875rem;
+  line-height: 1;
+  letter-spacing: 0.16em;
+  color: rgba(50, 48, 46, 0.42);
+}
+.case-m-ch:first-child {
+  margin-top: clamp(2rem, 8vw, 3rem);
+}
+
+/* ---- 正文 ---- */
+.case-m-h {
+  margin: clamp(2rem, 7vw, 2.75rem) 0 0.75rem;
+  font-size: 1.0625rem;
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: -0.005em;
+  color: rgba(50, 48, 46, 1);
+}
+.case-m-p {
+  margin: 0 0 1.15rem;
+  font-size: 0.9375rem;
+  line-height: 1.8;
+  letter-spacing: 0.01em;
+  color: rgba(50, 48, 46, 0.86);
+}
+.case-m-p:last-child {
+  margin-bottom: 0;
+}
+/* 画布里那些"一句话小标题"（20px、很短的一段）当引导句用 */
+.case-m-p--lead {
+  font-size: 1rem;
+  color: rgba(50, 48, 46, 1);
+  margin-bottom: 0.9rem;
+}
+.case-m-cap {
+  margin: 0.6rem 0 0;
+  font-size: 0.75rem;
+  line-height: 1.6;
+  letter-spacing: 0.02em;
+  color: rgba(50, 48, 46, 0.5);
+  text-align: center;
+}
+/* 画布里的段落是一堆 div，其中空行是 &nbsp;——这里统一交给外层的行高 */
+.case-m-p > div:empty,
+.case-m-p > div > span:empty {
+  display: none;
+}
+
+/* ---- 图卡：设计稿里那块底板的底色 + 板上的图逐张铺满一列 ---- */
+.case-m-fig {
+  margin: clamp(1.25rem, 5vw, 1.75rem) 0 clamp(1.75rem, 6vw, 2.25rem);
+  padding: clamp(0.75rem, 3.5vw, 1.25rem);
+  border-radius: 14px;
+  overflow: hidden;
+}
+.case-m-fig > * + * {
+  margin-top: clamp(0.75rem, 3.5vw, 1.25rem);
+}
+.case-m-shot,
+.case-m-fig img {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 0 auto;
+  border-radius: 6px;
+}
+/* 一张图里横着摆了好几屏的：卡片内横向滑动，图按高度放大到看得清 */
+.case-m-rail {
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+}
+.case-m-rail::-webkit-scrollbar {
+  display: none;
+}
+.case-m-rail img {
+  width: auto;
+  max-width: none;
+  margin: 0;
+}
+
+/* 拼贴组：保留设计稿里的相对位置，整组按卡片宽度等比缩 */
+.case-m-fig--comp {
+  position: relative;
+  padding: 0;
+}
+.case-m-fig--comp > * + * {
+  margin-top: 0;
+}
+.case-m-fig__in {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: 0 0;
+  transform: scale(var(--mcs, 1));
+}
+.case-m-fig__in > * {
+  position: absolute;
+}
+.case-m-fig--comp img {
+  width: auto;
+  margin: 0;
+  border-radius: 0;
+}
+
+/* ---- 入场：与桌面同一条曲线，位移按手机收到 22px ---- */
+.case-m [data-m-reveal] {
+  opacity: 0;
+  transform: translate3d(0, 22px, 0);
+  transition: opacity 1s cubic-bezier(0.1, 1, 0.2, 1), transform 1s cubic-bezier(0.1, 1, 0.2, 1);
+}
+.case-m [data-m-reveal].is-in {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .case-m [data-m-reveal] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
