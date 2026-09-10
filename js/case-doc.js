@@ -44,14 +44,29 @@
          用 visibility 而不是 display：盒子还在，scrollWidth 和滚动条滑块宽度都不变，
          但浏览器不再绘制它，栅格化面积直接掉下来。
          判据只用滚动容器自己的可视区（[scrollLeft, scrollLeft+clientWidth] 之外一定被
-         容器裁掉、看不见），左右各留 1/4 宽度余量，所以拖动时不会看到空档。 */
+         容器裁掉、看不见），左右各留 1/4 宽度余量，所以拖动时不会看到空档。
+         捏合放大之后，屏幕上真正看得见的只是容器里很窄的一条，判据收窄到那一条上——
+         这时贴图最贵，也最需要少画。rect 和 visualViewport 的 offsetLeft/width 都是
+         布局视口坐标，可以直接减，再除掉画布缩放换成画布坐标。 */
       const strip = view.firstElementChild;
       const items = strip ? [...strip.children] : [];
       const cull = () => {
         if (!view.clientWidth || items.length < 2) return;
         const base = strip.offsetLeft;
-        const lo = view.scrollLeft - view.clientWidth * 0.25;
-        const hi = view.scrollLeft + view.clientWidth * 1.25;
+        let lo = view.scrollLeft - view.clientWidth * 0.25;
+        let hi = view.scrollLeft + view.clientWidth * 1.25;
+        const vv = window.visualViewport;
+        if (vv && vv.scale >= 1.6) {
+          const cs = scale || 1;
+          const r = view.getBoundingClientRect();
+          const vLo = Math.max(r.left, vv.offsetLeft);
+          const vHi = Math.min(r.right, vv.offsetLeft + vv.width);
+          if (vHi > vLo) {
+            const w = (vHi - vLo) / cs;
+            lo = view.scrollLeft + (vLo - r.left) / cs - w * 0.35;
+            hi = view.scrollLeft + (vHi - r.left) / cs + w * 0.35;
+          }
+        }
         items.forEach((it) => {
           const l = it.offsetLeft - base;
           it.style.visibility = (l + it.offsetWidth < lo || l > hi) ? 'hidden' : '';
@@ -68,7 +83,12 @@
       };
       view.addEventListener('scroll', sync);
       addEventListener('resize', sync);
-      if (window.visualViewport) window.visualViewport.addEventListener('resize', sync);
+      addEventListener('scroll', cull, { passive: true });
+      if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', sync);
+        // 放大后判据跟着可视区走，捏合平移也要重算
+        window.visualViewport.addEventListener('scroll', cull);
+      }
       if (window.ResizeObserver) new ResizeObserver(sync).observe(view);
       thumb.addEventListener('pointerdown', (e) => {
         e.preventDefault();
@@ -262,15 +282,28 @@
   // 按行切开的正文块 → 切之前的原文，供后面复查不合格时还原
   const lineBackups = new Map();
 
-  /* 每个 .doc-line 必须正好占一行。行是按【量的时候】的断行位置烤死的，最终排版
-     只要差一点点（iOS 上同一段文字的行盒比这边宽一点就够了），某一行就会再折一次，
-     于是出现"一个字单独掉到下一行"这种莫名其妙的换行。验不过就整段还原成原文、
-     退回整块渐显——宁可少一档按行入场，也不能把排版搞乱。
-     段被收起来的时候量不到（rect 数为 0），跳过等下一次复查。 */
+  /* 每个 .doc-line 必须正好占一行。行是按【量的时候】的断行位置烤死的，真机上同一段
+     文字的推进量只要比这边多一点点，某一行就会再折一次，于是出现"一个字单独掉到下一行"。
+     第一道防线是 CSS 的 white-space: nowrap（折不了），这里是第二道：万一字体换了之后
+     整行宽出去一截（nowrap 会让它横向溢出），就整段还原成原文、退回整块渐显。
+
+     判据只能看溢出，不能看 getClientRects().length——行是 display:block，
+     不管折成几行都只有一个矩形，之前那版判据其实一直恒真，等于没在工作。
+     行内容是画布坐标下的布局宽度（scale 在祖先上），所以直接比 scrollWidth/clientWidth。
+     段被收起来的时候量不到（宽度为 0），跳过等下一次复查。 */
   function linesOk(el) {
-    const counts = [...el.querySelectorAll('.doc-line')].map((s) => s.getClientRects().length);
-    if (!counts.length || counts.some((n) => n === 0)) return null;
-    return counts.every((n) => n === 1);
+    const lines = [...el.querySelectorAll('.doc-line')];
+    if (!lines.length) return null;
+    // 容差给到 0.75em：行尾那个空格挂出去也算不上问题，多出一个汉字（1em）才算
+    const tol = Math.max(4, (parseFloat(el.style.fontSize) || 20) * 0.75);
+    let measured = 0;
+    for (let i = 0; i < lines.length; i += 1) {
+      const w = lines[i].clientWidth;
+      if (!w) continue;
+      measured += 1;
+      if (lines[i].scrollWidth > w + tol) return false;
+    }
+    return measured ? true : null;
   }
 
   function recheckLines() {
@@ -448,6 +481,51 @@
     startCulling();
   }
 
+  /* ---- 放大之后按可视区停绘单个块 ----------------------------------------
+     裁段只能按【段】裁，段本身有一屏多高；放大 4 倍时同一段要 16 倍贴图，光靠裁段
+     已经压不住了。这里再细一层：倍数够大时，把落在可视区外的画布块（含横向！放大后
+     只看得见画布的一小条宽度）visibility: hidden 掉。
+     - 只在 scale 够大时才开，正常浏览完全不介入，动效参数一个都不碰；
+     - 用 visibility 而不是 display：盒子和滚动尺寸都不变，入场过渡照跑，缩回去立刻恢复；
+     - 坐标同样只用 rect + visualViewport 的 offsetTop/offsetLeft/width/height，
+       绝不掺 scrollX/scrollY（放大后是双份偏移）。 */
+  function makeZoomCull() {
+    const vv = window.visualViewport;
+    if (!vv) return null;
+    const items = [];
+    slices.forEach((slice) => {
+      [...slice.children].forEach((el) => {
+        if (!el.classList.contains('doc-anchor')) items.push(el);
+      });
+    });
+    if (items.length < 8) return null;
+    const ON = 1.6;
+    let armed = false;
+    return () => {
+      if (vv.scale < ON) {
+        if (!armed) return;
+        armed = false;
+        items.forEach((el) => el.classList.remove('is-zoff'));
+        return;
+      }
+      armed = true;
+      const padX = vv.width * 0.35;
+      const padY = vv.height * 0.5;
+      const lo = vv.offsetTop - padY;
+      const hi = vv.offsetTop + vv.height + padY;
+      const left = vv.offsetLeft - padX;
+      const right = vv.offsetLeft + vv.width + padX;
+      const rects = items.map((el) => el.getBoundingClientRect());
+      items.forEach((el, i) => {
+        const r = rects[i];
+        // 量不到（所在段被收起来了）就别改，交给裁段那层
+        if (!r.width && !r.height) return;
+        const off = r.bottom < lo || r.top > hi || r.right < left || r.left > right;
+        el.classList.toggle('is-zoff', off);
+      });
+    };
+  }
+
   /* ---- 离屏的段不进渲染树 ------------------------------------------------
      画布的栅格化按视觉像素算，捏合放大 N 倍，同一块内容要 N² 倍贴图；内页在 iOS 上
      "放大后先自己刷新一次、再滑一下就崩"就是这么撑爆的。这里把远离可视区的段
@@ -462,7 +540,8 @@
      另外留一道保险：只要 wrap 与布局视口本身有交集就绝不裁。放大时布局视口不缩小，
      所以这一条会多留一两段（栅格化省得少一点），但换来"看得见的东西一定在渲染树里"。 */
   function startCulling() {
-    if (wraps.length < 2) return;
+    const zoomCull = makeZoomCull();
+    if (wraps.length < 2 && !zoomCull) return;
     const vv = window.visualViewport;
     let raf = 0;
     let lastScale = vv ? vv.scale : 1;
@@ -486,8 +565,9 @@
       });
       if (wake) back.forEach((wrap) => wake(wrap));
       if (restoreVisibleBigs) restoreVisibleBigs(lo, hi);
-      /* 缩放变了就复查一遍烤死的行：字形推进量在不同栅格化尺度下会有零点几像素的差别，
-         放大之后某一行可能就多出一个字、被挤到下一行去（用户是在放大读正文时看到的）。 */
+      // 段级裁完，再按可视区裁一层块（只在放大到一定倍数时才动）
+      if (zoomCull) zoomCull();
+      /* 缩放变了就复查一遍烤死的行：字体换过之后行宽可能整行超出去。 */
       if (vv && vv.scale !== lastScale) {
         lastScale = vv.scale;
         recheckLines();

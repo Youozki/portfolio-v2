@@ -280,6 +280,10 @@ body.is-case main { background: #f7f7f7; }
 }
 .case-doc .doc-line {
   display: block;
+  /* 行是按【量的时候】的断行位置烤死的。真机上同一行的推进量只要比这边多零点几像素，
+     这一行就会再折一次，末尾一个字单独掉到下一行——用户报的"莫名其妙的换行"。
+     禁掉换行，宽出来的那零点几像素是看不见的溢出，排版不会散。 */
+  white-space: nowrap;
   opacity: 0;
   transform: translate3d(0, 44px, 0);
   transition: opacity 1.15s cubic-bezier(0.1, 1, 0.2, 1) calc(var(--i, 0) * 80ms),
@@ -293,6 +297,11 @@ body.is-case main { background: #f7f7f7; }
 .case-doc [data-doc-px] {
   transform: translate3d(0, var(--pz, 0px), 0);
   will-change: transform;
+}
+/* 捏合放大到一定倍数之后，画布里落在可视区外的块停止绘制。
+   只能用 visibility：盒子、滚动宽度、入场过渡全都保留，缩回去立刻恢复。 */
+.case-doc .is-zoff {
+  visibility: hidden;
 }
 
 @media (prefers-reduced-motion: reduce) {
