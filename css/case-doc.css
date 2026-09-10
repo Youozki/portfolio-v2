@@ -298,11 +298,6 @@ body.is-case main { background: #f7f7f7; }
   transform: translate3d(0, var(--pz, 0px), 0);
   will-change: transform;
 }
-/* 捏合放大到一定倍数之后，画布里落在可视区外的块停止绘制。
-   只能用 visibility：盒子、滚动宽度、入场过渡全都保留，缩回去立刻恢复。 */
-.case-doc .is-zoff {
-  visibility: hidden;
-}
 
 @media (prefers-reduced-motion: reduce) {
   .case-doc [data-doc-reveal] { opacity: 1; transform: none; filter: none; transition: none; }

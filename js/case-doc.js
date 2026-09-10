@@ -45,28 +45,17 @@
          但浏览器不再绘制它，栅格化面积直接掉下来。
          判据只用滚动容器自己的可视区（[scrollLeft, scrollLeft+clientWidth] 之外一定被
          容器裁掉、看不见），左右各留 1/4 宽度余量，所以拖动时不会看到空档。
-         捏合放大之后，屏幕上真正看得见的只是容器里很窄的一条，判据收窄到那一条上——
-         这时贴图最贵，也最需要少画。rect 和 visualViewport 的 offsetLeft/width 都是
-         布局视口坐标，可以直接减，再除掉画布缩放换成画布坐标。 */
+         **判据不要掺 visualViewport 的 offsetLeft/width**：试过"放大后收窄到真正看得见的
+         那一条"，iOS 捏合平移时这两个值不可靠（Safari 会连布局视口一起挪、offset 归零），
+         正在看的那张被判成在可视区外 → 藏掉，手指一动又判回来，就是"放大后图片文字闪烁、
+         消失"。横向没有"与布局视口有交集就不裁"这道保险可用，所以只能按容器自己算。 */
       const strip = view.firstElementChild;
       const items = strip ? [...strip.children] : [];
       const cull = () => {
         if (!view.clientWidth || items.length < 2) return;
         const base = strip.offsetLeft;
-        let lo = view.scrollLeft - view.clientWidth * 0.25;
-        let hi = view.scrollLeft + view.clientWidth * 1.25;
-        const vv = window.visualViewport;
-        if (vv && vv.scale >= 1.6) {
-          const cs = scale || 1;
-          const r = view.getBoundingClientRect();
-          const vLo = Math.max(r.left, vv.offsetLeft);
-          const vHi = Math.min(r.right, vv.offsetLeft + vv.width);
-          if (vHi > vLo) {
-            const w = (vHi - vLo) / cs;
-            lo = view.scrollLeft + (vLo - r.left) / cs - w * 0.35;
-            hi = view.scrollLeft + (vHi - r.left) / cs + w * 0.35;
-          }
-        }
+        const lo = view.scrollLeft - view.clientWidth * 0.25;
+        const hi = view.scrollLeft + view.clientWidth * 1.25;
         items.forEach((it) => {
           const l = it.offsetLeft - base;
           it.style.visibility = (l + it.offsetWidth < lo || l > hi) ? 'hidden' : '';
@@ -84,11 +73,7 @@
       view.addEventListener('scroll', sync);
       addEventListener('resize', sync);
       addEventListener('scroll', cull, { passive: true });
-      if (window.visualViewport) {
-        window.visualViewport.addEventListener('resize', sync);
-        // 放大后判据跟着可视区走，捏合平移也要重算
-        window.visualViewport.addEventListener('scroll', cull);
-      }
+      if (window.visualViewport) window.visualViewport.addEventListener('resize', sync);
       if (window.ResizeObserver) new ResizeObserver(sync).observe(view);
       thumb.addEventListener('pointerdown', (e) => {
         e.preventDefault();
@@ -481,50 +466,15 @@
     startCulling();
   }
 
-  /* ---- 放大之后按可视区停绘单个块 ----------------------------------------
-     裁段只能按【段】裁，段本身有一屏多高；放大 4 倍时同一段要 16 倍贴图，光靠裁段
-     已经压不住了。这里再细一层：倍数够大时，把落在可视区外的画布块（含横向！放大后
-     只看得见画布的一小条宽度）visibility: hidden 掉。
-     - 只在 scale 够大时才开，正常浏览完全不介入，动效参数一个都不碰；
-     - 用 visibility 而不是 display：盒子和滚动尺寸都不变，入场过渡照跑，缩回去立刻恢复；
-     - 坐标同样只用 rect + visualViewport 的 offsetTop/offsetLeft/width/height，
-       绝不掺 scrollX/scrollY（放大后是双份偏移）。 */
-  function makeZoomCull() {
-    const vv = window.visualViewport;
-    if (!vv) return null;
-    const items = [];
-    slices.forEach((slice) => {
-      [...slice.children].forEach((el) => {
-        if (!el.classList.contains('doc-anchor')) items.push(el);
-      });
-    });
-    if (items.length < 8) return null;
-    const ON = 1.6;
-    let armed = false;
-    return () => {
-      if (vv.scale < ON) {
-        if (!armed) return;
-        armed = false;
-        items.forEach((el) => el.classList.remove('is-zoff'));
-        return;
-      }
-      armed = true;
-      const padX = vv.width * 0.35;
-      const padY = vv.height * 0.5;
-      const lo = vv.offsetTop - padY;
-      const hi = vv.offsetTop + vv.height + padY;
-      const left = vv.offsetLeft - padX;
-      const right = vv.offsetLeft + vv.width + padX;
-      const rects = items.map((el) => el.getBoundingClientRect());
-      items.forEach((el, i) => {
-        const r = rects[i];
-        // 量不到（所在段被收起来了）就别改，交给裁段那层
-        if (!r.width && !r.height) return;
-        const off = r.bottom < lo || r.top > hi || r.right < left || r.left > right;
-        el.classList.toggle('is-zoff', off);
-      });
-    };
-  }
+  /* ---- 放大之后按可视区停绘单个块：试过，已撤（2026-09-10） ----------------
+     做法是 visualViewport.scale ≥ 1.6 时把落在可视区外的画布块 visibility: hidden。
+     本机模拟 scale 3 时判据完全正确（四页"看得见却被藏"都是 0），但真机上用户立刻报
+     "放大之后图片和文字闪烁、消失"——iOS 捏合平移时 visualViewport 的 offsetTop/offsetLeft
+     并不稳定（Safari 会连布局视口一起挪），按它算的可视区和眼睛看到的对不上，
+     于是正在看的块被藏、手指一动又回来。
+     **教训：任何"按视觉视口位置"裁绘制的判据，都必须带"与布局视口有交集就绝不裁"这道
+     保险**（段级裁段就是靠这一条才稳的）；到了单个块这一层，保险一加就等于什么都裁不掉，
+     所以这条路直接封死——放大这一档的内存要省，只能走手机版式。 */
 
   /* ---- 离屏的段不进渲染树 ------------------------------------------------
      画布的栅格化按视觉像素算，捏合放大 N 倍，同一块内容要 N² 倍贴图；内页在 iOS 上
@@ -540,8 +490,7 @@
      另外留一道保险：只要 wrap 与布局视口本身有交集就绝不裁。放大时布局视口不缩小，
      所以这一条会多留一两段（栅格化省得少一点），但换来"看得见的东西一定在渲染树里"。 */
   function startCulling() {
-    const zoomCull = makeZoomCull();
-    if (wraps.length < 2 && !zoomCull) return;
+    if (wraps.length < 2) return;
     const vv = window.visualViewport;
     let raf = 0;
     let lastScale = vv ? vv.scale : 1;
@@ -565,8 +514,6 @@
       });
       if (wake) back.forEach((wrap) => wake(wrap));
       if (restoreVisibleBigs) restoreVisibleBigs(lo, hi);
-      // 段级裁完，再按可视区裁一层块（只在放大到一定倍数时才动）
-      if (zoomCull) zoomCull();
       /* 缩放变了就复查一遍烤死的行：字体换过之后行宽可能整行超出去。 */
       if (vv && vv.scale !== lastScale) {
         lastScale = vv.scale;
