@@ -182,12 +182,19 @@ N² 倍贴图**。terabox 只有 10 张图、7MB 解码，照样崩，就是这�
 1. `tools/split_case_slices.py --target 1000` 把画布切细（terabox 6 段、justpaper/companion 8 段、
    oreate 10 段，每段 ≤1400 画布 px）。切点只能落在没有元素跨越的空隙里。
 2. 远离可视区的段整段 `display: none`（`.case-doc-wrap.is-idle > .case-doc`）。
-   **判据必须用 `visualViewport` 而不是布局视口**——捏合放大时布局视口尺寸一点不变，
-   `IntersectionObserver` / `content-visibility` 都感知不到，而放大恰恰是最需要缩小
-   保活范围的时候。放大 ≤1.2 倍时留满一屏余量（等于不裁，观感零风险），放大之后收到半屏。
-   实测 390×844 dpr3：zoom 1 时 0 段被裁，zoom 3 时只剩 3 段在渲染树里。
-3. oreate 的跑马灯轨道是 22117 画布 px 宽，放大 3 倍时那一层要 99MB，而且每帧都在重栅格化。
-   所以 `visualViewport.scale > 1.5` 就暂停它，缩回去自动恢复。
+   **判据必须用 `visualViewport`，而且只能用 `getBoundingClientRect()` + `visualViewport.offsetTop/height`
+   这两样**（都相对布局视口，可以直接比）。**千万不要再把 `window.scrollY` 掺进来**——
+   iOS 放大之后 scrollY 与 offsetTop 会各自算一遍偏移，加起来是双份，判据整体偏下，
+   正在看的那一段被裁掉，用户报的"放大到一定程度图片和文字都消失"就是这个。
+   余量一整个可视高度，再加一道保险：只要 wrap 与布局视口有交集就绝不裁
+   （放大时会多留一两段，栅格化省得少一点，换"看得见的一定在渲染树里"）。
+   实测 390×844 dpr3：zoom 1 基本不裁，zoom 3 时 oreate 10 段留 5–6 段、terabox 6 段留 4–5 段。
+3. **发丝级元素不能进入场序列**：横向滚动图下面那根蓝色滚动条在手机上只有 1.1px 高，
+   段被 `display:none` 收起再放出来之后拿不到 IntersectionObserver 的 0.04 阈值交叉，
+   永久停在 `opacity: 0`（用户报"justpaper 滚动图下方蓝条消失了"）。
+   `startCanvasMotion()` 现在跳过高度 <4px 的元素，并且段放回来时用 `wake()`
+   补点亮已经进视口的元素（还在视口外的留给 observer，入场动画不会被提前烧掉）。
+4. **不要拿动效换内存**：曾加过"放大 >1.5 倍就暂停跑马灯"，用户立刻发现图墙停了，已撤。
 
 **上一版用 `content-visibility: auto` 没治住**，原因就是第 2 条：它要 Safari 18+，而且按布局
 视口判定离屏。已经换掉，不要再加回来。
