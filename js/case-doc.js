@@ -37,7 +37,28 @@
       const thumb = bar && bar.querySelector('.hscroll__thumb');
       if (!thumb) return;
       let thumbW = 0;
+      /* 横向长图带里，卷出可视范围的那几张不参与绘制。
+         用户实测"在 justpaper 以那两条滚动图为中心放大，马上崩"——这两条带子在画布
+         坐标里是 3713 和 2737px 宽，整条都是合成层的绘制内容，放大之后同一条带子的
+         贴图按缩放平方涨，是全页最贵的一块。
+         用 visibility 而不是 display：盒子还在，scrollWidth 和滚动条滑块宽度都不变，
+         但浏览器不再绘制它，栅格化面积直接掉下来。
+         判据只用滚动容器自己的可视区（[scrollLeft, scrollLeft+clientWidth] 之外一定被
+         容器裁掉、看不见），左右各留 1/4 宽度余量，所以拖动时不会看到空档。 */
+      const strip = view.firstElementChild;
+      const items = strip ? [...strip.children] : [];
+      const cull = () => {
+        if (!view.clientWidth || items.length < 2) return;
+        const base = strip.offsetLeft;
+        const lo = view.scrollLeft - view.clientWidth * 0.25;
+        const hi = view.scrollLeft + view.clientWidth * 1.25;
+        items.forEach((it) => {
+          const l = it.offsetLeft - base;
+          it.style.visibility = (l + it.offsetWidth < lo || l > hi) ? 'hidden' : '';
+        });
+      };
       const sync = () => {
+        cull();
         if (!view.clientWidth || !view.scrollWidth || !bar.clientWidth) return;
         const max = view.scrollWidth - view.clientWidth;
         thumbW = Math.max(bar.clientWidth * (view.clientWidth / view.scrollWidth), 12);
@@ -47,6 +68,7 @@
       };
       view.addEventListener('scroll', sync);
       addEventListener('resize', sync);
+      if (window.visualViewport) window.visualViewport.addEventListener('resize', sync);
       if (window.ResizeObserver) new ResizeObserver(sync).observe(view);
       thumb.addEventListener('pointerdown', (e) => {
         e.preventDefault();
@@ -237,6 +259,28 @@
 
   // startCanvasMotion 量完入场序列后挂上：裁段把段放回来时用它补点亮
   let wake = null;
+  // 按行切开的正文块 → 切之前的原文，供后面复查不合格时还原
+  const lineBackups = new Map();
+
+  /* 每个 .doc-line 必须正好占一行。行是按【量的时候】的断行位置烤死的，最终排版
+     只要差一点点（iOS 上同一段文字的行盒比这边宽一点就够了），某一行就会再折一次，
+     于是出现"一个字单独掉到下一行"这种莫名其妙的换行。验不过就整段还原成原文、
+     退回整块渐显——宁可少一档按行入场，也不能把排版搞乱。
+     段被收起来的时候量不到（rect 数为 0），跳过等下一次复查。 */
+  function linesOk(el) {
+    const counts = [...el.querySelectorAll('.doc-line')].map((s) => s.getClientRects().length);
+    if (!counts.length || counts.some((n) => n === 0)) return null;
+    return counts.every((n) => n === 1);
+  }
+
+  function recheckLines() {
+    lineBackups.forEach((backup, el) => {
+      if (linesOk(el) !== false) return;
+      el.innerHTML = backup;
+      el.setAttribute('data-doc-reveal', '');
+      lineBackups.delete(el);
+    });
+  }
 
   /* ---- 正文按"视觉行"切开 ----------------------------------------------
      切分点取的就是浏览器自己算出来的换行位置：逐字问一次 top，top 跳了就是换
@@ -327,7 +371,13 @@
          自带 30px 字号的块，正文是 20px，其余是图和容器。标题只做模糊到清晰，
          正文按行位移＋渐显，图整块位移＋渐显。 */
       let mode = head ? 'head' : '';
-      if (plan && plan.length && applyLines(plan) > 0) mode = 'lines';
+      if (plan && plan.length) {
+        const backup = el.innerHTML;
+        if (applyLines(plan) > 0) {
+          if (linesOk(el) === false) el.innerHTML = backup;
+          else { mode = 'lines'; lineBackups.set(el, backup); }
+        }
+      }
       el.setAttribute('data-doc-reveal', mode);
 
       /* 画布正文自带 opacity:0.8 这类内联值，内联优先级压过样式表里的 opacity:0，
@@ -415,6 +465,7 @@
     if (wraps.length < 2) return;
     const vv = window.visualViewport;
     let raf = 0;
+    let lastScale = vv ? vv.scale : 1;
     const pass = () => {
       raf = 0;
       const vh = vv ? vv.height : innerHeight;
@@ -435,6 +486,12 @@
       });
       if (wake) back.forEach((wrap) => wake(wrap));
       if (restoreVisibleBigs) restoreVisibleBigs(lo, hi);
+      /* 缩放变了就复查一遍烤死的行：字形推进量在不同栅格化尺度下会有零点几像素的差别，
+         放大之后某一行可能就多出一个字、被挤到下一行去（用户是在放大读正文时看到的）。 */
+      if (vv && vv.scale !== lastScale) {
+        lastScale = vv.scale;
+        recheckLines();
+      }
     };
     const ping = () => { if (!raf) raf = requestAnimationFrame(pass); };
     addEventListener('scroll', ping, { passive: true });
@@ -457,5 +514,10 @@
   addEventListener('load', () => {
     fit();
     if (window.ScrollTrigger) ScrollTrigger.refresh();
+    /* 按行切开是在 idle 里做的，那之后字体、图片还可能再改一次排版。
+       所以这里、以及字体就绪之后，各复查一遍烤死的行有没有被挤成两行。 */
+    recheckLines();
+    setTimeout(recheckLines, 1200);
   });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(recheckLines);
 })();
