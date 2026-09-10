@@ -75,24 +75,6 @@
   /* 素材图墙：整条复制一份，位移到一半归零，所以看不出接缝 */
   function initMarquee(root) {
     if (window.SITE && window.SITE.reduced) return;
-    const items = [];
-    /* 捏合放大时轨道那一层贵得离谱：oreate 的轨道是 22117 画布 px 宽，手机 1 倍时
-       合成层约 11MB，放大 3 倍就是 99MB，而且它一直在动、每帧都要重新栅格化。
-       放大着看图墙本来也没意义，所以放大超过 1.5 倍就停下来，缩回去再继续。 */
-    const zoomedIn = () => !!(window.visualViewport && window.visualViewport.scale > 1.5);
-    const sync = () => {
-      const off = zoomedIn();
-      items.forEach((it) => {
-        const play = it.seen && !off;
-        if (play) {
-          it.track.style.willChange = 'transform';
-          it.anim.play();
-        } else {
-          it.anim.pause();
-          it.track.style.willChange = 'auto';
-        }
-      });
-    };
     root.querySelectorAll('.marquee').forEach((box) => {
       const track = box.querySelector('.marquee__track');
       if (!track) return;
@@ -111,16 +93,15 @@
          就有这一份压力。暂停之后它只在自己露脸的那几屏里活着。
          没有 IntersectionObserver 的浏览器保持原样，不影响。 */
       if (!('IntersectionObserver' in window)) return;
-      const it = { track, anim, seen: false };
-      items.push(it);
       anim.pause();
       track.style.willChange = 'auto';
       new IntersectionObserver((entries) => {
-        entries.forEach((e) => { it.seen = e.isIntersecting; });
-        sync();
+        entries.forEach((e) => {
+          if (e.isIntersecting) { track.style.willChange = 'transform'; anim.play(); }
+          else { anim.pause(); track.style.willChange = 'auto'; }
+        });
       }, { rootMargin: '20% 0px 20% 0px' }).observe(box);
     });
-    if (window.visualViewport) window.visualViewport.addEventListener('resize', sync);
   }
 
   initHScroll(document);
@@ -139,6 +120,9 @@
     || matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   const slices = [...document.querySelectorAll('.case-slice')];
+
+  // startCanvasMotion 量完入场序列后挂上：裁段把段放回来时用它补点亮
+  let wake = null;
 
   /* ---- 正文按"视觉行"切开 ----------------------------------------------
      切分点取的就是浏览器自己算出来的换行位置：逐字问一次 top，top 跳了就是换
@@ -207,6 +191,11 @@
       [...slice.children].forEach((el) => {
         if (el.classList.contains('doc-anchor')) return;
         const r = el.getBoundingClientRect();
+        /* 发丝级的元素不进入场序列。横向滚动图下面那根蓝色滚动条在手机上只有 1.1px 高，
+           这种尺寸的 IntersectionObserver 判定不稳：段被 display:none 收起来再放出来之后
+           它拿不到 0.04 的阈值交叉，就永久停在 opacity 0——用户报的"justpaper 滚动图
+           下方蓝条消失了"就是这个。这么细的东西本来也看不出渐显，直接让它一直亮着。 */
+        if (r.height && r.height < 4) return;
         const fs = parseFloat(el.style.fontSize) || 0;
         targets.push({
           el,
@@ -255,6 +244,20 @@
     }, { rootMargin: '0px 0px -8% 0px', threshold: 0.04 });
     targets.forEach(({ el, seen }) => { if (!seen) io.observe(el); });
 
+    /* 段被收起来再放出来之后，个别元素可能拿不到 IntersectionObserver 的阈值交叉，
+       就停在 opacity 0 上（"东西不见了"）。所以裁段那边把段放回来时点一下这里，
+       补一遍已经进到视口里的元素。只补进了视口的——还在视口外的留给 io，
+       否则入场动画会被提前烧掉。 */
+    wake = (wrap) => {
+      wrap.querySelectorAll('[data-doc-reveal]:not(.is-in)').forEach((el) => {
+        const r = el.getBoundingClientRect();
+        if (r.bottom > 0 && r.top < innerHeight) {
+          el.classList.add('is-in');
+          io.unobserve(el);
+        }
+      });
+    };
+
     // 视差：一帧读一次位置，只写 CSS 变量，合成线程自己跑
     let ticking = false;
     const tick = () => {
@@ -285,11 +288,15 @@
      画布的栅格化按视觉像素算，捏合放大 N 倍，同一块内容要 N² 倍贴图；内页在 iOS 上
      "放大后先自己刷新一次、再滑一下就崩"就是这么撑爆的。这里把远离可视区的段
      display:none 掉（段高写死在 wrap 上，文档高度和滚动位置都不动）。
-     判据必须用 visualViewport 而不是布局视口：捏合放大时布局视口尺寸一点不变，只有
-     visualViewport 会跟着缩小——放大越多、保活的段越少，正好抵消掉那个平方。
-     放大倍数不高时留满一屏余量（等于不裁，观感零风险），放大之后收到半屏。
-     必须等 startCanvasMotion 量完行位置再开：display:none 的块量不出换行点，
-     提前裁会让离屏正文丢掉按行入场的那一档。 */
+
+     坐标只用两样东西：wrap 的 getBoundingClientRect() 和 visualViewport 的
+     offsetTop/height——两者都是相对【布局视口】的，可以直接比。
+     **不要把 window.scrollY 掺进来**：iOS 放大之后 scrollY 与 visualViewport.offsetTop
+     会各自算一遍偏移，加起来就是双份，判据整体偏下，结果把正在看的那一段裁掉——
+     用户报的"放大到一定程度图片和文字都消失"就是这个。
+
+     另外留一道保险：只要 wrap 与布局视口本身有交集就绝不裁。放大时布局视口不缩小，
+     所以这一条会多留一两段（栅格化省得少一点），但换来"看得见的东西一定在渲染树里"。 */
   function startCulling() {
     if (wraps.length < 2) return;
     const vv = window.visualViewport;
@@ -297,17 +304,22 @@
     const pass = () => {
       raf = 0;
       const vh = vv ? vv.height : innerHeight;
-      const top = (vv ? vv.offsetTop : 0) + (window.scrollY || 0);
-      const pad = vh * (vv && vv.scale > 1.2 ? 0.5 : 1);
-      const lo = top - pad;
-      const hi = top + vh + pad;
+      const vTop = vv ? vv.offsetTop : 0;
+      const pad = Math.max(vh, 240);
+      const lo = vTop - pad;
+      const hi = vTop + vh + pad;
       // 先把位置一次读完再统一写 class：边读边写会让每个 wrap 都强制一次重排
       const rects = wraps.map((wrap) => wrap.getBoundingClientRect());
-      const sy = window.scrollY || 0;
+      const back = [];
       wraps.forEach((wrap, i) => {
-        const t = rects[i].top + sy;
-        wrap.classList.toggle('is-idle', t + rects[i].height < lo || t > hi);
+        const r = rects[i];
+        const inBand = r.bottom > lo && r.top < hi;
+        const inLayout = r.bottom > 0 && r.top < innerHeight;
+        const idle = !inBand && !inLayout;
+        if (!idle && wrap.classList.contains('is-idle')) back.push(wrap);
+        wrap.classList.toggle('is-idle', idle);
       });
+      if (wake) back.forEach((wrap) => wake(wrap));
     };
     const ping = () => { if (!raf) raf = requestAnimationFrame(pass); };
     addEventListener('scroll', ping, { passive: true });
