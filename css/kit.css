@@ -226,7 +226,7 @@ figcaption { color: var(--ink-soft); margin-top: var(--space-sm); }
 .band--ink .matrix tbody tr:last-child th,
 .band--ink .matrix tbody tr:last-child td { border-bottom-color: var(--hair-on-ink); }
 
-/* ---- 节点链：横向推进的流程（Oreate 的推演线、4A 结构都走这个） ----
+/* ---- 节点链：横向推进的流程（KOOKO 的推演线、4A 结构都走这个） ----
    不做钉住横滚——那是招牌段才配得上的开销。这里是一条会自己画出来的轨道，
    节点按轨道推进依次点亮。轨道用 scaleX，节点只动 opacity 与 y。 */
 .nodes { position: relative; display: grid; gap: var(--space-lg); }
@@ -357,7 +357,6 @@ figcaption { color: var(--ink-soft); margin-top: var(--space-sm); }
   .matrix { font-size: var(--text-xs); }
   .matrix th, .matrix td { padding: 0.45rem 0.4rem; }
 }
-
 
 
 

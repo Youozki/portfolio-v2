@@ -103,7 +103,7 @@ def bump_top(frag, delta):
 def eager_spans(frag):
     """标出"里面的图必须 eager"的容器区间：横向画廊与跑马灯。
 
-    这些容器里的图往右铺出去几千像素（Oreate 那条跑马灯 track 宽 16588px），
+    这些容器里的图往右铺出去几千像素（KOOKO 那条跑马灯 track 宽 16588px），
     容器自己 overflow 藏着、靠 CSS 动画横向走。浏览器判断 lazy 只看"离视口远不远"，
     横向溢出的部分永远算远，于是竖着滚一整页都不会去抓。
 
@@ -325,7 +325,7 @@ CASES = [
         chapters=[('intro', 'Intro', 0, 'paper'), ('problem', 'Problem', 1432, 'white'),
                   ('strategy', 'Strategy', 2180, 'ink'), ('design', 'Design', 3211, 'paper'),
                   ('outcome', 'Outcome', 8583, 'white')],
-        next=('case-oreate.html', '3', 'Oreate AI',
+        next=('case-oreate.html', '3', 'KOOKO',
               'AI 全模态内容，快速生成 AI 图像、视频等多元需求，支持 PPT、助力深度研究与写作。'),
         coda='当然，一个完整的项目肯定不止这些，这仅是我所参与的部分，感兴趣的话找我聊聊。',
         dual=True,
@@ -339,12 +339,12 @@ CASES = [
     ),
     dict(
         id='oreate', no='3', src='case-oreate.js', key='OREATE',
-        title='Oreate AI', lines=['Oreate', 'AI'],
+        title='KOOKO', lines=['KOOKO'],
         year='2026', team='PSIG 海外产品创新组',
         tags=['多模态', '视觉范式', '模型交互'],
-        intro=['Oreate AI 是百度文库 AI 版的海外产品，海外用户已达百万级，'
+        intro=['KOOKO 是百度文库 AI 版的海外产品，海外用户已达百万级，'
                '并在海外社交媒体平台引发广泛关注。',
-               '我参与了 Oreate AI 中多模态场景的视觉范式设计与基础建设更新；'
+               '我参与了 KOOKO 中多模态场景的视觉范式设计与基础建设更新；'
                '优化核心的图与视频场景下的模型交互体验优化，提升输出效果。'
                '构建高质量数据集，支撑案例迭代与流程自动化。'],
         chapters=[('intro', 'Intro', 0, 'paper'), ('problem', 'Problem', 1337, 'white'),

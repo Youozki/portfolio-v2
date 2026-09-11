@@ -17,7 +17,7 @@ DESC = {
                            '包括表情动效的制作与交互、Twist Center 页的视觉优化及 OOBE 页工作。',
     'case-justpaper.html': 'Just Paper 是联想 35 周年纪念双屏笔记本 ThinkPad Tizio 中的原生笔记软件。'
                            '我参与了核心视觉系统、100+ Icon 组件库、设计规范与第二屏幕创新交互的定义设计。',
-    'case-oreate.html': 'Oreate AI 是百度文库 AI 版的海外产品，海外用户已达百万级。我参与了多模态场景的'
+    'case-oreate.html': 'KOOKO 是百度文库 AI 版的海外产品，海外用户已达百万级。我参与了多模态场景的'
                         '视觉范式设计与基础建设更新，优化图与视频场景下的模型交互体验。',
     'case-terabox.html': 'Terabox 是百度网盘海外版本，主打内容 + AI。我参与了图片编辑器场景的海外迁移，'
                          '为 Terabox 相册丰富可用的编辑能力。',

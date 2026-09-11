@@ -21,7 +21,7 @@ PROJECTS = [
     ('justpaper', '2', 'Just Paper', '2026', 'IDG UI/UX 组',
      '原生笔记软件，结合双屏的产品特点为用户构建笔记使用新体验。',
      ['组件库', '设计规范', '双屏交互'], 'case-justpaper.html'),
-    ('oreate', '3', 'Oreate AI', '2026', 'PSIG 海外产品创新组',
+    ('oreate', '3', 'KOOKO', '2026', 'PSIG 海外产品创新组',
      'AI 全模态内容，快速生成 AI 图像、视频等多元需求，支持 PPT、助力深度研究与写作。',
      ['多模态', '视觉范式', '模型交互'], 'case-oreate.html'),
     ('terabox', '4', 'Terabox', '2026', 'PSIG 海外产品创新组',
@@ -138,4 +138,3 @@ if __name__ == '__main__':
         print('已填 %s' % cid)
     open('index.html', 'w', encoding='utf-8').write(s)
     print('index.html 现在 %d 行' % s.count('\n'))
-
