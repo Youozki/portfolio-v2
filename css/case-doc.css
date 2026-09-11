@@ -51,6 +51,14 @@
   display: none;
 }
 
+/* Just Paper 的 1920 坐标画布素材最多，真机捏合到高倍数时优先保 WebContent 不被
+   jetsam 回收。脚本只在该页且 visualViewport.scale >= 1.6 时给离开视觉视口的块
+   加这个类；visibility 不改盒子、滚动长度或排版，缩回去会全部恢复。代价是 iOS
+   捏合平移期间 offset 偶尔漂移时，边缘图文可能短暂消失——这是用户明确接受的降级。 */
+.is-justpaper .case-doc .is-zoff {
+  visibility: hidden !important;
+}
+
 /* 画布切成多段之后，那段留白只能留给第一段：每段都带一份的话，段与段之间会各多出
    56–104px，整篇内容被往下推（terabox 实测偏移 280px）。 */
 .case-doc-wrap + .case-doc-wrap {

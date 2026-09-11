@@ -469,15 +469,47 @@
     startCulling();
   }
 
-  /* ---- 放大之后按可视区停绘单个块：试过，已撤（2026-09-10） ----------------
-     做法是 visualViewport.scale ≥ 1.6 时把落在可视区外的画布块 visibility: hidden。
-     本机模拟 scale 3 时判据完全正确（四页"看得见却被藏"都是 0），但真机上用户立刻报
-     "放大之后图片和文字闪烁、消失"——iOS 捏合平移时 visualViewport 的 offsetTop/offsetLeft
-     并不稳定（Safari 会连布局视口一起挪），按它算的可视区和眼睛看到的对不上，
-     于是正在看的块被藏、手指一动又回来。
-     **教训：任何"按视觉视口位置"裁绘制的判据，都必须带"与布局视口有交集就绝不裁"这道
-     保险**（段级裁段就是靠这一条才稳的）；到了单个块这一层，保险一加就等于什么都裁不掉，
-     所以这条路直接封死——放大这一档的内存要省，只能走手机版式。 */
+  /* ---- Just Paper 高倍放大时按视觉视口停绘单个块 ---------------------------
+     手机版式已按用户要求回滚；Just Paper 又是四页里唯一仍会稳定触发 jetsam 的页面。
+     因此只在这一页恢复旧的 visibility 裁块策略。它能明显压低高倍放大时的栅格化面积，
+     代价是 iOS 的 visualViewport offset 漂移时，边缘图文可能短暂消失。用户明确表示
+     如果无法两全，宁可采用"会消失但不崩"的状态，所以这里不再加会抵消省内存效果的
+     布局视口保险；其它项目页完全不启用。 */
+  function makeJustpaperZoomCull() {
+    if (!document.body.classList.contains('is-justpaper')) return null;
+    const vv = window.visualViewport;
+    if (!vv) return null;
+    const items = [];
+    slices.forEach((slice) => {
+      [...slice.children].forEach((el) => {
+        if (!el.classList.contains('doc-anchor')) items.push(el);
+      });
+    });
+    if (items.length < 8) return null;
+    const ON = 1.6;
+    let armed = false;
+    return () => {
+      if (vv.scale < ON) {
+        if (!armed) return;
+        armed = false;
+        items.forEach((el) => el.classList.remove('is-zoff'));
+        return;
+      }
+      armed = true;
+      const padX = vv.width * 0.35;
+      const padY = vv.height * 0.5;
+      const lo = vv.offsetTop - padY;
+      const hi = vv.offsetTop + vv.height + padY;
+      const left = vv.offsetLeft - padX;
+      const right = vv.offsetLeft + vv.width + padX;
+      const rects = items.map((el) => el.getBoundingClientRect());
+      items.forEach((el, i) => {
+        const r = rects[i];
+        if (!r.width && !r.height) return;
+        el.classList.toggle('is-zoff', r.bottom < lo || r.top > hi || r.right < left || r.left > right);
+      });
+    };
+  }
 
   /* ---- 离屏的段不进渲染树 ------------------------------------------------
      画布的栅格化按视觉像素算，捏合放大 N 倍，同一块内容要 N² 倍贴图；内页在 iOS 上
@@ -492,8 +524,12 @@
 
      另外留一道保险：只要 wrap 与布局视口本身有交集就绝不裁。放大时布局视口不缩小，
      所以这一条会多留一两段（栅格化省得少一点），但换来"看得见的东西一定在渲染树里"。 */
+  let cullingStarted = false;
   function startCulling() {
-    if (wraps.length < 2) return;
+    if (cullingStarted) return;
+    const zoomCull = makeJustpaperZoomCull();
+    if (wraps.length < 2 && !zoomCull) return;
+    cullingStarted = true;
     const vv = window.visualViewport;
     let raf = 0;
     let lastScale = vv ? vv.scale : 1;
@@ -517,6 +553,7 @@
       });
       if (wake) back.forEach((wrap) => wake(wrap));
       if (restoreVisibleBigs) restoreVisibleBigs(lo, hi);
+      if (zoomCull) zoomCull();
       /* 缩放变了就复查一遍烤死的行：字体换过之后行宽可能整行超出去。 */
       if (vv && vv.scale !== lastScale) {
         lastScale = vv.scale;
@@ -532,6 +569,10 @@
     }
     pass();
   }
+
+  // Just Paper 的 DOM 最重，不能等正文逐字测量和入场序列初始化完才开始防崩。
+  // 先立即挂上裁段与高倍裁块；后面 startCanvasMotion 再调用时会被幂等保护挡住。
+  if (document.body.classList.contains('is-justpaper')) startCulling();
 
   if (slices.length && !reduced) {
     if ('requestIdleCallback' in window) requestIdleCallback(startCanvasMotion, { timeout: 700 });
