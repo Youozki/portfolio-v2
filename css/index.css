@@ -56,6 +56,11 @@
   max-width: none;
   padding-inline: clamp(1.25rem, 3.4vw, 3.5rem);
 }
+.hero__mark,
+.hero__title,
+.hero__jump .t-cap {
+  color: rgba(255, 255, 255, 0.88);
+}
 .hero__title { max-width: 24rem; }
 .hero__jump {
   display: flex;
@@ -98,6 +103,7 @@
      11px 才是"一个小记号"的分量。这里不用令牌，--text-xs(12) 是正文的可读下限，
      而这个箭头不承载阅读。 */
   font-size: 0.6875rem;
+  color: rgba(255, 255, 255, 0.88);
 }
 /* 胶囊本体的入场交给 heroIntro() 那条 [data-hero="move"] 的 tween，和项目胶囊
    完全同参；起始态由 base.css 里 .js [data-hero='move'] 统一给。 */
