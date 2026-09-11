@@ -224,8 +224,8 @@
 @media (max-width: 767px) {
   .hero { height: 100svh; }
   .hero__copy { bottom: 5.5rem; }
-  /* 窄屏上 cover 会把主视觉裁到产品本体，文案正好压在最亮的旋钮上，读不清。
-     底部加一层纸色渐隐（只在窄屏），桌面端的构图不受影响。 */
+  /* 窄屏上 cover 会把主视觉裁到产品本体，底部用黑色渐隐托住浅色文案。
+     只在窄屏生效，桌面端构图不受影响。 */
   .hero::after {
     content: '';
     position: absolute;
@@ -233,7 +233,7 @@
     height: 38%;
     z-index: 1;
     pointer-events: none;
-    background: linear-gradient(to top, rgba(237, 237, 234, 0.94), rgba(237, 237, 234, 0));
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.72), rgba(0, 0, 0, 0));
   }
 }
 
