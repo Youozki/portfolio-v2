@@ -24,20 +24,24 @@
 /* 中文：思源黑，按站内实际用字裁的子集（tools/subset_cn.py）。
    自托管而不是靠系统字，否则 Windows 会回退到微软雅黑、细字重直接消失。
    裁成两个静态实例并按 Geist 光学对齐——同一个 font-weight 下思源黑本来更重，
-   直接用变量轴混排就会中文发黑、英文偏细。 */
+   直接用变量轴混排就会中文发黑、英文偏细。
+
+   URL 必须带版本号：子集是按当前文案裁的，改完文案重跑 subset_cn.py 之后文件名不变，
+   不打版本号浏览器和 CDN 就继续用旧子集——旧子集里没有的字会逐字回退到系统字，
+   Windows 上表现为"同一段里个别汉字明显更粗"。补完字这里要一起改。 */
 @font-face {
   font-family: 'Noto Sans SC Subset';
   font-style: normal;
   font-weight: 300;
   font-display: swap;
-  src: url('../fonts/notosanssc-300.woff2') format('woff2');
+  src: url('../fonts/notosanssc-300.woff2?v=20260914') format('woff2');
 }
 @font-face {
   font-family: 'Noto Sans SC Subset';
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url('../fonts/notosanssc-400.woff2') format('woff2');
+  src: url('../fonts/notosanssc-400.woff2?v=20260914') format('woff2');
 }
 
 /* ---- 跨文档换页：交给浏览器的 View Transition ------------------------

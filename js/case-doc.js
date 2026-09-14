@@ -303,16 +303,28 @@
     });
   }
 
+  /* 量的时候还不在渲染树里的正文块。裁段把段放回来之后再补切，这样离屏的段
+     照样有逐行入场，不必为了躲开 display:none 就整段退回块渐显。 */
+  const pendingSplit = new Set();
+
   /* ---- 正文按"视觉行"切开 ----------------------------------------------
      切分点取的就是浏览器自己算出来的换行位置：逐字问一次 top，top 跳了就是换
      了一行。切完每行的内容宽度本来就 ≤ 容器宽度，行盒和原来一一对应，所以坐
      标、字号、行高、断行位置全都不动。画布是整幅 scale 的，缩放不改断行，
      所以量一次就够，resize 也不用重切。
-     measureLines 只读不写，applyLines 才动 DOM——分开是为了整趟只有一次布局。 */
+     measureLines 只读不写，applyLines 才动 DOM——分开是为了整趟只有一次布局。
+
+     量不到的块必须直接放弃（返回 null），不能硬切：Just Paper 为了防崩在这之前
+     就开始裁段，离屏的段是 display:none，逐字 rect 全是 0 高，一个换行点都问不出来，
+     于是整段被切成"一行"。那一行带着 white-space: nowrap，段放回来之后就是一整段
+     文字横着捅出页面——用户报的"文字排版超出页面"。这种块交给 pendingSplit 等它
+     回到渲染树里再量。 */
   function measureLines(block) {
+    if (!block.clientWidth) return null;
     const walker = document.createTreeWalker(block, NodeFilter.SHOW_TEXT, null);
     const range = document.createRange();
     const plan = [];
+    let measured = false;
     let node = walker.nextNode();
     while (node) {
       const text = node.nodeValue;
@@ -324,6 +336,7 @@
           range.setEnd(node, i + 1);
           const rect = range.getBoundingClientRect();
           if (rect.height) {
+            measured = true;
             if (prev !== null && rect.top - prev > 1) cuts.push(i);
             prev = rect.top;
           }
@@ -333,7 +346,7 @@
       }
       node = walker.nextNode();
     }
-    return plan;
+    return measured ? plan : null;
   }
 
   function applyLines(plan) {
@@ -352,6 +365,32 @@
       node.parentNode.replaceChild(frag, node);
     });
     return i;
+  }
+
+  /* 补切一个块：量、切、验，三步都不过关就保持原样走块渐显。
+     和上面批量那趟的区别只是读写没有分开——这里一次只处理刚放回来的那几个块。 */
+  function splitBlock(el) {
+    const plan = measureLines(el);
+    if (!plan || !plan.length) return;
+    const backup = el.innerHTML;
+    if (applyLines(plan) <= 0) return;
+    if (linesOk(el) === false) {
+      el.innerHTML = backup;
+      return;
+    }
+    lineBackups.set(el, backup);
+    el.setAttribute('data-doc-reveal', 'lines');
+  }
+
+  /* root 给了就只处理这一段里的块（裁段放回来时用），不给就把所有已经能量的都补上。 */
+  function flushPendingSplit(root) {
+    if (!pendingSplit.size) return;
+    pendingSplit.forEach((el) => {
+      if (root && !root.contains(el)) return;
+      if (!el.clientWidth) return;
+      pendingSplit.delete(el);
+      splitBlock(el);
+    });
   }
 
   /* 这一段要遍历上百个节点、再读一遍位置。同步跑的话正好压在换页过渡那几百
@@ -376,18 +415,20 @@
            下方蓝条消失了"就是这个。这么细的东西本来也看不出渐显，直接让它一直亮着。 */
         if (r.height && r.height < 4) return;
         const fs = parseFloat(el.style.fontSize) || 0;
+        // 自带字号又不含图的块才是正文／小标题，按行切；mockup 里那几百个
+        // 七八号小字不掺和，切了既看不出来又白花时间
+        const splittable = fs >= 14 && fs < 28 && !el.querySelector('img');
         targets.push({
           el,
           seen: r.top < innerHeight && r.bottom > 0,
           head: fs >= 28,
-          // 自带字号又不含图的块才是正文／小标题，按行切；mockup 里那几百个
-          // 七八号小字不掺和，切了既看不出来又白花时间
-          plan: fs >= 14 && fs < 28 && !el.querySelector('img') ? measureLines(el) : null,
+          splittable,
+          plan: splittable ? measureLines(el) : null,
         });
       });
     });
 
-    targets.forEach(({ el, seen, head, plan }) => {
+    targets.forEach(({ el, seen, head, splittable, plan }) => {
       /* 章节标题（Problem / Strategy / Solution / Outcome 这一层）在画布里是
          自带 30px 字号的块，正文是 20px，其余是图和容器。标题只做模糊到清晰，
          正文按行位移＋渐显，图整块位移＋渐显。 */
@@ -398,6 +439,9 @@
           if (linesOk(el) === false) el.innerHTML = backup;
           else { mode = 'lines'; lineBackups.set(el, backup); }
         }
+      } else if (splittable && !head) {
+        // 量的时候被裁段收起来了，等它回到渲染树里再切
+        pendingSplit.add(el);
       }
       el.setAttribute('data-doc-reveal', mode);
 
@@ -551,7 +595,12 @@
         if (!idle && wrap.classList.contains('is-idle')) back.push(wrap);
         wrap.classList.toggle('is-idle', idle);
       });
-      if (wake) back.forEach((wrap) => wake(wrap));
+      /* 段放回渲染树之后才量得到断行位置：先补切，再补点亮。顺序不能反，
+         切完 DOM 变了，wake 拿到的才是最终的行盒。 */
+      back.forEach((wrap) => {
+        flushPendingSplit(wrap);
+        if (wake) wake(wrap);
+      });
       if (restoreVisibleBigs) restoreVisibleBigs(lo, hi);
       if (zoomCull) zoomCull();
       /* 缩放变了就复查一遍烤死的行：字体换过之后行宽可能整行超出去。 */
@@ -586,9 +635,13 @@
     fit();
     if (window.ScrollTrigger) ScrollTrigger.refresh();
     /* 按行切开是在 idle 里做的，那之后字体、图片还可能再改一次排版。
-       所以这里、以及字体就绪之后，各复查一遍烤死的行有没有被挤成两行。 */
+       所以这里、以及字体就绪之后，各复查一遍烤死的行有没有被挤成两行；
+       顺带把当时量不到、现在已经在渲染树里的块补切上。 */
+    flushPendingSplit();
     recheckLines();
-    setTimeout(recheckLines, 1200);
+    setTimeout(() => { flushPendingSplit(); recheckLines(); }, 1200);
   });
-  if (document.fonts && document.fonts.ready) document.fonts.ready.then(recheckLines);
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(() => { flushPendingSplit(); recheckLines(); });
+  }
 })();
