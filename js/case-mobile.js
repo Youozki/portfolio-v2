@@ -44,24 +44,57 @@
   });
   blocks.sort((a, b) => a.top - b.top || a.left - b.left);
 
-  /* ---- 2) 图组：设计稿里纵向挨着的装饰件与图算一组，一组出一张卡片 ---- */
-  const GAP = 48;
+  /* ---- 2) 分组 ----
+     判据（对齐用户要求"都和电脑端一样，不拆图，最多并排改上下"）：
+     - 大图（画布宽/高 ≥ 340）各自成块，按 y 依次堆叠——并排的两大块自然变成上下排；
+     - 小图（logo 墙 / 图标组）与它们的窄标注，按空间邻近用并查集聚成一"簇"，
+       整簇保留电脑端相对坐标、整体等比缩放，绝不拆成一行一个；
+     - 正文段落（宽文本）、章节头、锚点、marquee、hscroll 各自单独处理；
+     - 纯装饰底板（无图）直接丢弃，避免出现空白灰框。 */
+  const GAP = 72;
+  const hasMarquee = (b) => b.el.matches('.marquee') || !!b.el.querySelector('.marquee__track');
+  const hasHScroll = (b) => b.el.matches('[data-hscroll]') || !!b.el.querySelector('.hscroll__view');
+  const isBigArt = (b) => b.hasImg && (b.w >= 340 || b.h >= 340);
+  const isWideText = (b) => b.kind === 'text' && b.w >= 520;
+  const isHead = (b) => !!(b.el.classList && b.el.classList.contains('doc-ch'));
+  const isSpecial = (b) => hasMarquee(b) || hasHScroll(b);
+  // 可聚簇的候选：小图、窄标注、无图小装饰件
+  const eligible = blocks.filter((b) => b.kind !== 'anchor' && !isHead(b)
+      && !isWideText(b) && !isBigArt(b) && !isSpecial(b));
+  const parent = new Map();
+  eligible.forEach((b) => parent.set(b, b));
+  const find = (x) => { while (parent.get(x) !== x) { parent.set(x, parent.get(parent.get(x))); x = parent.get(x); } return x; };
+  for (let i = 0; i < eligible.length; i++) {
+    for (let j = i + 1; j < eligible.length; j++) {
+      const a = eligible[i], c = eligible[j];
+      if (a.left < c.right + GAP && a.right > c.left - GAP
+          && a.top < c.bottom + GAP && a.bottom > c.top - GAP) parent.set(find(a), find(c));
+    }
+  }
+  const comp = new Map();
+  eligible.forEach((b) => { const r = find(b); (comp.get(r) || comp.set(r, []).get(r)).push(b); });
+  const bboxOf = (mem) => mem.reduce((a, b) => ({
+    top: Math.min(a.top, b.top), left: Math.min(a.left, b.left),
+    right: Math.max(a.right, b.right), bottom: Math.max(a.bottom, b.bottom),
+  }), { top: 1e9, left: 1e9, right: -1e9, bottom: -1e9 });
+
+  const emitted = new Set();
   const groups = [];
   blocks.forEach((b) => {
-    if (b.kind !== 'art') { groups.push({ solo: b }); return; }
-    const last = groups[groups.length - 1];
-    // 只有"纵向紧挨且横向有交叠"才算同一组：并排的两块（同一 y、左右分开）
-    // 会被拆成前后两组，进而在手机上自然变成上下排列（用户要的"两张并排改上下"）。
-    if (last && last.arts && b.top < last.bottom + GAP
-        && b.left < last.right - 8 && b.right > last.left + 8) {
-      last.arts.push(b);
-      last.top = Math.min(last.top, b.top);
-      last.left = Math.min(last.left, b.left);
-      last.right = Math.max(last.right, b.right);
-      last.bottom = Math.max(last.bottom, b.bottom);
+    if (b.kind === 'anchor' || isHead(b) || isWideText(b)) { groups.push({ type: 'solo', b }); return; }
+    if (hasMarquee(b)) { groups.push({ type: 'marquee', b }); return; }
+    if (hasHScroll(b)) { groups.push({ type: 'hscroll', b }); return; }
+    if (isBigArt(b)) { groups.push({ type: 'fig', members: [b], ...bboxOf([b]) }); return; }
+    const r = find(b);
+    if (emitted.has(r)) return;
+    emitted.add(r);
+    const mem = comp.get(r);
+    if (!mem.some((m) => m.hasImg)) {
+      // 全是文字的簇 → 按段落各自回流；纯装饰底板（无图无字）丢弃
+      mem.forEach((m) => { if (m.kind === 'text') groups.push({ type: 'solo', b: m }); });
       return;
     }
-    groups.push({ arts: [b], top: b.top, left: b.left, right: b.right, bottom: b.bottom });
+    groups.push({ type: 'fig', members: mem, ...bboxOf(mem) });
   });
 
   const col = document.createElement('div');
@@ -76,10 +109,6 @@
     el.querySelectorAll('[style*="font-size"]').forEach((d) => d.style.removeProperty('font-size'));
     el.querySelectorAll('[style*="white-space"]').forEach((d) => d.style.removeProperty('white-space'));
   };
-
-  const isImg = (b) => b.el.tagName === 'IMG' || !!b.el.querySelector('img');
-  const isMarquee = (b) => b.el.matches('.marquee') || !!b.el.querySelector('.marquee__track');
-  const isHScroll = (b) => b.el.matches('[data-hscroll]') || !!b.el.querySelector('.hscroll__view');
 
   const shotImgs = [];   // 铺满一列的大截图，按真实显示宽挑档
   const compFigs = [];   // 拼贴组，整块 scale 到列宽
@@ -121,8 +150,8 @@
 
   groups.forEach((g) => {
     /* ---- 2a) 文本 / 章节头 / 锚点 ---- */
-    if (g.solo) {
-      const b = g.solo;
+    if (g.type === 'solo') {
+      const b = g.b;
       const el = b.el;
       if (b.kind === 'anchor') { el.style.removeProperty('top'); col.appendChild(el); return; }
       strip(el);
@@ -140,38 +169,20 @@
       return;
     }
 
-    /* ---- 2b) 图组 ---- */
-    const fw = g.right - g.left;
-    const fh = g.bottom - g.top;
-    if (!fw || !fh) return;
-    const panels = g.arts.filter((b) => !isImg(b));
-    const shots = g.arts.filter(isImg);
-    if (!shots.length) return; // 纯装饰底板在手机上没有意义，丢掉
-
-    const card = document.createElement('div');
-    card.className = 'case-m-fig';
-    card.setAttribute('data-m-reveal', '');
-    const skin = panels[0] && panels[0].el.style;
-    if (skin && skin.backgroundColor) card.style.background = skin.backgroundColor;
-
-    // marquee（KOOKO 产出那种自动横向滚动）→ 保留原样，只把外壳收进列宽，自动滚动照旧。
-    const marquee = shots.find(isMarquee);
-    if (marquee) {
-      const el = marquee.el;
+    /* ---- 2b) marquee（KOOKO 产出那种自动横向滚动）→ 保留原样，收进列宽，自动滚动照旧 ---- */
+    if (g.type === 'marquee') {
+      const el = g.b.el;
       ['position', 'top', 'left', 'height', 'min-height'].forEach((p) => el.style.removeProperty(p));
       el.style.width = '100%';
       el.classList.add('case-m-marquee');
       el.setAttribute('data-m-reveal', '');
-      panels.forEach((b) => b.el.remove());
       col.appendChild(el);
       return;
     }
 
-    // hscroll（画布自带的横向画廊，如 justpaper visual_scroll、KOOKO intentcasting）→
-    // 保持与电脑端一致的"横向滚动"形式：整块内容按可读高度缩放后横滑，不拆散原构图。
-    const hs = shots.find(isHScroll);
-    if (hs) {
-      const box = hs.el;
+    /* ---- 2c) hscroll（画布自带的横向画廊）→ 整块内容按可读高度缩放后横滑，形式同电脑端 ---- */
+    if (g.type === 'hscroll') {
+      const box = g.b.el;
       const view = box.querySelector('.hscroll__view');
       if (view) {
         view.style.overflow = 'visible';
@@ -181,25 +192,30 @@
       box.querySelectorAll('img').forEach((im) => im.removeAttribute('loading'));
       box.removeAttribute('style');
       box.style.overflow = 'visible';
-      panels.forEach((b) => b.el.remove());
-      col.appendChild(makeRail(box, fh, fw));
+      col.appendChild(makeRail(box, g.bottom - g.top, g.right - g.left));
       return;
     }
 
-    /* 其余所有图组：一律保留画布坐标"整块等比缩"，和电脑端同一份构图，绝不拆开单张。
-       缩放同时受列宽与最大高度约束（只缩不放大）。并排的两块已在分组阶段按左右拆开，
-       所以自然变成上下排布；每块连同它的灰色底板一起缩放，形式完全一致。 */
+    /* ---- 2d) 图块 / 图簇：保留画布相对坐标，整块等比缩到列宽（只缩不放大）。
+       大图各自成块 → 并排的两块在此自然变成上下排；小图簇整片保留电脑端网格，不拆行。 ---- */
+    const fw = g.right - g.left;
+    const fh = g.bottom - g.top;
+    if (!fw || !fh) return;
+
+    const card = document.createElement('div');
+    card.className = 'case-m-fig case-m-fig--comp';
+    card.setAttribute('data-m-reveal', '');
     const inner = document.createElement('div');
     inner.className = 'case-m-fig__in';
     inner.style.width = fw + 'px';
     inner.style.height = fh + 'px';
-    g.arts.forEach((b) => {
+    g.members.forEach((b) => {
       b.el.style.top = (b.top - g.top) + 'px';
       b.el.style.left = (b.left - g.left) + 'px';
       inner.appendChild(b.el);
     });
     inner.querySelectorAll('img').forEach((im) => {
-      // 保留 loading=lazy：整页图很多（justpaper 500+ 张），一次性全解码会把内存顶爆/卡死。
+      // 保留 loading=lazy：整页图很多，一次性全解码会把内存顶爆/卡死。
       // 只补宽高比占位，避免没内联高度的图在未加载时塌成 0 高。
       if (!im.style.height) {
         const aw = parseFloat(im.getAttribute('width'));
@@ -207,7 +223,6 @@
         if (aw && ah) im.style.aspectRatio = aw + ' / ' + ah;
       }
     });
-    card.classList.add('case-m-fig--comp');
     card.appendChild(inner);
     col.appendChild(card);
     compFigs.push({ card, inner, fw, fh });
