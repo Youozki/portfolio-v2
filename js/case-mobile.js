@@ -22,78 +22,87 @@
   root.classList.add('is-doc-mobile');
   const num = (v) => parseFloat(v) || 0;
 
-  /* ---- 1) 把画布块读成一张表，按设计稿的 y 排序 ---- */
+  /* ---- 1) 把画布块读成一张表，按设计稿的 y 排序（记录所属 slice） ---- */
   const blocks = [];
+  let sliceSeq = 0;
   wraps.forEach((wrap) => {
-    wrap.querySelectorAll('.case-slice > *').forEach((el) => {
-      const st = el.style;
-      const top = num(st.top);
-      const left = num(st.left);
-      const w = num(st.width);
-      const h = num(st.height) || num(st.minHeight);
-      const fs = num(st.fontSize);
-      const text = (el.textContent || '').trim();
-      const hasImg = el.tagName === 'IMG' || !!el.querySelector('img');
-      let kind;
-      if (el.classList.contains('doc-anchor')) kind = 'anchor';
-      else if (hasImg) kind = 'art';
-      else if (fs >= 14 && text) kind = 'text';
-      else kind = 'art'; // 纯色底板、分割线这类装饰件跟着图走
-      blocks.push({ el, top, left, w, h, fs, kind, text, hasImg, right: left + w, bottom: top + h });
+    wrap.querySelectorAll('.case-slice').forEach((slice) => {
+      const si = sliceSeq++;
+      [...slice.children].forEach((el) => {
+        const st = el.style;
+        const top = num(st.top);
+        const left = num(st.left);
+        const w = num(st.width);
+        const h = num(st.height) || num(st.minHeight);
+        const fs = num(st.fontSize);
+        const text = (el.textContent || '').trim();
+        const hasImg = el.tagName === 'IMG' || !!el.querySelector('img');
+        let kind;
+        if (el.classList.contains('doc-anchor')) kind = 'anchor';
+        else if (hasImg) kind = 'art';
+        else if (fs >= 14 && text) kind = 'text';
+        else kind = 'art'; // 纯色底板、分割线这类装饰件跟着图走
+        blocks.push({ el, si, top, left, w, h, fs, kind, text, hasImg, right: left + w, bottom: top + h });
+      });
     });
   });
   blocks.sort((a, b) => a.top - b.top || a.left - b.left);
 
   /* ---- 2) 分组 ----
-     判据（对齐用户要求"都和电脑端一样，不拆图，最多并排改上下"）：
-     - 大图（画布宽/高 ≥ 340）各自成块，按 y 依次堆叠——并排的两大块自然变成上下排；
-     - 小图（logo 墙 / 图标组）与它们的窄标注，按空间邻近用并查集聚成一"簇"，
-       整簇保留电脑端相对坐标、整体等比缩放，绝不拆成一行一个；
-     - 正文段落（宽文本）、章节头、锚点、marquee、hscroll 各自单独处理；
-     - 纯装饰底板（无图）直接丢弃，避免出现空白灰框。 */
-  const GAP = 72;
+     用户明确要求：图片排版形式全部复刻电脑端，不手动改动、不重排——
+     所以同一个 .case-slice 里的所有图形（图片 + 图上的窄标注 + 装饰底板）
+     整体作为一块，保留电脑端相对坐标，一起等比缩到列宽，构图与电脑端逐像素一致。
+     手机端只调"文字"：正文段落（宽文本）、章节头、锚点单独回流成移动端可读排版。
+     marquee（自动横滚）/ hscroll（横向画廊）保持其既有滚动形式。
+     纯装饰底板（整块无图）丢弃，避免空白灰框。 */
   const hasMarquee = (b) => b.el.matches('.marquee') || !!b.el.querySelector('.marquee__track');
   const hasHScroll = (b) => b.el.matches('[data-hscroll]') || !!b.el.querySelector('.hscroll__view');
-  const isBigArt = (b) => b.hasImg && (b.w >= 340 || b.h >= 340);
   const isWideText = (b) => b.kind === 'text' && b.w >= 520;
   const isHead = (b) => !!(b.el.classList && b.el.classList.contains('doc-ch'));
+  const isTextFlow = (b) => b.kind === 'anchor' || isHead(b) || isWideText(b);
   const isSpecial = (b) => hasMarquee(b) || hasHScroll(b);
-  // 可聚簇的候选：小图、窄标注、无图小装饰件
-  const eligible = blocks.filter((b) => b.kind !== 'anchor' && !isHead(b)
-      && !isWideText(b) && !isBigArt(b) && !isSpecial(b));
-  const parent = new Map();
-  eligible.forEach((b) => parent.set(b, b));
-  const find = (x) => { while (parent.get(x) !== x) { parent.set(x, parent.get(parent.get(x))); x = parent.get(x); } return x; };
-  for (let i = 0; i < eligible.length; i++) {
-    for (let j = i + 1; j < eligible.length; j++) {
-      const a = eligible[i], c = eligible[j];
-      if (a.left < c.right + GAP && a.right > c.left - GAP
-          && a.top < c.bottom + GAP && a.bottom > c.top - GAP) parent.set(find(a), find(c));
-    }
-  }
-  const comp = new Map();
-  eligible.forEach((b) => { const r = find(b); (comp.get(r) || comp.set(r, []).get(r)).push(b); });
   const bboxOf = (mem) => mem.reduce((a, b) => ({
     top: Math.min(a.top, b.top), left: Math.min(a.left, b.left),
     right: Math.max(a.right, b.right), bottom: Math.max(a.bottom, b.bottom),
   }), { top: 1e9, left: 1e9, right: -1e9, bottom: -1e9 });
 
+  // 每个 slice 的图形成员（非文字流、非特殊件）聚成一块。
+  // 图上的窄标注（压在图片范围内的文字，如流程图节点名）跟着图走；
+  // 不压在任何图片上的独立窄文字（图名/短引言）当作文字回流。
+  const overlaps = (a, b) => a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
+  const sliceImgs = new Map();
+  blocks.forEach((b) => {
+    if (b.hasImg) { if (!sliceImgs.has(b.si)) sliceImgs.set(b.si, []); sliceImgs.get(b.si).push(b); }
+  });
+  const inFig = (b) => {
+    if (isTextFlow(b) || isSpecial(b)) return false;
+    if (b.hasImg) return true;
+    if (b.kind !== 'text') return true; // 装饰底板：跟图走
+    const imgs = sliceImgs.get(b.si) || [];
+    return imgs.some((im) => overlaps(b, im)); // 窄标注：仅当压在图片上才并入
+  };
+  const sliceFig = new Map();
+  blocks.forEach((b) => {
+    if (!inFig(b)) return;
+    if (!sliceFig.has(b.si)) sliceFig.set(b.si, []);
+    sliceFig.get(b.si).push(b);
+  });
+
   const emitted = new Set();
   const groups = [];
   blocks.forEach((b) => {
-    if (b.kind === 'anchor' || isHead(b) || isWideText(b)) { groups.push({ type: 'solo', b }); return; }
+    if (isTextFlow(b)) { groups.push({ type: 'solo', b }); return; }
     if (hasMarquee(b)) { groups.push({ type: 'marquee', b }); return; }
     if (hasHScroll(b)) { groups.push({ type: 'hscroll', b }); return; }
-    if (isBigArt(b)) { groups.push({ type: 'fig', members: [b], ...bboxOf([b]) }); return; }
-    const r = find(b);
-    if (emitted.has(r)) return;
-    emitted.add(r);
-    const mem = comp.get(r);
-    if (!mem.some((m) => m.hasImg)) {
-      // 全是文字的簇 → 按段落各自回流；纯装饰底板（无图无字）丢弃
-      mem.forEach((m) => { if (m.kind === 'text') groups.push({ type: 'solo', b: m }); });
+    if (!inFig(b)) {
+      // 独立窄文字（图名/短引言）→ 文字回流；无图无字的装饰件丢弃
+      if (b.kind === 'text') groups.push({ type: 'solo', b });
       return;
     }
+    if (emitted.has(b.si)) return;
+    emitted.add(b.si);
+    const mem = sliceFig.get(b.si) || [];
+    if (!mem.some((m) => m.hasImg)) return; // 整块无图 → 丢弃装饰底板
     groups.push({ type: 'fig', members: mem, ...bboxOf(mem) });
   });
 
@@ -258,9 +267,8 @@
 
   function fitFigs() {
     const colW = Math.min(640, innerWidth || 390) - 48;
-    const maxH = Math.max(360, Math.min(640, (innerHeight || 720) * 0.82));
     compFigs.forEach(({ card, inner, fw, fh }) => {
-      const cs = Math.min(colW / fw, maxH / fh, 1); // 同时受列宽与限高约束，只缩不放大
+      const cs = Math.min(colW / fw, 1); // 纯按列宽等比缩，只缩不放大——构图与电脑端逐像素一致
       inner.style.transformOrigin = '0 0';
       inner.style.transform = 'scale(' + cs.toFixed(6) + ')';
       card.style.width = Math.round(fw * cs) + 'px';
