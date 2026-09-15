@@ -3,11 +3,13 @@
    并把 .case-doc-wrap 整棵删掉——同一份内容不会在内存里存两遍，放大时也不再有
    "整幅设计稿 × 缩放²" 的栅格化（iOS 捏合崩溃的根因，见 feedback_canvas_raster_zoom）。
 
-   三条绝不变形的渲染规则（关键：任何 <img> 要么只定一个维度，要么整块等比缩放）：
-   1) 大截图（画布宽 ≥ 600）：整幅铺满一列，width:100% / height:auto，比例由素材自身决定；
-   2) 小拼贴 / 图标组 / 底板（画布宽 < 600 的组）：保留画布坐标，整块 transform:scale 到列宽，
-      和电脑端逐像素一致，uniform scale 数学上不可能变形；
-   3) 横向组件（hscroll / marquee / 超宽单图，比例 > 3.2）：定高横向滑动 + 蓝色滚动条。
+   分组思路（复刻电脑端排版，只回流文字）：
+   1) 每个 .case-slice 内，先把"图形块"（图片 / 不透明底板 / 带边框的表格图）按横向重叠聚成"列"。
+      桌面并排的两列在手机上自然变成上下两块，各自等比缩到列宽——构图与电脑端逐像素一致，只是竖起来。
+   2) 压在图形范围内的小字（图上的标注、奖项框里的标题）跟着图走，作为该列成员原位缩放。
+   3) 落在图形之外（下方/上方）的小字是"图名"，回流成可读的图注，挂在所属列的正下方。
+   4) 正文段落、章节头、锚点单独回流成移动端可读排版。
+   5) marquee（自动横滚）/ hscroll（横向画廊）保持其既有滚动形式。
 
    本文件必须排在 js/case-doc.js 之前：它在 <html> 上挂 is-doc-mobile，
    case-doc.js 看到就整体让路（画布缩放、裁段、按行入场全不跑）。 */
@@ -38,41 +40,56 @@
         const fs = num(st.fontSize);
         const text = (el.textContent || '').trim();
         const hasImg = el.tagName === 'IMG' || !!el.querySelector('img');
-        let kind;
-        if (el.classList.contains('doc-anchor')) kind = 'anchor';
-        else if (hasImg) kind = 'art';
-        else if (text) kind = 'text'; // 有文字无图 → 文字（字号缺省时按正文处理）
-        else kind = 'art'; // 纯色底板、分割线这类装饰件跟着图走
-        blocks.push({ el, si, dom: domSeq++, top, left, w, h, fs, kind, text, hasImg, right: left + w, bottom: top + h });
+        blocks.push({ el, si, dom: domSeq++, top, left, w, h, fs, text, hasImg, right: left + w, bottom: top + h });
       });
     });
   });
   blocks.sort((a, b) => a.top - b.top || a.left - b.left);
 
-  /* ---- 2) 分组 ----
-     用户明确要求：图片排版形式全部复刻电脑端，不手动改动、不重排——
-     所以同一个 .case-slice 里的所有图形（图片 + 图上的窄标注 + 装饰底板）
-     整体作为一块，保留电脑端相对坐标，一起等比缩到列宽，构图与电脑端逐像素一致。
-     手机端只调"文字"：正文段落（宽文本）、章节头、锚点单独回流成移动端可读排版。
-     marquee（自动横滚）/ hscroll（横向画廊）保持其既有滚动形式。
-     纯装饰底板（整块无图）丢弃，避免空白灰框。 */
+  /* ---- 2) 分类 ---- */
+  const isAnchor = (b) => b.el.classList.contains('doc-anchor');
+  const isHead = (b) => !!(b.el.classList && b.el.classList.contains('doc-ch'));
   const hasMarquee = (b) => b.el.matches('.marquee') || !!b.el.querySelector('.marquee__track');
   const hasHScroll = (b) => b.el.matches('[data-hscroll]') || !!b.el.querySelector('.hscroll__view');
-  const isWideText = (b) => b.kind === 'text' && b.w >= 520;
-  const isHead = (b) => !!(b.el.classList && b.el.classList.contains('doc-ch'));
-  const isTextFlow = (b) => b.kind === 'anchor' || isHead(b) || isWideText(b);
   const isSpecial = (b) => hasMarquee(b) || hasHScroll(b);
+  // 不透明底：rgba(...,0) / transparent 视为无底，其余有底色的算图形底板
+  const opaqueBg = (el) => {
+    const c = el && el.style && el.style.backgroundColor;
+    if (!c || c === 'transparent') return false;
+    return !/,\s*0\s*\)$/.test(c.replace(/\s+/g, (m) => m));
+  };
+  const hasBorder = (el) => {
+    const s = el && el.style; if (!s) return false;
+    return num(s.borderWidth) > 0 || /solid|dashed|dotted/.test(s.borderStyle || '');
+  };
+  // 图形块：图片 / 带不透明底或边框的块 / 内含底板或表格边框的块（如手势交互表）
+  const isGraphic = (b) => {
+    if (isAnchor(b) || isHead(b) || isSpecial(b)) return false;
+    if (b.hasImg) return true;
+    if (opaqueBg(b.el) || hasBorder(b.el)) return true;
+    const kids = b.el.querySelectorAll('[style*="background-color"],[style*="border"]');
+    for (const k of kids) { if (opaqueBg(k) || hasBorder(k)) return true; }
+    return false;
+  };
+  // 小字：字号 ≤16 的短标注 / 图名（压图的当标注，离图的当图注）
+  const isSmall = (b) => !isGraphic(b) && !isSpecial(b) && !isAnchor(b) && !isHead(b) && !!b.text && b.fs > 0 && b.fs <= 16;
+  // 正文：其余有字的块，回流成可读段落
+  const isProse = (b) => !isGraphic(b) && !isSpecial(b) && !isAnchor(b) && !isHead(b) && !isSmall(b) && !!b.text;
+
+  const overlapX = (a, c, gap) => a.left < c.right + gap && a.right > c.left - gap;
+  const overlapY = (a, c, gap) => a.top < c.bottom + gap && a.bottom > c.top - gap;
   const bboxOf = (mem) => mem.reduce((a, b) => ({
     top: Math.min(a.top, b.top), left: Math.min(a.left, b.left),
     right: Math.max(a.right, b.right), bottom: Math.max(a.bottom, b.bottom),
   }), { top: 1e9, left: 1e9, right: -1e9, bottom: -1e9 });
 
-  // 裁稀疏：以面积最大的成员为主体，纵向 180px 内相连的才保留，远处孤立碎件丢掉——
+  // 裁稀疏：以面积最大的成员为主体，纵向 200px 内相连的才保留，远处孤立碎件丢掉——
   // 消除 Figma 画布那种"两帧在上、底部一个小碎件"撑出的巨大空隙。
   const denseBlock = (mem) => {
     if (mem.length <= 1) return mem;
-    const CUT = 180;
-    const seed = mem.reduce((a, b) => ((b.right - b.left) * (b.bottom - b.top) > (a.right - a.left) * (a.bottom - a.top) ? b : a));
+    const CUT = 200;
+    const area = (m) => (m.right - m.left) * (m.bottom - m.top);
+    const seed = mem.reduce((a, b) => (area(b) > area(a) ? b : a));
     let top = seed.top, bottom = seed.bottom, grew = true;
     while (grew) {
       grew = false;
@@ -86,68 +103,107 @@
     return mem.filter((m) => m.top < bottom + 1 && m.bottom > top - 1);
   };
 
-  // 每个 slice 的图形成员（非文字流、非特殊件）聚成一块。
-  // 图上的窄标注（压在图片范围内的文字，如流程图节点名）跟着图走；
-  // 不压在任何图片上的独立窄文字（图名/短引言）当作文字回流。
-  const sliceImgs = new Map();
-  blocks.forEach((b) => {
-    if (b.hasImg) { if (!sliceImgs.has(b.si)) sliceImgs.set(b.si, []); sliceImgs.get(b.si).push(b); }
-  });
-  // 图形块（图片本身，或压在图片范围内的底板/标注）才进入 fig；
-  // 画布里离图很远的装饰线/间隔件会撑大 bbox 造成"莫名空隙"，一律排除。
-  const MARGIN = 160;
-  const nearImgs = (b) => {
-    const imgs = sliceImgs.get(b.si) || [];
-    return imgs.some((im) => b.top < im.bottom + MARGIN && b.bottom > im.top - MARGIN
-        && b.left < im.right + MARGIN && b.right > im.left - MARGIN);
-  };
-  const inFig = (b) => {
-    if (isTextFlow(b) || isSpecial(b)) return false;
-    if (b.hasImg) return true;
-    if (b.kind === 'text') return false; // 标注/图名一律回流成可读文字
-    return nearImgs(b); // 底板/装饰件：仅当紧贴图片才并入，远处的间隔件丢弃（否则撑出空隙）
-  };
-  const sliceFig = new Map();
-  blocks.forEach((b) => {
-    if (!inFig(b)) return;
-    if (!sliceFig.has(b.si)) sliceFig.set(b.si, []);
-    sliceFig.get(b.si).push(b);
+  /* ---- 3) 每个 slice 内：图形块按横向重叠聚成"列" ---- */
+  const GAP = 14;
+  const bySlice = new Map();
+  blocks.forEach((b) => { if (!bySlice.has(b.si)) bySlice.set(b.si, []); bySlice.get(b.si).push(b); });
+  const columns = [];   // { mem[], caps[], left, right, top, bottom }
+  const orphanCaps = []; // 找不到归属列的图名 → 单独回流
+
+  bySlice.forEach((list) => {
+    const figs = list.filter(isGraphic);
+    const cols = [];
+    figs.slice().sort((a, b) => a.left - b.left).forEach((b) => {
+      let col = cols.find((c) => overlapX(b, c, GAP));
+      if (!col) { col = { mem: [], caps: [], left: b.left, right: b.right, top: b.top, bottom: b.bottom }; cols.push(col); }
+      col.mem.push(b);
+      col.left = Math.min(col.left, b.left); col.right = Math.max(col.right, b.right);
+      col.top = Math.min(col.top, b.top); col.bottom = Math.max(col.bottom, b.bottom);
+    });
+    list.filter(isSmall).forEach((t) => {
+      // 压在某个图形范围内 → 标注，并入该列（原位缩放，如奖项框里的标题）
+      const host = figs.find((f) => overlapX(t, f, 0) && overlapY(t, f, 0));
+      if (host) {
+        const col = cols.find((c) => c.mem.includes(host));
+        if (col) {
+          col.mem.push(t);
+          col.left = Math.min(col.left, t.left); col.right = Math.max(col.right, t.right);
+          col.top = Math.min(col.top, t.top); col.bottom = Math.max(col.bottom, t.bottom);
+          return;
+        }
+      }
+      // 落在图形之外 → 图名，挂到 x 覆盖且最近的一列下方
+      const cx = (t.left + t.right) / 2;
+      let best = null, bd = 1e9;
+      cols.forEach((c) => {
+        if (cx >= c.left - GAP && cx <= c.right + GAP) {
+          const d = Math.abs(t.top - c.bottom);
+          if (d < bd) { bd = d; best = c; }
+        }
+      });
+      if (best) best.caps.push(t); else orphanCaps.push(t);
+    });
+    cols.forEach((c) => columns.push(c));
   });
 
-  const emitted = new Set();
+  // 图注抽取：pattern「灰底板 + 底板边上一行小图名」的容器（如 Twist Center 那两块），
+  // 桌面是"底板当背景、图压在上面、图名在底板下沿"。手机上底板会被缩得很小，
+  // 图名跟着缩到几乎看不清。这里把图名从容器里摘出来，作为该列的图注按可读字号回流到列下方。
+  columns.forEach((c) => {
+    c.mem.slice().forEach((m) => {
+      if (m.hasImg || !m.text || !m.el.children) return;
+      const kids = [...m.el.children];
+      const bgChild = kids.find((ch) => opaqueBg(ch));
+      const capChild = kids.find((ch) => ch !== bgChild && (ch.textContent || '').trim());
+      if (bgChild && capChild) {
+        c.caps.push({ el: capChild, top: m.bottom });
+        capChild.remove();
+      }
+    });
+  });
+
+  /* ---- 4) 组装 groups（保留 top 排序；同 top 时左列优先） ---- */
   const groups = [];
   blocks.forEach((b) => {
-    if (isTextFlow(b)) { groups.push({ type: 'solo', b }); return; }
-    if (hasMarquee(b)) { groups.push({ type: 'marquee', b }); return; }
-    if (hasHScroll(b)) { groups.push({ type: 'hscroll', b }); return; }
-    if (!inFig(b)) {
-      // 图名/短引言（离图较远的窄文字）→ 文字回流；无图无字装饰件丢弃
-      if (b.kind === 'text') groups.push({ type: 'solo', b });
-      return;
-    }
-    if (emitted.has(b.si)) return;
-    emitted.add(b.si);
-    let mem = sliceFig.get(b.si) || [];
-    if (!mem.some((m) => m.hasImg)) return; // 整块无图 → 丢弃装饰底板
-    mem = denseBlock(mem); // 裁掉离主体很远的稀疏碎件（否则撑出大空隙）
-    if (!mem.some((m) => m.hasImg)) return;
-    groups.push({ type: 'fig', members: mem, ...bboxOf(mem) });
+    if (isAnchor(b) || isHead(b) || isProse(b)) { groups.push({ type: 'solo', b, st: b.top, sl: b.left }); return; }
+    if (hasMarquee(b)) { groups.push({ type: 'marquee', b, caps: [], st: b.top, sl: b.left }); return; }
+    if (hasHScroll(b)) { groups.push({ type: 'hscroll', b, caps: [], st: b.top, sl: b.left }); return; }
   });
+  orphanCaps.forEach((b) => groups.push({ type: 'solo', b, st: b.top, sl: b.left }));
+  columns.forEach((c) => {
+    const mem = denseBlock(c.mem);
+    if (!mem.some((m) => m.hasImg || opaqueBg(m.el) || hasBorder(m.el))) return; // 纯空块（无图无底）丢弃
+    const bb = bboxOf(mem);
+    groups.push({ type: 'fig', members: mem, caps: c.caps, ...bb, st: bb.top, sl: bb.left });
+  });
+  groups.sort((a, b) => a.st - b.st || a.sl - b.sl);
 
   const col = document.createElement('div');
   col.className = 'case-m';
 
-  // 画布里的字号/定位/宽度全部由手机版的类接管，内联值必须先清掉
+  // 画布里的字号/定位/宽度全部由手机版的类接管，内联值必须先清掉（含所有后代，
+  // 否则内层还挂着 width:1098px / white-space:nowrap，回流时会横向溢出被裁）
   const strip = (el) => {
     ['position', 'top', 'left', 'width', 'minHeight', 'height', 'fontSize',
-      'lineHeight', 'whiteSpace', 'opacity', 'letterSpacing', 'color'].forEach((p) => {
+      'lineHeight', 'whiteSpace', 'opacity', 'letterSpacing', 'color',
+      'margin', 'marginTop', 'marginLeft', 'marginRight', 'marginBottom'].forEach((p) => {
       el.style.removeProperty(p.replace(/[A-Z]/g, (m) => '-' + m.toLowerCase()));
     });
-    el.querySelectorAll('[style*="font-size"]').forEach((d) => d.style.removeProperty('font-size'));
-    el.querySelectorAll('[style*="white-space"]').forEach((d) => d.style.removeProperty('white-space'));
+    el.querySelectorAll('[style]').forEach((d) => {
+      d.style.removeProperty('width');
+      d.style.removeProperty('white-space');
+      d.style.removeProperty('font-size');
+    });
+  };
+  const renderCap = (b) => {
+    const el = b.el;
+    strip(el);
+    el.className = (el.className + ' case-m-cap').trim();
+    el.setAttribute('data-m-reveal', '');
+    col.appendChild(el);
   };
 
-  const shotImgs = [];   // 铺满一列的大截图，按真实显示宽挑档
+  const shotImgs = [];   // 铺满一列的大截图 / marquee 图，按真实显示宽挑档
   const compFigs = [];   // 拼贴组，整块 scale 到列宽
   const railFigs = [];   // 横向画廊：整块内容按可读高度缩放后横滑（形式同电脑端 hscroll）
   const BLANK = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==';
@@ -186,11 +242,11 @@
   }
 
   groups.forEach((g) => {
-    /* ---- 2a) 文本 / 章节头 / 锚点 ---- */
+    /* ---- 文本 / 章节头 / 锚点 / 图名 ---- */
     if (g.type === 'solo') {
       const b = g.b;
       const el = b.el;
-      if (b.kind === 'anchor') { el.style.removeProperty('top'); col.appendChild(el); return; }
+      if (isAnchor(b)) { el.style.removeProperty('top'); col.appendChild(el); return; }
       strip(el);
       if (el.classList.contains('doc-ch')) {
         el.classList.add('case-m-ch');
@@ -206,9 +262,7 @@
       return;
     }
 
-    /* ---- 2b) marquee（KOOKO 产出那种自动横向滚动）→ 保留原样，收进列宽，自动滚动照旧。
-       画布上的图尺寸偏大又被放大显得糊：清掉内联宽高交给 CSS 定一个较小的行高，
-       再按显示尺寸重挑 srcset 档（缩小=更清晰）。 ---- */
+    /* ---- marquee（KOOKO 产出那种自动横向滚动）→ 保留原样，收进列宽，自动滚动照旧 ---- */
     if (g.type === 'marquee') {
       const el = g.b.el;
       ['position', 'top', 'left', 'height', 'min-height'].forEach((p) => el.style.removeProperty(p));
@@ -222,10 +276,11 @@
         shotImgs.push(im);
       });
       col.appendChild(el);
+      (g.caps || []).forEach(renderCap);
       return;
     }
 
-    /* ---- 2c) hscroll（画布自带的横向画廊）→ 整块内容按可读高度缩放后横滑，形式同电脑端 ---- */
+    /* ---- hscroll（画布自带的横向画廊）→ 整块内容按可读高度缩放后横滑，形式同电脑端 ---- */
     if (g.type === 'hscroll') {
       const box = g.b.el;
       const view = box.querySelector('.hscroll__view');
@@ -237,16 +292,15 @@
       box.querySelectorAll('img').forEach((im) => im.removeAttribute('loading'));
       box.removeAttribute('style');
       box.style.overflow = 'visible';
-      col.appendChild(makeRail(box, g.bottom - g.top, g.right - g.left));
+      col.appendChild(makeRail(box, g.b.h, g.b.w));
+      (g.caps || []).forEach(renderCap);
       return;
     }
 
-    /* ---- 2d) 图块 / 图簇：保留画布相对坐标，整块等比缩到列宽（只缩不放大）。
-       大图各自成块 → 并排的两块在此自然变成上下排；小图簇整片保留电脑端网格，不拆行。 ---- */
+    /* ---- 图列：保留画布相对坐标，整块等比缩到列宽（只缩不放大），图名回流到列下方 ---- */
     const fw = g.right - g.left;
     const fh = g.bottom - g.top;
     if (!fw || !fh) return;
-
     const card = document.createElement('div');
     card.className = 'case-m-fig case-m-fig--comp';
     card.setAttribute('data-m-reveal', '');
@@ -261,8 +315,6 @@
       inner.appendChild(b.el);
     });
     inner.querySelectorAll('img').forEach((im) => {
-      // 保留 loading=lazy：整页图很多，一次性全解码会把内存顶爆/卡死。
-      // 只补宽高比占位，避免没内联高度的图在未加载时塌成 0 高。
       if (!im.style.height) {
         const aw = parseFloat(im.getAttribute('width'));
         const ah = parseFloat(im.getAttribute('height'));
@@ -272,15 +324,13 @@
     card.appendChild(inner);
     col.appendChild(card);
     compFigs.push({ card, inner, fw, fh });
+    (g.caps || []).forEach(renderCap);
   });
 
   wraps[0].parentNode.insertBefore(col, wraps[0]);
   wraps.forEach((wrap) => wrap.remove());
 
-  /* ---- 3) 按真实显示宽度重挑 srcset 档 ----
-     画布上的 sizes 是按桌面版心声明的，手机版式里显示宽度完全不同，光改 sizes 没用
-     （图已加载过，浏览器不会为了变大再换）。这里按显示宽 × dpr × 0.8 在 srcset 里
-     选最小够用的一档写回 src，并把 srcset/sizes 摘掉。不留放大余量：手机不用捏合。 */
+  /* ---- 5) 按真实显示宽度重挑 srcset 档（缩小=更清晰；不留放大余量：手机不用捏合） ---- */
   const HEADROOM = 0.8;
   const CAP_D = 2.4;
   function sharpen(img, showW) {
@@ -317,15 +367,17 @@
       const w = img.getBoundingClientRect().width;
       if (w) sharpen(img, w);
     });
-    // 横向画廊：整块内容按可读高度缩放，sizer 撑到缩放后的尺寸让容器横向滚动
-    const galH = Math.max(300, Math.min(400, (innerHeight || 720) * 0.5));
+    // 横向画廊：整块内容按可读高度缩放（比 kooko 那种偏大的滚动图再收一档，
+    // 高度取内容真实高与画布高的较大者，避免底部被裁）
+    const galH = Math.max(280, Math.min(360, (innerHeight || 720) * 0.46));
     railFigs.forEach(({ content, sizer, canvasH, canvasW, sync }) => {
       const rawW = Math.max(content.scrollWidth || 0, content.offsetWidth || 0, canvasW || 0) || 1;
-      const cs = Math.min(galH / (canvasH || galH), 1);
+      const rawH = Math.max(content.scrollHeight || 0, content.offsetHeight || 0, canvasH || 0) || galH;
+      const cs = Math.min(galH / rawH, 1);
       content.style.transformOrigin = '0 0';
       content.style.transform = 'scale(' + cs.toFixed(6) + ')';
       sizer.style.width = Math.round(rawW * cs) + 'px';
-      sizer.style.height = Math.round((canvasH || galH) * cs) + 'px';
+      sizer.style.height = Math.round(rawH * cs) + 'px';
       content.querySelectorAll('img').forEach((img) => {
         const r = img.getBoundingClientRect();
         if (r.width) sharpen(img, r.width);
@@ -337,8 +389,7 @@
   addEventListener('resize', fitFigs);
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitFigs);
 
-  /* ---- 4) 大图离屏卸解码：远离视口的换成 1×1 空图（先钉住宽高比，布局不跳）----
-     判据用 IntersectionObserver（相对布局视口），不掺 visualViewport。 */
+  /* ---- 6) 大图离屏卸解码：远离视口的换成 1×1 空图（先钉住宽高比，布局不跳）---- */
   function startUnload() {
     const bigs = shotImgs.filter((img) => img && !img.closest('.case-m-fig--comp') && !img.closest('.case-m-marquee'));
     if (!bigs.length || !('IntersectionObserver' in window)) return;
@@ -362,7 +413,7 @@
   }
   startUnload();
 
-  /* ---- 5) 入场：与桌面同一条曲线，位移收到 22px ---- */
+  /* ---- 7) 入场：与桌面同一条曲线，位移收到 22px ---- */
   const items = [...col.querySelectorAll('[data-m-reveal]')];
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
     items.forEach((el) => el.classList.add('is-in'));

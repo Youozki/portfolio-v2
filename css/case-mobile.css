@@ -104,6 +104,16 @@
   color: rgba(50, 48, 46, 0.5);
   text-align: center;
 }
+/* 图注紧跟在它所属的图/画廊下方：把上边距收回来，让图名贴着图 */
+.case-m-fig--comp + .case-m-cap,
+.case-m-railwrap + .case-m-cap,
+.case-m-marquee + .case-m-cap {
+  margin-top: -1.4rem;
+}
+/* 连续两个图名（并排两列各自的图注）之间留一点距离 */
+.case-m-cap + .case-m-cap {
+  margin-top: 0.2rem;
+}
 
 /* ---- 图卡 ---- */
 .case-m-fig {
