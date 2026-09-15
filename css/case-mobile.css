@@ -190,6 +190,11 @@
 .case-m-marquee .marquee__track > * {
   flex: 0 0 auto;
 }
+/* 行高收小一档：KOOKO 产出图原尺寸偏大，缩到约 132px 一行更清晰、不占版面 */
+.case-m-marquee .marquee__track img {
+  height: clamp(112px, 34vw, 138px);
+  width: auto;
+}
 @keyframes case-m-marquee {
   to { transform: translateX(-50%); }
 }

@@ -22,9 +22,10 @@
   root.classList.add('is-doc-mobile');
   const num = (v) => parseFloat(v) || 0;
 
-  /* ---- 1) 把画布块读成一张表，按设计稿的 y 排序（记录所属 slice） ---- */
+  /* ---- 1) 把画布块读成一张表，按设计稿的 y 排序（记录所属 slice 与原始 DOM 次序） ---- */
   const blocks = [];
   let sliceSeq = 0;
+  let domSeq = 0;
   wraps.forEach((wrap) => {
     wrap.querySelectorAll('.case-slice').forEach((slice) => {
       const si = sliceSeq++;
@@ -40,9 +41,9 @@
         let kind;
         if (el.classList.contains('doc-anchor')) kind = 'anchor';
         else if (hasImg) kind = 'art';
-        else if (fs >= 14 && text) kind = 'text';
+        else if (text) kind = 'text'; // 有文字无图 → 文字（字号缺省时按正文处理）
         else kind = 'art'; // 纯色底板、分割线这类装饰件跟着图走
-        blocks.push({ el, si, top, left, w, h, fs, kind, text, hasImg, right: left + w, bottom: top + h });
+        blocks.push({ el, si, dom: domSeq++, top, left, w, h, fs, kind, text, hasImg, right: left + w, bottom: top + h });
       });
     });
   });
@@ -66,20 +67,45 @@
     right: Math.max(a.right, b.right), bottom: Math.max(a.bottom, b.bottom),
   }), { top: 1e9, left: 1e9, right: -1e9, bottom: -1e9 });
 
+  // 裁稀疏：以面积最大的成员为主体，纵向 180px 内相连的才保留，远处孤立碎件丢掉——
+  // 消除 Figma 画布那种"两帧在上、底部一个小碎件"撑出的巨大空隙。
+  const denseBlock = (mem) => {
+    if (mem.length <= 1) return mem;
+    const CUT = 180;
+    const seed = mem.reduce((a, b) => ((b.right - b.left) * (b.bottom - b.top) > (a.right - a.left) * (a.bottom - a.top) ? b : a));
+    let top = seed.top, bottom = seed.bottom, grew = true;
+    while (grew) {
+      grew = false;
+      mem.forEach((m) => {
+        if (m.top < bottom + CUT && m.bottom > top - CUT) {
+          if (m.top < top - 1) { top = Math.min(top, m.top); grew = true; }
+          if (m.bottom > bottom + 1) { bottom = Math.max(bottom, m.bottom); grew = true; }
+        }
+      });
+    }
+    return mem.filter((m) => m.top < bottom + 1 && m.bottom > top - 1);
+  };
+
   // 每个 slice 的图形成员（非文字流、非特殊件）聚成一块。
   // 图上的窄标注（压在图片范围内的文字，如流程图节点名）跟着图走；
   // 不压在任何图片上的独立窄文字（图名/短引言）当作文字回流。
-  const overlaps = (a, b) => a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
   const sliceImgs = new Map();
   blocks.forEach((b) => {
     if (b.hasImg) { if (!sliceImgs.has(b.si)) sliceImgs.set(b.si, []); sliceImgs.get(b.si).push(b); }
   });
+  // 图形块（图片本身，或压在图片范围内的底板/标注）才进入 fig；
+  // 画布里离图很远的装饰线/间隔件会撑大 bbox 造成"莫名空隙"，一律排除。
+  const MARGIN = 160;
+  const nearImgs = (b) => {
+    const imgs = sliceImgs.get(b.si) || [];
+    return imgs.some((im) => b.top < im.bottom + MARGIN && b.bottom > im.top - MARGIN
+        && b.left < im.right + MARGIN && b.right > im.left - MARGIN);
+  };
   const inFig = (b) => {
     if (isTextFlow(b) || isSpecial(b)) return false;
     if (b.hasImg) return true;
-    if (b.kind !== 'text') return true; // 装饰底板：跟图走
-    const imgs = sliceImgs.get(b.si) || [];
-    return imgs.some((im) => overlaps(b, im)); // 窄标注：仅当压在图片上才并入
+    if (b.kind === 'text') return false; // 标注/图名一律回流成可读文字
+    return nearImgs(b); // 底板/装饰件：仅当紧贴图片才并入，远处的间隔件丢弃（否则撑出空隙）
   };
   const sliceFig = new Map();
   blocks.forEach((b) => {
@@ -95,14 +121,16 @@
     if (hasMarquee(b)) { groups.push({ type: 'marquee', b }); return; }
     if (hasHScroll(b)) { groups.push({ type: 'hscroll', b }); return; }
     if (!inFig(b)) {
-      // 独立窄文字（图名/短引言）→ 文字回流；无图无字的装饰件丢弃
+      // 图名/短引言（离图较远的窄文字）→ 文字回流；无图无字装饰件丢弃
       if (b.kind === 'text') groups.push({ type: 'solo', b });
       return;
     }
     if (emitted.has(b.si)) return;
     emitted.add(b.si);
-    const mem = sliceFig.get(b.si) || [];
+    let mem = sliceFig.get(b.si) || [];
     if (!mem.some((m) => m.hasImg)) return; // 整块无图 → 丢弃装饰底板
+    mem = denseBlock(mem); // 裁掉离主体很远的稀疏碎件（否则撑出大空隙）
+    if (!mem.some((m) => m.hasImg)) return;
     groups.push({ type: 'fig', members: mem, ...bboxOf(mem) });
   });
 
@@ -171,20 +199,28 @@
         return;
       }
       if (b.fs >= 28) el.className = (el.className + ' case-m-h').trim();
-      else if (b.fs <= 16) el.className = (el.className + ' case-m-cap').trim();
+      else if (b.fs > 0 && b.fs <= 16) el.className = (el.className + ' case-m-cap').trim();
       else el.className = (el.className + ' case-m-p' + (b.text.length <= 24 ? ' case-m-p--lead' : '')).trim();
       el.setAttribute('data-m-reveal', '');
       col.appendChild(el);
       return;
     }
 
-    /* ---- 2b) marquee（KOOKO 产出那种自动横向滚动）→ 保留原样，收进列宽，自动滚动照旧 ---- */
+    /* ---- 2b) marquee（KOOKO 产出那种自动横向滚动）→ 保留原样，收进列宽，自动滚动照旧。
+       画布上的图尺寸偏大又被放大显得糊：清掉内联宽高交给 CSS 定一个较小的行高，
+       再按显示尺寸重挑 srcset 档（缩小=更清晰）。 ---- */
     if (g.type === 'marquee') {
       const el = g.b.el;
       ['position', 'top', 'left', 'height', 'min-height'].forEach((p) => el.style.removeProperty(p));
       el.style.width = '100%';
       el.classList.add('case-m-marquee');
       el.setAttribute('data-m-reveal', '');
+      el.querySelectorAll('img').forEach((im) => {
+        im.style.removeProperty('width');
+        im.style.removeProperty('height');
+        im.removeAttribute('loading');
+        shotImgs.push(im);
+      });
       col.appendChild(el);
       return;
     }
@@ -218,7 +254,8 @@
     inner.className = 'case-m-fig__in';
     inner.style.width = fw + 'px';
     inner.style.height = fh + 'px';
-    g.members.forEach((b) => {
+    // 按原始 DOM 次序 append，保持与电脑端一致的叠放顺序（否则灰底板会盖住照片 → 空白框）
+    g.members.slice().sort((a, b) => a.dom - b.dom).forEach((b) => {
       b.el.style.top = (b.top - g.top) + 'px';
       b.el.style.left = (b.left - g.left) + 'px';
       inner.appendChild(b.el);
@@ -303,7 +340,7 @@
   /* ---- 4) 大图离屏卸解码：远离视口的换成 1×1 空图（先钉住宽高比，布局不跳）----
      判据用 IntersectionObserver（相对布局视口），不掺 visualViewport。 */
   function startUnload() {
-    const bigs = shotImgs.filter((img) => img && !img.closest('.case-m-fig--comp'));
+    const bigs = shotImgs.filter((img) => img && !img.closest('.case-m-fig--comp') && !img.closest('.case-m-marquee'));
     if (!bigs.length || !('IntersectionObserver' in window)) return;
     const park = (img) => {
       if (img.dataset.mSrc) return;
