@@ -21,12 +21,12 @@
   object-fit: contain;
   object-position: center;
 }
-/* 拼贴组 / 横向画廊里的图，宽高都来自画布（作者定的显示尺寸），整组是等比缩的。
-   用 cover：铺满画布声明的盒子、不留白也不拉伸（超出部分裁掉），既不像 contain 那样
-   留白（白卡看着"短一截"），也不像 fill 那样把响应式档位比例的出入放大成形变。 */
+/* 拼贴组 / 横向画廊里的图：JS 会把每张图的显示高度回算成素材真实比例（reconcile），
+   使盒子比例=素材比例，于是 contain 既不留白也不裁切也不拉伸——完整显示、不变形、不被裁。
+   （cover 会因响应式档位比例的细微出入裁掉边缘，如 terabox 手机截图的对话框两端被切。） */
 .case-m-fig--comp img,
 .case-m-galsizer img {
-  object-fit: cover;
+  object-fit: contain;
 }
 .case-m .doc-anchor {
   /* 画布里的锚点是 position: absolute + 内联 top，进了流式版必须回到静态定位，

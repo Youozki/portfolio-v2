@@ -414,6 +414,22 @@
   wraps[0].parentNode.insertBefore(col, wraps[0]);
   wraps.forEach((wrap) => wrap.remove());
 
+  /* 把拼贴/画廊里每张图的显示高度回算成素材真实比例：让盒子比例=素材比例，
+     于是 object-fit:contain 既不留白也不裁切也不拉伸——完整、不变形、不被裁。
+     图未加载完时先按内联宽高占位，load 后再回算（sharpen 换档也会重触发 load）。 */
+  const reconcile = (img) => {
+    if (!img.naturalWidth || !img.naturalHeight) return;
+    const w = parseFloat(img.style.width);
+    if (!w) return;
+    img.style.height = (w * img.naturalHeight / img.naturalWidth).toFixed(2) + 'px';
+    img.style.removeProperty('aspect-ratio');
+  };
+  const reconcileImgs = [...col.querySelectorAll('.case-m-fig--comp img, .case-m-galsizer img')];
+  reconcileImgs.forEach((img) => {
+    if (img.complete) reconcile(img);
+    img.addEventListener('load', () => reconcile(img));
+  });
+
   /* ---- 5) 按真实显示宽度重挑 srcset 档（缩小=更清晰；不留放大余量：手机不用捏合） ---- */
   const HEADROOM = 0.8;
   const CAP_D = 2.4;
