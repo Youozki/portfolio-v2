@@ -160,24 +160,50 @@
     cols.forEach((c) => columns.push(c));
   });
 
-  // 3b) 一列里若并排着两块以上大底板（被跨缝的装饰件连成了一列），按底板拆回上下两块——
-  //     只在"大底板并排"时触发，其它版面不动（如奖项那种早已分开的列不受影响）。
-  const bigPanel = (m) => opaqueBg(m.el) && (m.right - m.left) > 300 && (m.bottom - m.top) > 200;
-  const splitCols = [];
+  // 3b) 一列里若含两块以上大底板，就按底板之间的最大空隙递归切开，各块各自铺满列宽——
+  //     竖切（上下）不统一高度；横切（左右）出来的两块是并排关系，打同一 grp 稍后统一卡片高度。
+  //     这样：情绪卡(宽)在上、缩略图组(窄)在下时，下面那组会自己铺满列宽不再显小；
+  //     并排两图（如 intro 手机图/折叠插画）仍上下排且灰底一致。单底板/等宽等情况不动。
+  const isPanel = (m) => {
+    const bw = m.right - m.left, bh = m.bottom - m.top;
+    if (bw < 300 || bh < 200) return false;
+    if (opaqueBg(m.el)) return true;
+    return [...m.el.children].some((ch) => opaqueBg(ch) && (parseFloat(ch.style.width) || 0) > bw * 0.8);
+  };
   let splitGrp = 0;
+  const gapCut = (panels, lo, hi) => {
+    const s = panels.slice().sort((a, b) => a[lo] - b[lo]);
+    let maxGap = 0, cut = null, run = s[0][hi];
+    for (let i = 1; i < s.length; i++) {
+      const gap = s[i][lo] - run;
+      if (gap > maxGap) { maxGap = gap; cut = (s[i][lo] + run) / 2; }
+      run = Math.max(run, s[i][hi]);
+    }
+    return { maxGap, cut };
+  };
+  const splitRec = (mem, depth) => {
+    const panels = mem.filter(isPanel);
+    if (depth > 3 || panels.length < 2) return [{ mem }];
+    const cy = gapCut(panels, 'top', 'bottom');
+    const cx = gapCut(panels, 'left', 'right');
+    if (Math.max(cy.maxGap, cx.maxGap) < 10) return [{ mem }];
+    const useY = cy.maxGap >= cx.maxGap;
+    const lo = useY ? 'top' : 'left', hi = useY ? 'bottom' : 'right', cut = useY ? cy.cut : cx.cut;
+    const a = [], b = [];
+    mem.forEach((m) => (((m[lo] + m[hi]) / 2 < cut) ? a : b).push(m));
+    if (!a.length || !b.length) return [{ mem }];
+    const pa = splitRec(a, depth + 1), pb = splitRec(b, depth + 1);
+    if (!useY && pa.length === 1 && pb.length === 1) { // 并排两叶：统一卡片高度
+      const grp = 'g' + (splitGrp++);
+      return [{ mem: pa[0].mem, grp }, { mem: pb[0].mem, grp }];
+    }
+    return [...pa, ...pb];
+  };
+  const splitCols = [];
   columns.forEach((c) => {
-    const panels = c.mem.filter(bigPanel).sort((a, b) => a.left - b.left);
-    let sideBySide = panels.length >= 2;
-    for (let i = 1; i < panels.length; i++) { if (panels[i].left < panels[i - 1].right - 40) sideBySide = false; }
-    if (!sideBySide) { splitCols.push(c); return; }
-    const grp = 'g' + (splitGrp++); // 同一行拆出来的兄弟块，稍后统一卡片高度（灰底大小一致）
-    const subs = panels.map((p, i) => ({ p, mem: [], caps: i === 0 ? c.caps : [] }));
-    c.mem.forEach((m) => {
-      let best = subs[0], ba = -1e9;
-      subs.forEach((s) => { const ov = Math.min(m.right, s.p.right) - Math.max(m.left, s.p.left); if (ov > ba) { ba = ov; best = s; } });
-      best.mem.push(m);
-    });
-    subs.forEach((s) => splitCols.push({ mem: s.mem, caps: s.caps, grp, ...bboxOf(s.mem) }));
+    const parts = splitRec(c.mem, 0);
+    if (parts.length < 2) { splitCols.push(c); return; }
+    parts.forEach((p, i) => splitCols.push({ mem: p.mem, caps: i === 0 ? c.caps : [], grp: p.grp, ...bboxOf(p.mem) }));
   });
   columns = splitCols;
 
@@ -430,6 +456,8 @@
     byGrp.forEach((list) => {
       if (list.length < 2) return;
       const Hmax = Math.max(...list.map((cf) => cf.baseH));
+      const Hmin = Math.min(...list.map((cf) => cf.baseH));
+      if (Hmax / Hmin > 1.6) return; // 高度差太大（内容不对等）就别硬补灰底，各自自然高度
       list.forEach((cf) => {
         cf.card.style.height = Hmax + 'px';
         if (cf.baseH < Hmax) {
