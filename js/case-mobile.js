@@ -28,19 +28,42 @@
   const blocks = [];
   let sliceSeq = 0;
   let domSeq = 0;
+  const bgOpaque = (el) => {
+    const c = el && el.style && el.style.backgroundColor;
+    if (!c || c === 'transparent') return false;
+    return !/,\s*0\s*\)$/.test(c.replace(/\s+/g, (m) => m));
+  };
   wraps.forEach((wrap) => {
     wrap.querySelectorAll('.case-slice').forEach((slice) => {
       const si = sliceSeq++;
-      [...slice.children].forEach((el) => {
+      const addBlock = (el, ox, oy) => {
         const st = el.style;
-        const top = num(st.top);
-        const left = num(st.left);
+        const top = num(st.top) + oy;
+        const left = num(st.left) + ox;
         const w = num(st.width);
         const h = num(st.height) || num(st.minHeight);
         const fs = num(st.fontSize);
         const text = (el.textContent || '').trim();
         const hasImg = el.tagName === 'IMG' || !!el.querySelector('img');
         blocks.push({ el, si, dom: domSeq++, top, left, w, h, fs, text, hasImg, right: left + w, bottom: top + h });
+      };
+      [...slice.children].forEach((el) => {
+        // 拆包：一个近满宽的容器里若并排嵌着两块以上大底板（如 KOOKO 图片编辑器那组），
+        // 把它的子级提升成独立块（坐标换算成绝对值），让两块自然分成上下两列。
+        const kids = [...el.children];
+        const panelKids = kids.filter((k) => bgOpaque(k) && num(k.style.width) > 300
+          && (num(k.style.minHeight) || num(k.style.height)) > 200);
+        let disjoint = panelKids.length >= 2;
+        const sorted = panelKids.slice().sort((a, b) => num(a.style.left) - num(b.style.left));
+        for (let i = 1; i < sorted.length; i++) {
+          if (num(sorted[i].style.left) < num(sorted[i - 1].style.left) + num(sorted[i - 1].style.width) - 40) disjoint = false;
+        }
+        if (num(el.style.width) >= 1200 && disjoint) {
+          const ox = num(el.style.left), oy = num(el.style.top);
+          kids.forEach((k) => addBlock(k, ox, oy));
+        } else {
+          addBlock(el, 0, 0);
+        }
       });
     });
   });
@@ -103,12 +126,12 @@
     return mem.filter((m) => m.top < bottom + 1 && m.bottom > top - 1);
   };
 
-  /* ---- 3) 每个 slice 内：图形块按横向重叠聚成"列" ---- */
+  /* ---- 3) 每个 slice 内：图形块按横向重叠聚成"列"（图名先收集，稍后跨 slice 统一归位）---- */
   const GAP = 14;
   const bySlice = new Map();
   blocks.forEach((b) => { if (!bySlice.has(b.si)) bySlice.set(b.si, []); bySlice.get(b.si).push(b); });
-  const columns = [];   // { mem[], caps[], left, right, top, bottom }
-  const orphanCaps = []; // 找不到归属列的图名 → 单独回流
+  let columns = [];      // { mem[], caps[], left, right, top, bottom }
+  const looseCaps = [];  // 落在图形之外的小字（图名），跨 slice 统一挂到最近的上方图/画廊
 
   bySlice.forEach((list) => {
     const figs = list.filter(isGraphic);
@@ -132,19 +155,29 @@
           return;
         }
       }
-      // 落在图形之外 → 图名，挂到 x 覆盖且最近的一列下方
-      const cx = (t.left + t.right) / 2;
-      let best = null, bd = 1e9;
-      cols.forEach((c) => {
-        if (cx >= c.left - GAP && cx <= c.right + GAP) {
-          const d = Math.abs(t.top - c.bottom);
-          if (d < bd) { bd = d; best = c; }
-        }
-      });
-      if (best) best.caps.push(t); else orphanCaps.push(t);
+      looseCaps.push(t); // 图名，稍后跨 slice 归到最近上方的图下
     });
     cols.forEach((c) => columns.push(c));
   });
+
+  // 3b) 一列里若并排着两块以上大底板（被跨缝的装饰件连成了一列），按底板拆回上下两块——
+  //     只在"大底板并排"时触发，其它版面不动（如奖项那种早已分开的列不受影响）。
+  const bigPanel = (m) => opaqueBg(m.el) && (m.right - m.left) > 300 && (m.bottom - m.top) > 200;
+  const splitCols = [];
+  columns.forEach((c) => {
+    const panels = c.mem.filter(bigPanel).sort((a, b) => a.left - b.left);
+    let sideBySide = panels.length >= 2;
+    for (let i = 1; i < panels.length; i++) { if (panels[i].left < panels[i - 1].right - 40) sideBySide = false; }
+    if (!sideBySide) { splitCols.push(c); return; }
+    const subs = panels.map((p, i) => ({ p, mem: [], caps: i === 0 ? c.caps : [] }));
+    c.mem.forEach((m) => {
+      let best = subs[0], ba = -1e9;
+      subs.forEach((s) => { const ov = Math.min(m.right, s.p.right) - Math.max(m.left, s.p.left); if (ov > ba) { ba = ov; best = s; } });
+      best.mem.push(m);
+    });
+    subs.forEach((s) => splitCols.push({ mem: s.mem, caps: s.caps, ...bboxOf(s.mem) }));
+  });
+  columns = splitCols;
 
   // 图注抽取：pattern「灰底板 + 底板边上一行小图名」的容器（如 Twist Center 那两块），
   // 桌面是"底板当背景、图压在上面、图名在底板下沿"。手机上底板会被缩得很小，
@@ -156,25 +189,43 @@
       const bgChild = kids.find((ch) => opaqueBg(ch));
       const capChild = kids.find((ch) => ch !== bgChild && (ch.textContent || '').trim());
       if (bgChild && capChild) {
-        c.caps.push({ el: capChild, top: m.bottom });
+        c.caps.push({ el: capChild });
         capChild.remove();
       }
     });
   });
 
-  /* ---- 4) 组装 groups（保留 top 排序；同 top 时左列优先） ---- */
+  /* ---- 4) 组装 groups；图名跨 slice 挂到最近上方的图/画廊下 ---- */
   const groups = [];
+  const targets = []; // 可挂图名的目标：图列 + 横滚 / marquee
   blocks.forEach((b) => {
     if (isAnchor(b) || isHead(b) || isProse(b)) { groups.push({ type: 'solo', b, st: b.top, sl: b.left }); return; }
-    if (hasMarquee(b)) { groups.push({ type: 'marquee', b, caps: [], st: b.top, sl: b.left }); return; }
-    if (hasHScroll(b)) { groups.push({ type: 'hscroll', b, caps: [], st: b.top, sl: b.left }); return; }
+    if (hasMarquee(b) || hasHScroll(b)) {
+      const g = { type: hasMarquee(b) ? 'marquee' : 'hscroll', b, caps: [], st: b.top, sl: b.left };
+      groups.push(g);
+      targets.push({ left: b.left, right: b.right, top: b.top, bottom: b.bottom, g });
+    }
   });
-  orphanCaps.forEach((b) => groups.push({ type: 'solo', b, st: b.top, sl: b.left }));
   columns.forEach((c) => {
     const mem = denseBlock(c.mem);
     if (!mem.some((m) => m.hasImg || opaqueBg(m.el) || hasBorder(m.el))) return; // 纯空块（无图无底）丢弃
     const bb = bboxOf(mem);
-    groups.push({ type: 'fig', members: mem, caps: c.caps, ...bb, st: bb.top, sl: bb.left });
+    const g = { type: 'fig', members: mem, caps: c.caps.slice(), ...bb, st: bb.top, sl: bb.left };
+    groups.push(g);
+    targets.push({ ...bb, g });
+  });
+  // 图名归位：x 覆盖 + 正好落在其上方最近一张图/画廊的下沿（图名一般紧贴图底）
+  looseCaps.forEach((t) => {
+    const cx = (t.left + t.right) / 2;
+    let best = null, bd = 1e9;
+    targets.forEach((tg) => {
+      if (cx < tg.left - 20 || cx > tg.right + 20) return;
+      const d = t.top - tg.bottom; // 图名在图下方为正
+      if (d < -60 || d > 200) return; // 只认紧贴（略压到图上或图下不远）
+      if (Math.abs(d) < bd) { bd = Math.abs(d); best = tg; }
+    });
+    if (best) best.g.caps.push(t);
+    else groups.push({ type: 'solo', b: t, st: t.top, sl: t.left });
   });
   groups.sort((a, b) => a.st - b.st || a.sl - b.sl);
 
@@ -284,6 +335,9 @@
     if (g.type === 'hscroll') {
       const box = g.b.el;
       const view = box.querySelector('.hscroll__view');
+      // 去掉只铺了前半段的灰底板（内容比它宽，滚到后半段就没底，视觉不一致）——
+      // 仅移除横滚框里 view 之外的兄弟底板，不动内容里的白卡。
+      [...box.children].forEach((ch) => { if (ch !== view && !ch.classList.contains('hscroll__bar')) ch.remove(); });
       if (view) {
         view.style.overflow = 'visible';
         view.style.width = 'max-content';
