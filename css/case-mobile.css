@@ -21,12 +21,12 @@
   object-fit: contain;
   object-position: center;
 }
-/* 拼贴组 / 横向画廊里的图，宽高都来自画布（作者定的显示尺寸），整组是等比缩的，
-   必须像电脑端一样铺满自己那个盒子（默认 fill）。若用 contain，遇到响应式档位的
-   实际比例与画布声明比例略有出入时会被套进盒子留白，白卡看起来就"短了一截"。 */
+/* 拼贴组 / 横向画廊里的图，宽高都来自画布（作者定的显示尺寸），整组是等比缩的。
+   用 cover：铺满画布声明的盒子、不留白也不拉伸（超出部分裁掉），既不像 contain 那样
+   留白（白卡看着"短一截"），也不像 fill 那样把响应式档位比例的出入放大成形变。 */
 .case-m-fig--comp img,
 .case-m-galsizer img {
-  object-fit: fill;
+  object-fit: cover;
 }
 .case-m .doc-anchor {
   /* 画布里的锚点是 position: absolute + 内联 top，进了流式版必须回到静态定位，

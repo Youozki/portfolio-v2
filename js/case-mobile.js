@@ -164,18 +164,20 @@
   //     只在"大底板并排"时触发，其它版面不动（如奖项那种早已分开的列不受影响）。
   const bigPanel = (m) => opaqueBg(m.el) && (m.right - m.left) > 300 && (m.bottom - m.top) > 200;
   const splitCols = [];
+  let splitGrp = 0;
   columns.forEach((c) => {
     const panels = c.mem.filter(bigPanel).sort((a, b) => a.left - b.left);
     let sideBySide = panels.length >= 2;
     for (let i = 1; i < panels.length; i++) { if (panels[i].left < panels[i - 1].right - 40) sideBySide = false; }
     if (!sideBySide) { splitCols.push(c); return; }
+    const grp = 'g' + (splitGrp++); // 同一行拆出来的兄弟块，稍后统一卡片高度（灰底大小一致）
     const subs = panels.map((p, i) => ({ p, mem: [], caps: i === 0 ? c.caps : [] }));
     c.mem.forEach((m) => {
       let best = subs[0], ba = -1e9;
       subs.forEach((s) => { const ov = Math.min(m.right, s.p.right) - Math.max(m.left, s.p.left); if (ov > ba) { ba = ov; best = s; } });
       best.mem.push(m);
     });
-    subs.forEach((s) => splitCols.push({ mem: s.mem, caps: s.caps, ...bboxOf(s.mem) }));
+    subs.forEach((s) => splitCols.push({ mem: s.mem, caps: s.caps, grp, ...bboxOf(s.mem) }));
   });
   columns = splitCols;
 
@@ -210,7 +212,7 @@
     const mem = denseBlock(c.mem);
     if (!mem.some((m) => m.hasImg || opaqueBg(m.el) || hasBorder(m.el))) return; // 纯空块（无图无底）丢弃
     const bb = bboxOf(mem);
-    const g = { type: 'fig', members: mem, caps: c.caps.slice(), ...bb, st: bb.top, sl: bb.left };
+    const g = { type: 'fig', members: mem, caps: c.caps.slice(), grp: c.grp, ...bb, st: bb.top, sl: bb.left };
     groups.push(g);
     targets.push({ ...bb, g });
   });
@@ -363,9 +365,11 @@
     inner.style.width = fw + 'px';
     inner.style.height = fh + 'px';
     // 按原始 DOM 次序 append，保持与电脑端一致的叠放顺序（否则灰底板会盖住照片 → 空白框）
+    let panelBg = '';
     g.members.slice().sort((a, b) => a.dom - b.dom).forEach((b) => {
       b.el.style.top = (b.top - g.top) + 'px';
       b.el.style.left = (b.left - g.left) + 'px';
+      if (!panelBg && !b.hasImg && opaqueBg(b.el)) panelBg = b.el.style.backgroundColor;
       inner.appendChild(b.el);
     });
     inner.querySelectorAll('img').forEach((im) => {
@@ -377,7 +381,7 @@
     });
     card.appendChild(inner);
     col.appendChild(card);
-    compFigs.push({ card, inner, fw, fh });
+    compFigs.push({ card, inner, fw, fh, grp: g.grp, panelBg });
     (g.caps || []).forEach(renderCap);
   });
 
@@ -408,13 +412,31 @@
 
   function fitFigs() {
     const colW = Math.min(640, innerWidth || 390) - 48;
-    compFigs.forEach(({ card, inner, fw, fh }) => {
+    compFigs.forEach((cf) => {
+      const { card, inner, fw, fh } = cf;
       const cs = Math.min(colW / fw, 1); // 纯按列宽等比缩，只缩不放大——构图与电脑端逐像素一致
       inner.style.transformOrigin = '0 0';
       inner.style.transform = 'scale(' + cs.toFixed(6) + ')';
+      cf.baseH = Math.round(fh * cs);
       card.style.width = Math.round(fw * cs) + 'px';
-      card.style.height = Math.round(fh * cs) + 'px';
+      card.style.height = cf.baseH + 'px';
+      inner.style.top = '0px';
       inner.querySelectorAll('img').forEach((img) => sharpen(img, num(img.style.width) * cs));
+    });
+    // 同一行拆出来的兄弟卡片：统一到最高的那张，矮的补灰底、内容竖向居中——
+    // 让并排改上下后两块的灰底大小一致（如 companion intro 手机图 vs 折叠插画）。
+    const byGrp = new Map();
+    compFigs.forEach((cf) => { if (cf.grp) { if (!byGrp.has(cf.grp)) byGrp.set(cf.grp, []); byGrp.get(cf.grp).push(cf); } });
+    byGrp.forEach((list) => {
+      if (list.length < 2) return;
+      const Hmax = Math.max(...list.map((cf) => cf.baseH));
+      list.forEach((cf) => {
+        cf.card.style.height = Hmax + 'px';
+        if (cf.baseH < Hmax) {
+          if (cf.panelBg) cf.card.style.backgroundColor = cf.panelBg;
+          cf.inner.style.top = Math.round((Hmax - cf.baseH) / 2) + 'px';
+        }
+      });
     });
     shotImgs.forEach((img) => {
       if (!img) return;
